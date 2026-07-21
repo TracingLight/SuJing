@@ -94,7 +94,7 @@ npm run check
 npm run pages:deploy
 ```
 
-GitHub 仓库接入 Cloudflare Pages 后，推送到 `main` 将由 Cloudflare 自动构建。站点主域名：
+GitHub 仓库已接入 Cloudflare Pages，推送到 `main` 会自动构建并发布。站点主域名：
 
 <https://sujing.dev>
 
