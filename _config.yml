@@ -3,22 +3,23 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: 游戏开发
-subtitle: '记录游戏开发和技术学习'
-description: ''
-keywords:
+title: 溯境
+subtitle: '在代码与世界之间，也记录生活的回声'
+description: '溯光如初的长期个人博客，以游戏开发与 Unity 技术为主，也记录音乐、生活、兴趣与沿途经验。'
+keywords: Unity, 游戏开发, 客户端开发, CSharp, C++, Lua, 计算机图形学, 个人博客, 音乐, 生活记录
 author: 溯光如初
+email: suguangruchu@gmail.com
 language: zh-CN
-timezone: ''
+timezone: Asia/Shanghai
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
-url: http://example.com
+url: https://sujing.dev
 permalink: :year/:month/:day/:title/
 permalink_defaults:
 pretty_urls:
-  trailing_index: true # Set to false to remove trailing 'index.html' from permalinks
-  trailing_html: true # Set to false to remove trailing '.html' from permalinks
+  trailing_index: false # Set to false to remove trailing 'index.html' from permalinks
+  trailing_html: false # Set to false to remove trailing '.html' from permalinks
 
 # Directory
 source_dir: source
@@ -60,7 +61,7 @@ prismjs:
 # per_page: Posts displayed per page. (0 = disable pagination)
 # order_by: Posts order. (Order by date descending by default)
 index_generator:
-  path: ''
+  path: articles
   per_page: 10
   order_by: -date
 
@@ -97,6 +98,30 @@ ignore:
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
 theme: butterfly
+
+# Search
+search:
+  path: search.xml
+  field: post
+  content: true
+  format: html
+
+# RSS
+feed:
+  type: atom
+  path: atom.xml
+  limit: 20
+  hub:
+  content: true
+  content_limit: 0
+  order_by: -date
+
+# Sitemap
+sitemap:
+  path: sitemap.xml
+  rel: true
+  tags: true
+  categories: true
 
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment

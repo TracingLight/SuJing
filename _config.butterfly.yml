@@ -1,0 +1,256 @@
+# Brand and navigation
+nav:
+  logo: /img/sujing-mark.svg
+  display_title: true
+  display_post_title: true
+  fixed: true
+
+menu:
+  首页: / || fas fa-compass
+  文章: /articles/ || fas fa-book-open
+  分类: /categories/ || fas fa-folder-open
+  标签: /tags/ || fas fa-tags
+  记录||fas fa-feather-pointed:
+    短讯: /notes/ || fas fa-bolt
+    相册: /gallery/ || fas fa-images
+    音乐: /music/ || fas fa-music
+  关于: /about/ || fas fa-user
+
+social:
+  fab fa-github: https://github.com/TracingLight || GitHub || '#181717'
+  fas fa-envelope: mailto:suguangruchu@gmail.com || Email || '#b44b4b'
+
+# Visual identity
+favicon: /img/sujing-mark.svg
+avatar:
+  img: /img/sujing-hero-a.webp
+  effect: false
+disable_top_img: false
+default_top_img: /img/sujing-hero-a.webp
+index_img: /img/sujing-hero-a.webp
+archive_img: /img/sujing-hero-a.webp
+tag_img: /img/sujing-hero-a.webp
+category_img: /img/sujing-hero-a.webp
+footer_img: false
+background: '#eef2f3'
+cover:
+  index_enable: true
+  aside_enable: true
+  archives_enable: true
+  default_cover:
+    - /img/sujing-hero-b.webp
+
+index_site_info_top: 43%
+index_top_img_height: 78vh
+subtitle:
+  enable: true
+  effect: false
+  source: false
+  sub:
+    - 在代码与世界之间，也记录生活的回声
+
+index_layout: 4
+index_post_content:
+  method: 2
+  length: 220
+
+post_meta:
+  page:
+    date_type: created
+    date_format: date
+    categories: true
+    tags: true
+    label: false
+  post:
+    position: left
+    date_type: both
+    date_format: date
+    categories: true
+    tags: true
+    label: true
+
+# Reading and code
+code_blocks:
+  theme: ocean
+  macStyle: false
+  height_limit: 900
+  word_wrap: false
+  copy: true
+  language: true
+  shrink: false
+  fullpage: false
+toc:
+  post: true
+  page: false
+  number: true
+  expand: false
+  style_simple: true
+  scroll_percent: true
+readmode: true
+copy:
+  enable: true
+  copyright:
+    enable: true
+    limit_count: 180
+wordcount:
+  enable: true
+  post_wordcount: true
+  min2read: true
+  total_wordcount: true
+noticeOutdate:
+  enable: true
+  style: flat
+  limit_day: 365
+  position: top
+  message_prev: 距离上次更新已经
+  message_next: 天，部分内容可能需要结合新版本重新验证。
+post_copyright:
+  enable: true
+  decode: false
+  author_href: https://github.com/TracingLight
+  license: CC BY-NC-SA 4.0
+  license_url: https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+# Sidebar
+aside:
+  enable: true
+  hide: false
+  button: true
+  mobile: false
+  position: right
+  display:
+    archive: true
+    tag: true
+    category: true
+  card_author:
+    enable: true
+    description: 游戏开发 · 技术笔记 · 生活与兴趣
+    button:
+      enable: true
+      icon: fab fa-github
+      text: GitHub
+      link: https://github.com/TracingLight
+  card_announcement:
+    enable: true
+    content: 以游戏开发为主线，长期记录技术、经验、音乐与生活。
+  card_recent_post:
+    enable: true
+    limit: 5
+    sort: date
+  card_newest_comments:
+    enable: false
+  card_categories:
+    enable: true
+    limit: 10
+    expand: none
+  card_tags:
+    enable: true
+    limit: 30
+    color: false
+    orderby: name
+    order: 1
+  card_archives:
+    enable: true
+    type: monthly
+    format: YYYY年MM月
+    order: -1
+    limit: 8
+  card_post_series:
+    enable: true
+    series_title: true
+    orderBy: date
+    order: 1
+  card_webinfo:
+    enable: true
+    post_count: true
+    last_push_date: true
+
+# Search, sharing, comments
+search:
+  use: local_search
+  placeholder: 搜索技术文章、生活记录与兴趣内容
+  local_search:
+    preload: false
+    top_n_per_article: 3
+    unescape: true
+    pagination:
+      enable: true
+      hitsPerPage: 8
+share:
+  use: sharejs
+  sharejs:
+    sites: wechat,weibo,qq
+comments:
+  use:
+  text: true
+  lazyload: true
+  count: false
+  card_post_count: false
+
+# UI and performance
+darkmode:
+  enable: true
+  button: true
+  autoChangeMode: 1
+rounded_corners_ui: true
+mask:
+  header: true
+  footer: true
+display_mode: light
+enter_transitions: true
+rightside_scroll_percent: true
+rightside_config_animation: false
+busuanzi:
+  site_uv: false
+  site_pv: false
+  page_pv: false
+lazyload:
+  enable: true
+  field: site
+  placeholder:
+  blur: false
+lightbox: fancybox
+series:
+  enable: true
+  orderBy: title
+  order: 1
+  number: true
+Open_Graph_meta:
+  enable: true
+structured_data:
+  enable: true
+  alternate_name:
+    - 溯光如初的游戏开发笔记
+
+theme_color:
+  enable: true
+  main: '#177e89'
+  paginator: '#177e89'
+  button_hover: '#bd4f43'
+  text_selection: '#7ac7c4'
+  link_color: '#287b86'
+  meta_color: '#65747c'
+  hr_color: '#8ab8b8'
+  code_foreground: '#d65a4a'
+  code_background: 'rgba(25, 37, 44, 0.07)'
+  toc_color: '#177e89'
+  blockquote_padding_color: '#177e89'
+  blockquote_background_color: 'rgba(23, 126, 137, 0.08)'
+  scrollbar_color: '#177e89'
+  meta_theme_color_light: '#f4f7f7'
+  meta_theme_color_dark: '#12191d'
+
+footer:
+  owner:
+    enable: true
+    since: 2026
+  copyright:
+    enable: true
+    version: false
+  custom_text: 以代码构筑世界，以文字沉淀经验
+
+inject:
+  head:
+    - <link rel="stylesheet" href="/css/sujing.css">
+  bottom:
+    - <script src="/js/sujing.js" defer></script>

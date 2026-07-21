@@ -1,0 +1,25 @@
+{
+  "name": "sujing-image-cdn",
+  "main": "src/index.mjs",
+  "compatibility_date": "2026-07-21",
+  "workers_dev": true,
+  "routes": [
+    {
+      "pattern": "img.sujing.dev",
+      "custom_domain": true
+    },
+    {
+      "pattern": "www.sujing.dev",
+      "custom_domain": true
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "IMAGES",
+      "bucket_name": "sujing-images"
+    }
+  ],
+  "vars": {
+    "DEFAULT_CACHE_CONTROL": "public, max-age=31536000, immutable"
+  }
+}

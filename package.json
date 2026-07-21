@@ -1,12 +1,26 @@
 {
-  "name": "hexo-site",
-  "version": "0.0.0",
+  "name": "sujing",
+  "version": "1.0.0",
+  "description": "溯境：以游戏开发与 Unity 技术为主，也记录生活与兴趣的长期个人博客。",
   "private": true,
+  "homepage": "https://sujing.dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TracingLight/SuJing.git"
+  },
   "packageManager": "npm@10.9.2",
+  "engines": {
+    "node": ">=22 <25"
+  },
   "scripts": {
     "build": "hexo generate",
+    "check": "hexo clean && hexo generate",
     "clean": "hexo clean",
     "deploy": "hexo deploy",
+    "image:login": "npx wrangler login",
+    "image:bucket": "npx wrangler r2 bucket create sujing-images",
+    "image:deploy": "npx wrangler deploy --config infra/image-host/wrangler.jsonc",
+    "image:upload": "node tools/upload-image.js",
     "server": "hexo server"
   },
   "hexo": {
@@ -16,7 +30,10 @@
     "hexo": "^8.0.0",
     "hexo-generator-archive": "^2.0.0",
     "hexo-generator-category": "^2.0.0",
+    "hexo-generator-feed": "^4.0.0",
     "hexo-generator-index": "^4.0.0",
+    "hexo-generator-searchdb": "^1.5.0",
+    "hexo-generator-sitemap": "^3.0.1",
     "hexo-generator-tag": "^2.0.0",
     "hexo-renderer-ejs": "^2.0.0",
     "hexo-renderer-marked": "^7.0.0",
@@ -24,6 +41,9 @@
     "hexo-renderer-stylus": "^3.0.1",
     "hexo-server": "^3.0.0",
     "hexo-theme-butterfly": "^5.5.5",
-    "hexo-theme-landscape": "^1.0.0"
+    "hexo-wordcount": "^6.0.1"
+  },
+  "devDependencies": {
+    "wrangler": "^4.112.0"
   }
 }

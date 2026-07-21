@@ -1,0 +1,10 @@
+title: 溯境相册
+albums:
+  - title: 溯境视觉
+    description: 为博客建立的第一组原创视觉资产。
+    cover: /img/sujing-hero-a.webp
+    images:
+      - src: /img/sujing-hero-a.webp
+        alt: 月夜中的女性世界构筑者
+      - src: /img/sujing-hero-b.webp
+        alt: 晨光中的女性世界构筑者
