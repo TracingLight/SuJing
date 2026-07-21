@@ -2,6 +2,9 @@
 
 溯光如初的游戏开发技术博客，基于 Hexo 与 Butterfly 构建，部署于 Cloudflare Pages。
 
+- Website: <https://sujing.dev>
+- Repository: <https://github.com/TracingLight/SuJing>
+
 ## 本地开发
 
 要求 Node.js 22 和 npm 10。
