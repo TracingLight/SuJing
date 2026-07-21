@@ -275,6 +275,45 @@
     if (latest?.content) note.textContent = latest.content;
   };
 
+  const installHomeContent = async () => {
+    const card = document.querySelector('[data-sujing-latest-card]');
+    const stats = document.querySelector('[data-sujing-home-stats]');
+    if (!card && !stats) return;
+    const data = await loadSiteData();
+
+    if (stats) {
+      const values = {
+        posts: data.posts?.length || 0,
+        categories: data.categories?.length || 0,
+        tags: data.tags?.length || 0
+      };
+      Object.entries(values).forEach(([key, value]) => {
+        const target = stats.querySelector(`[data-stat="${key}"]`);
+        if (target) target.textContent = String(value);
+      });
+    }
+
+    const latest = data.posts?.[0];
+    if (!card || !latest) return;
+    const date = new Date(latest.date);
+    const readableDate = Number.isNaN(date.getTime())
+      ? ''
+      : new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
+        .format(date)
+        .replaceAll('/', '.');
+    card.href = latest.path;
+    if (latest.cover) card.style.setProperty('--sujing-latest-image', `url("${latest.cover.replace(/["\\]/g, '')}")`);
+    const time = card.querySelector('time');
+    if (time) {
+      time.dateTime = latest.date || '';
+      time.textContent = readableDate;
+    }
+    const title = card.querySelector('h3');
+    const description = card.querySelector('p');
+    if (title) title.textContent = latest.title || '最新文章';
+    if (description) description.textContent = latest.description || '继续阅读最新记录。';
+  };
+
   const installNotesPage = async () => {
     const container = document.querySelector('[data-sujing-notes]');
     if (!container || container.dataset.ready) return;
@@ -356,6 +395,7 @@
     installAuthorSkills();
     installPostTools();
     installHomeNote();
+    installHomeContent();
     installNotesPage();
     installGalleryPage();
     installMusicPage();
