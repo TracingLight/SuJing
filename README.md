@@ -79,14 +79,23 @@ npm run check
 
 ## Cloudflare Pages
 
+- Project: `sujing`
 - Production branch: `main`
 - Build command: `npm run build`
 - Build output directory: `public`
 - Node.js version: `22`
 
-推送到 `main` 后由 Cloudflare Pages 自动构建。站点主域名：
+当前可通过以下命令清理、构建并部署生产版本：
+
+```bash
+npm run pages:deploy
+```
+
+GitHub 仓库接入 Cloudflare Pages 后，推送到 `main` 将由 Cloudflare 自动构建。站点主域名：
 
 <https://sujing.dev>
+
+Pages 回退地址：<https://sujing.pages.dev>
 
 图床主域名：<https://img.sujing.dev>。`workers.dev` 地址保留为故障回退入口。
 
