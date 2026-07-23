@@ -182,16 +182,22 @@ input:focus-visible {
   position: relative;
   z-index: 1;
   display: inline-flex !important;
+  width: auto !important;
+  max-width: none !important;
   height: 38px;
+  flex-direction: row;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 7px;
-  padding: 0 12px !important;
+  padding: 0 14px !important;
   border: 1px solid transparent;
   border-radius: 999px;
   color: var(--sujing-ink-soft) !important;
   font-size: 0.86rem;
   font-weight: 650;
   line-height: 1;
+  white-space: nowrap;
+  writing-mode: horizontal-tb;
   text-shadow: none !important;
   cursor: pointer;
   transition:
@@ -200,6 +206,12 @@ input:focus-visible {
     border-color 0.2s ease,
     box-shadow 0.2s ease,
     transform 0.2s ease;
+}
+
+#nav .menus_items > .menus_item > .site-page span {
+  display: inline !important;
+  white-space: nowrap;
+  writing-mode: horizontal-tb;
 }
 
 #page-header:not(.not-top-img):not(.nav-fixed) #nav .site-page,
