@@ -912,6 +912,68 @@
     });
   };
 
+  const installAmbientInk = () => {
+    if (document.documentElement.dataset.sujingAmbient) return;
+    document.documentElement.dataset.sujingAmbient = 'true';
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+    const root = document.getElementById('web_bg') || document.documentElement;
+    let frame = null;
+    let nextX = 50;
+    let nextY = 28;
+    const paint = () => {
+      frame = null;
+      root.style.setProperty('--sujing-ambient-x', `${nextX.toFixed(1)}%`);
+      root.style.setProperty('--sujing-ambient-y', `${nextY.toFixed(1)}%`);
+    };
+    window.addEventListener('pointermove', (event) => {
+      nextX = (event.clientX / Math.max(window.innerWidth, 1)) * 100;
+      nextY = (event.clientY / Math.max(window.innerHeight, 1)) * 100;
+      if (frame !== null) return;
+      frame = window.requestAnimationFrame(paint);
+    }, { passive: true });
+  };
+
+  const installScrollAtmosphere = () => {
+    if (document.documentElement.dataset.sujingScrollAtm) return;
+    document.documentElement.dataset.sujingScrollAtm = 'true';
+    const root = document.getElementById('web_bg') || document.documentElement;
+    let frame = null;
+    const update = () => {
+      frame = null;
+      const max = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
+      const progress = Math.min(1, Math.max(0, window.scrollY / max));
+      root.style.setProperty('--sujing-scroll-shift', `${(progress * 48).toFixed(1)}px`);
+    };
+    window.addEventListener('scroll', () => {
+      if (frame !== null) return;
+      frame = window.requestAnimationFrame(update);
+    }, { passive: true });
+    update();
+  };
+
+  const sealChars = ['溯', '境', '墨', '卷', '录'];
+  let sealIndex = 0;
+
+  const createSealStamp = (event) => {
+    if (event.button !== 0 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const target = event.target.closest?.(
+      '.sujing-button-primary, a.sujing-bento-latest, .sujing-bento-destinations > a, .sujing-now-strip'
+    );
+    if (!target) return;
+
+    const stamp = document.createElement('span');
+    stamp.className = 'sujing-seal-stamp';
+    stamp.setAttribute('aria-hidden', 'true');
+    stamp.textContent = sealChars[sealIndex % sealChars.length];
+    sealIndex += 1;
+    stamp.style.left = `${event.clientX}px`;
+    stamp.style.top = `${event.clientY}px`;
+    stamp.addEventListener('animationend', () => stamp.remove(), { once: true });
+    document.body.appendChild(stamp);
+  };
+
   const rippleSelector = [
     '#nav .site-page',
     '.sujing-button',
@@ -953,6 +1015,7 @@
     document.documentElement.classList.add('sujing-motion');
 
     document.addEventListener('pointerdown', createInteractionRipple, { passive: true });
+    document.addEventListener('pointerdown', createSealStamp, { passive: true });
 
     document.addEventListener('click', (event) => {
       const openTrigger = event.target.closest('[data-sujing-command-open]');
@@ -1033,6 +1096,8 @@
     installMotion();
     installHeroParallax();
     installMagneticButtons();
+    installAmbientInk();
+    installScrollAtmosphere();
     updateReadingProgress();
   };
 

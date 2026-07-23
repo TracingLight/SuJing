@@ -78,15 +78,32 @@ input:focus-visible {
 }
 
 #web_bg {
+  --sujing-ambient-x: 50%;
+  --sujing-ambient-y: 28%;
+  --sujing-scroll-shift: 0px;
   overflow: hidden;
   background-color: var(--sujing-paper) !important;
   background-image:
-    radial-gradient(ellipse 95% 60% at 50% -12%, rgba(26, 122, 130, 0.13), transparent 60%),
-    radial-gradient(ellipse 48% 36% at 88% 12%, rgba(200, 90, 76, 0.07), transparent 54%),
-    radial-gradient(ellipse 40% 32% at 10% 78%, rgba(154, 123, 79, 0.06), transparent 52%),
+    radial-gradient(ellipse 70% 50% at var(--sujing-ambient-x) var(--sujing-ambient-y), rgba(26, 122, 130, 0.11), transparent 58%),
+    radial-gradient(ellipse 95% 60% at 50% calc(-12% + var(--sujing-scroll-shift)), rgba(26, 122, 130, 0.12), transparent 60%),
+    radial-gradient(ellipse 48% 36% at 88% 12%, rgba(180, 69, 58, 0.06), transparent 54%),
+    radial-gradient(ellipse 40% 32% at 10% 78%, rgba(154, 123, 79, 0.07), transparent 52%),
     radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.35), transparent 28%),
     radial-gradient(circle at 78% 68%, rgba(26, 122, 130, 0.04), transparent 26%);
   background-size: auto;
+}
+
+#web_bg::after {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.045;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(26, 38, 44, 0.35) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgba(26, 38, 44, 0.22) 0 1px, transparent 1px 4px);
+  mix-blend-mode: multiply;
+  content: "";
 }
 
 #sujing-starfield {
@@ -268,14 +285,19 @@ input:focus-visible {
 #nav .menus_items > .menus_item > .site-page.is-current,
 #nav .menus_item.is-open > .site-page {
   color: var(--sujing-ink) !important;
-  border-color: rgba(23, 126, 137, 0.22);
-  background: rgba(23, 126, 137, 0.1);
-  box-shadow: inset 0 0 0 1px rgba(23, 126, 137, 0.04);
+  border-color: rgba(154, 123, 79, 0.38);
+  background:
+    linear-gradient(180deg, rgba(154, 123, 79, 0.1), transparent 70%),
+    rgba(255, 255, 255, 0.55);
+  box-shadow: inset 0 -2px 0 rgba(180, 69, 58, 0.55);
 }
 
 #nav .menus_items > .menus_item > .site-page.is-current {
-  border-color: rgba(23, 126, 137, 0.34);
-  background: rgba(23, 126, 137, 0.14);
+  border-color: rgba(180, 69, 58, 0.35);
+  background:
+    linear-gradient(180deg, rgba(180, 69, 58, 0.08), transparent 72%),
+    rgba(255, 255, 255, 0.62);
+  box-shadow: inset 0 -2px 0 var(--sujing-seal);
 }
 
 #nav .site-page > i {
@@ -737,6 +759,24 @@ a.sujing-button-primary:hover {
   isolation: isolate;
 }
 
+.sujing-bento-hero::after {
+  position: absolute;
+  top: 50%;
+  right: 22px;
+  z-index: 2;
+  color: rgba(215, 193, 154, 0.42);
+  font-family: var(--sujing-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.42em;
+  line-height: 1.9;
+  pointer-events: none;
+  content: "墨痕未干";
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: translateY(-50%);
+}
+
 .sujing-bento-hero > img {
   position: absolute;
   inset: 0;
@@ -824,14 +864,14 @@ a.sujing-button-primary:hover {
 }
 
 .sujing-bento-hero-meta span {
-  padding: 5px 9px;
-  border: 1px solid rgba(255, 255, 255, 0.36);
-  border-radius: 999px;
-  color: rgba(255, 255, 255, 0.86);
+  padding: 5px 10px;
+  border: 1px solid rgba(215, 193, 154, 0.42);
+  border-radius: 4px;
+  color: #d7c19a;
   background: rgba(9, 18, 22, 0.42);
-  font-family: Consolas, monospace;
-  font-size: 0.58rem;
-  letter-spacing: 0.06em;
+  font-family: var(--sujing-display);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
   backdrop-filter: blur(8px);
 }
 
@@ -1323,6 +1363,8 @@ a.sujing-bento-card:hover::before {
 }
 
 .sujing-bento-destinations > a {
+  --sujing-tilt-x: 0deg;
+  --sujing-tilt-y: 0deg;
   display: grid;
   min-height: 108px;
   grid-template-columns: auto minmax(0, 1fr) auto;
@@ -1335,7 +1377,8 @@ a.sujing-bento-card:hover::before {
   background:
     linear-gradient(145deg, rgba(154, 123, 79, 0.06), transparent 40%),
     rgba(255, 255, 255, 0.72);
-  transition: color 0.22s ease, border-color 0.22s ease, background-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
+  transform: perspective(900px) rotateX(var(--sujing-tilt-x)) rotateY(var(--sujing-tilt-y));
+  transition: color 0.22s ease, border-color 0.22s ease, background-color 0.22s ease, box-shadow 0.22s ease, transform 0.12s ease;
 }
 
 .sujing-bento-destinations > a:hover {
@@ -1345,7 +1388,7 @@ a.sujing-bento-card:hover::before {
     linear-gradient(145deg, rgba(26, 122, 130, 0.08), transparent 45%),
     var(--sujing-surface);
   box-shadow: var(--sujing-interactive-shadow);
-  transform: translateY(-3px);
+  transform: perspective(900px) translateY(-3px) rotateX(var(--sujing-tilt-x)) rotateY(var(--sujing-tilt-y));
 }
 
 .sujing-bento-destinations > a > span {
@@ -1393,15 +1436,19 @@ a.sujing-bento-card:hover::before {
   gap: 32px;
   margin-bottom: 28px;
   padding: 30px 32px;
-  border: 1px solid var(--sujing-line);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(154, 123, 79, 0.28);
+  border-radius: 10px;
+  background:
+    linear-gradient(135deg, rgba(154, 123, 79, 0.08), transparent 42%),
+    rgba(255, 255, 255, 0.72);
 }
 
 .sujing-list-intro h1 {
   margin: 0;
   color: var(--sujing-ink);
-  font-size: 2rem;
+  font-family: var(--sujing-display);
+  font-size: 2.05rem;
+  letter-spacing: 0.14em;
 }
 
 .sujing-list-intro > p {
@@ -1422,15 +1469,15 @@ a.sujing-bento-card:hover::before {
   grid-template-columns: 260px minmax(0, 1fr);
   margin: 0 !important;
   overflow: hidden;
-  border: 1px solid var(--sujing-line);
-  border-radius: 8px;
+  border: 1px solid rgba(154, 123, 79, 0.22);
+  border-radius: 10px;
   background: rgba(255, 255, 255, 0.88);
   box-shadow: none;
-  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 #recent-posts > .recent-post-items > .recent-post-item:hover {
-  border-color: var(--sujing-teal);
+  border-color: rgba(180, 69, 58, 0.42);
   box-shadow: var(--sujing-shadow);
   transform: translateY(-3px);
 }
@@ -1650,13 +1697,16 @@ a.sujing-bento-card:hover::before {
   z-index: 10010;
   height: 3px;
   pointer-events: none;
+  background: rgba(154, 123, 79, 0.12);
 }
 
 #sujing-reading-progress span {
   display: block;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, var(--sujing-teal), var(--sujing-coral));
+  background:
+    linear-gradient(90deg, var(--sujing-teal) 0%, var(--sujing-gold) 52%, var(--sujing-seal) 100%);
+  box-shadow: 0 0 12px rgba(180, 69, 58, 0.28);
   transform: scaleX(0);
   transform-origin: left;
   will-change: transform;
@@ -2705,12 +2755,36 @@ a.sujing-bento-card:hover::before {
 /* Footer and utility controls */
 
 #footer {
+  position: relative;
   margin-top: 78px;
-  background: var(--sujing-night);
+  background:
+    linear-gradient(180deg, rgba(154, 123, 79, 0.08), transparent 28%),
+    var(--sujing-night);
 }
 
 #footer::before {
   background: transparent !important;
+}
+
+#footer::after {
+  position: absolute;
+  top: 18px;
+  right: max(24px, calc((100vw - var(--sujing-content)) / 2));
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(180, 69, 58, 0.45);
+  border-radius: 3px;
+  color: rgba(208, 113, 104, 0.72);
+  font-family: var(--sujing-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 42px;
+  text-align: center;
+  transform: rotate(9deg);
+  pointer-events: none;
+  content: "境";
+  box-shadow: inset 0 0 0 3px rgba(180, 69, 58, 0.12);
 }
 
 #footer-wrap {
@@ -2751,12 +2825,59 @@ a.sujing-bento-card:hover::before {
   z-index: 0;
   width: var(--sujing-ripple-size);
   height: var(--sujing-ripple-size);
-  border-radius: 50%;
-  background: rgba(82, 184, 181, 0.28);
+  border-radius: 46% 54% 48% 52% / 52% 46% 54% 48%;
+  background:
+    radial-gradient(circle at 42% 40%, rgba(26, 122, 130, 0.34), transparent 58%),
+    radial-gradient(circle at 60% 62%, rgba(180, 69, 58, 0.18), transparent 52%);
   opacity: 0;
-  transform: translate(-50%, -50%) scale(0.12);
+  transform: translate(-50%, -50%) scale(0.12) rotate(-8deg);
   pointer-events: none;
-  animation: sujing-ripple 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: sujing-ripple 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sujing-seal-stamp {
+  position: fixed;
+  z-index: 10040;
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border: 1.5px solid rgba(180, 69, 58, 0.72);
+  border-radius: 4px;
+  color: rgba(180, 69, 58, 0.88);
+  background:
+    linear-gradient(rgba(180, 69, 58, 0.08), rgba(180, 69, 58, 0.08)),
+    rgba(255, 252, 248, 0.82);
+  box-shadow:
+    inset 0 0 0 4px rgba(180, 69, 58, 0.14),
+    0 10px 28px rgba(20, 40, 47, 0.16);
+  font-family: var(--sujing-display);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -50%) rotate(12deg) scale(0.55);
+  animation: sujing-seal 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes sujing-seal {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(18deg) scale(0.4);
+  }
+  28% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(8deg) scale(1.08);
+  }
+  55% {
+    opacity: 0.95;
+    transform: translate(-50%, -50%) rotate(9deg) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(10deg) scale(0.92);
+  }
 }
 
 .sujing-button:active,
@@ -2764,15 +2885,41 @@ a.sujing-bento-card:hover::before {
 .sujing-bento-tracks nav a:active,
 .sujing-bento-gallery a:active,
 .sujing-bento-profile:active,
-.sujing-bento-destinations > a:active,
 .sujing-about-links a:active {
   transform: translateY(1px) scale(0.985);
 }
 
+.sujing-bento-destinations > a:active {
+  transform: perspective(900px) translateY(1px) scale(0.985) rotateX(var(--sujing-tilt-x)) rotateY(var(--sujing-tilt-y));
+}
+
 @keyframes sujing-ripple {
-  0% { opacity: 0.64; transform: translate(-50%, -50%) scale(0.12); }
-  72% { opacity: 0.18; }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+  0% { opacity: 0.7; transform: translate(-50%, -50%) scale(0.12) rotate(-8deg); }
+  55% { opacity: 0.28; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.05) rotate(4deg); }
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(154, 123, 79, 0.08);
+}
+
+::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(26, 122, 130, 0.55), rgba(154, 123, 79, 0.7)) padding-box,
+    transparent border-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background:
+    linear-gradient(180deg, rgba(26, 122, 130, 0.75), rgba(180, 69, 58, 0.65)) padding-box,
+    transparent border-box;
 }
 
 .sujing-motion [data-sujing-reveal] {
@@ -2834,13 +2981,28 @@ a.sujing-bento-card:hover::before {
   color: var(--sujing-ink) !important;
 }
 
+[data-theme='dark'] #web_bg::after {
+  opacity: 0.035;
+  mix-blend-mode: soft-light;
+}
+
 [data-theme='dark'] #nav .menus_items > .menus_item > .site-page:hover,
 [data-theme='dark'] #nav .menus_items > .menus_item > .site-page.is-current,
 [data-theme='dark'] #nav .menus_item.is-open > .site-page {
   color: var(--sujing-ink) !important;
-  border-color: rgba(122, 199, 196, 0.28);
-  background: rgba(23, 126, 137, 0.2);
-  box-shadow: none;
+  border-color: rgba(196, 165, 116, 0.35);
+  background:
+    linear-gradient(180deg, rgba(196, 165, 116, 0.12), transparent 70%),
+    rgba(32, 45, 51, 0.72);
+  box-shadow: inset 0 -2px 0 rgba(208, 113, 104, 0.7);
+}
+
+[data-theme='dark'] .sujing-seal-stamp {
+  color: rgba(208, 113, 104, 0.92);
+  border-color: rgba(208, 113, 104, 0.7);
+  background:
+    linear-gradient(rgba(208, 113, 104, 0.1), rgba(208, 113, 104, 0.1)),
+    rgba(24, 34, 39, 0.9);
 }
 
 [data-theme='dark'] #nav .menus_item_child {
@@ -3320,6 +3482,11 @@ a.sujing-bento-card:hover::before {
     font-size: 0.72rem;
   }
 
+  .sujing-bento-hero::after,
+  #footer::after {
+    display: none;
+  }
+
   .sujing-bento-hero-meta {
     display: none;
   }
@@ -3473,7 +3640,8 @@ a.sujing-bento-card:hover::before {
     transform: none !important;
   }
 
-  .sujing-interaction-ripple {
+  .sujing-interaction-ripple,
+  .sujing-seal-stamp {
     display: none !important;
   }
 
