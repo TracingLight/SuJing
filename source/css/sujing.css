@@ -49,6 +49,23 @@ input {
   letter-spacing: 0;
 }
 
+a,
+a:hover,
+a:focus,
+a:active,
+.container a,
+.container a:hover,
+.container a:focus,
+.container a:active,
+#nav a:hover,
+#footer a:hover,
+#recent-posts a:hover,
+.category-list a:hover,
+.tag-cloud-list a:hover,
+#aside-content a:hover {
+  text-decoration: none !important;
+}
+
 a:focus-visible,
 button:focus-visible,
 input:focus-visible {
@@ -586,6 +603,7 @@ a.sujing-button-primary:hover {
     linear-gradient(90deg, rgba(215, 90, 74, 0.1), transparent 36%),
     rgba(255, 255, 255, 0.82);
   box-shadow: 0 10px 28px rgba(20, 40, 47, 0.05);
+  text-decoration: none !important;
   transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
@@ -596,6 +614,7 @@ a.sujing-button-primary:hover {
     linear-gradient(90deg, rgba(215, 90, 74, 0.14), transparent 40%),
     var(--sujing-surface);
   box-shadow: 0 14px 32px rgba(20, 40, 47, 0.09);
+  text-decoration: none !important;
   transform: translateY(-1px);
 }
 
@@ -610,6 +629,7 @@ a.sujing-button-primary:hover {
   overflow: hidden;
   font-size: 0.84rem;
   font-weight: 600;
+  text-decoration: none !important;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1433,8 +1453,15 @@ a.sujing-bento-card:hover {
 
 .post #article-container a {
   color: var(--sujing-teal);
-  text-decoration-color: rgba(23, 126, 137, 0.35);
-  text-underline-offset: 3px;
+  text-decoration: none !important;
+  box-shadow: inset 0 -1px 0 rgba(23, 126, 137, 0.28);
+  transition: color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.post #article-container a:hover {
+  color: var(--sujing-coral);
+  text-decoration: none !important;
+  box-shadow: inset 0 -1px 0 rgba(215, 90, 74, 0.55);
 }
 
 .post #article-container blockquote {
