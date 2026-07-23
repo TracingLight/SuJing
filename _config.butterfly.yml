@@ -35,7 +35,7 @@ cover:
   aside_enable: false
   archives_enable: true
   default_cover:
-    - https://img.sujing.dev/illustrations/2026/07/game-developer-room-c7c0a0919c8c.webp
+    - /img/sujing-hero-b.webp
 
 index_site_info_top: 50%
 index_top_img_height: 0

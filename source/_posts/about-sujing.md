@@ -8,7 +8,7 @@ tags:
   - 建站
   - Unity
 description: 介绍溯境的内容方向、写作边界与后续规划。
-cover: https://img.sujing.dev/illustrations/2026/07/game-developer-room-c7c0a0919c8c.webp
+cover: /img/sujing-hero-b.webp
 copyright: true
 ---
 
