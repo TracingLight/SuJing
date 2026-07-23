@@ -1,26 +1,30 @@
 :root {
-  --sujing-paper: #f4f7f6;
-  --sujing-surface: #ffffff;
-  --sujing-surface-soft: #e9efee;
-  --sujing-ink: #17242b;
-  --sujing-ink-soft: #30434b;
-  --sujing-muted: #65767c;
-  --sujing-line: #d4dedc;
-  --sujing-line-strong: #b7c8c6;
-  --sujing-teal: #177e89;
-  --sujing-teal-bright: #52b8b5;
-  --sujing-teal-pale: #d7ece9;
-  --sujing-coral: #d75a4a;
+  --sujing-paper: #f3f6f4;
+  --sujing-surface: #fbfcfb;
+  --sujing-surface-soft: #e6eeec;
+  --sujing-ink: #1a262c;
+  --sujing-ink-soft: #3a4c54;
+  --sujing-muted: #6a7b81;
+  --sujing-line: #cfdad7;
+  --sujing-line-strong: #aebfbc;
+  --sujing-teal: #1a7a82;
+  --sujing-teal-bright: #4fb0ad;
+  --sujing-teal-pale: #d5ebe8;
+  --sujing-coral: #c85a4c;
+  --sujing-seal: #b4453a;
+  --sujing-gold: #9a7b4f;
   --sujing-control: rgba(255, 255, 255, 0.78);
   --sujing-control-hover: #edf7f5;
   --sujing-control-active: #dcecea;
-  --sujing-interactive-shadow: 0 12px 30px rgba(20, 40, 47, 0.12);
+  --sujing-interactive-shadow: 0 14px 34px rgba(20, 40, 47, 0.12);
   --sujing-night: #11181c;
   --sujing-night-surface: #182227;
   --sujing-night-soft: #202d33;
-  --sujing-shadow: 0 14px 40px rgba(20, 40, 47, 0.08);
+  --sujing-shadow: 0 16px 44px rgba(20, 40, 47, 0.09);
   --sujing-content: 1180px;
   --sujing-reading: 780px;
+  --sujing-display: "Source Han Serif SC", "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  --sujing-sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
 }
 
 * {
@@ -34,8 +38,8 @@ html {
 body {
   color: var(--sujing-ink);
   background: var(--sujing-paper);
-  font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", system-ui, sans-serif;
-  letter-spacing: 0;
+  font-family: var(--sujing-sans);
+  letter-spacing: 0.01em;
 }
 
 ::selection {
@@ -46,7 +50,7 @@ body {
 a,
 button,
 input {
-  letter-spacing: 0;
+  letter-spacing: 0.02em;
 }
 
 a,
@@ -77,12 +81,12 @@ input:focus-visible {
   overflow: hidden;
   background-color: var(--sujing-paper) !important;
   background-image:
-    radial-gradient(ellipse 90% 55% at 50% -8%, rgba(23, 126, 137, 0.14), transparent 58%),
-    radial-gradient(ellipse 42% 34% at 92% 18%, rgba(215, 90, 74, 0.07), transparent 52%),
-    radial-gradient(ellipse 36% 28% at 8% 72%, rgba(82, 184, 181, 0.06), transparent 50%),
-    linear-gradient(rgba(23, 126, 137, 0.028) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(23, 126, 137, 0.028) 1px, transparent 1px);
-  background-size: auto, auto, auto, 48px 48px, 48px 48px;
+    radial-gradient(ellipse 95% 60% at 50% -12%, rgba(26, 122, 130, 0.13), transparent 60%),
+    radial-gradient(ellipse 48% 36% at 88% 12%, rgba(200, 90, 76, 0.07), transparent 54%),
+    radial-gradient(ellipse 40% 32% at 10% 78%, rgba(154, 123, 79, 0.06), transparent 52%),
+    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.35), transparent 28%),
+    radial-gradient(circle at 78% 68%, rgba(26, 122, 130, 0.04), transparent 26%);
+  background-size: auto;
 }
 
 #sujing-starfield {
@@ -92,7 +96,9 @@ input:focus-visible {
   display: block;
   width: 100%;
   height: 100%;
+  opacity: 0.72;
   pointer-events: none;
+  mix-blend-mode: multiply;
 }
 
 #body-wrap {
@@ -172,19 +178,22 @@ input:focus-visible {
   display: inline-flex;
   align-items: center;
   color: var(--sujing-ink);
-  font-size: 1rem;
-  font-weight: 800;
+  font-family: var(--sujing-display);
+  font-size: 1.08rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
 }
 
 #nav .nav-site-title .site-name::before {
   display: inline-block;
-  width: 12px;
-  height: 12px;
-  flex: 0 0 12px;
+  width: 13px;
+  height: 13px;
+  flex: 0 0 13px;
   margin-right: 10px;
-  color: var(--sujing-teal);
+  color: var(--sujing-seal);
   background: currentColor;
-  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%, 50% 0, 50% 23%, 23% 50%, 50% 77%, 77% 50%, 50% 23%);
+  box-shadow: 0 0 0 1px rgba(180, 69, 58, 0.25);
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
   content: "";
 }
 
@@ -472,62 +481,85 @@ input:focus-visible {
 #page > .page-title {
   margin: 0 0 28px;
   color: var(--sujing-ink);
-  font-size: 1.8rem;
+  font-family: var(--sujing-display);
+  font-size: 1.9rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-align: left;
 }
 
 .sujing-kicker {
   margin: 0 0 11px;
   color: var(--sujing-teal);
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+  font-family: var(--sujing-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
   line-height: 1.4;
 }
 
 .sujing-button {
+  --sujing-magnet-x: 0px;
+  --sujing-magnet-y: 0px;
+  position: relative;
   display: inline-flex;
-  min-height: 44px;
+  min-height: 46px;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 0 18px;
+  overflow: hidden;
+  padding: 0 20px;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: 999px;
   font: inherit;
   font-size: 0.86rem;
   font-weight: 700;
+  letter-spacing: 0.06em;
   cursor: pointer;
-  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+  transform: translate3d(var(--sujing-magnet-x), var(--sujing-magnet-y), 0);
+  transition:
+    color 0.25s ease,
+    border-color 0.25s ease,
+    background-color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.18s ease;
 }
 
 .sujing-button:hover {
-  transform: translateY(-2px);
+  transform: translate3d(var(--sujing-magnet-x), calc(var(--sujing-magnet-y) - 2px), 0);
 }
 
 .sujing-button-primary,
 a.sujing-button-primary {
   color: #fff;
   border-color: var(--sujing-teal);
-  background: var(--sujing-teal);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.14), transparent 42%),
+    var(--sujing-teal);
+  box-shadow: 0 10px 24px rgba(26, 122, 130, 0.28);
 }
 
 .sujing-button-primary:hover,
 a.sujing-button-primary:hover {
   color: #fff;
-  border-color: var(--sujing-coral);
-  background: var(--sujing-coral);
+  border-color: var(--sujing-seal);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.16), transparent 42%),
+    var(--sujing-seal);
+  box-shadow: 0 14px 30px rgba(180, 69, 58, 0.28);
 }
 
 .sujing-button-quiet {
   color: var(--sujing-ink);
-  border-color: var(--sujing-line-strong);
-  background: rgba(255, 255, 255, 0.66);
+  border-color: rgba(154, 123, 79, 0.35);
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(8px);
 }
 
 .sujing-button-quiet:hover {
   color: var(--sujing-teal);
   border-color: var(--sujing-teal);
+  background: rgba(255, 255, 255, 0.82);
 }
 
 /* Homepage */
@@ -579,14 +611,53 @@ a.sujing-button-primary:hover {
 /* Bento homepage */
 
 .sujing-bento-home {
+  position: relative;
   width: min(var(--sujing-content), calc(100% - 40px));
   margin: 0 auto;
   padding: 14px 0 88px;
   overflow: visible;
 }
 
+.sujing-bento-home::before,
+.sujing-bento-home::after {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  content: "";
+}
+
 .sujing-bento-home::before {
-  display: none;
+  top: 8px;
+  right: 8px;
+  width: 54px;
+  height: 54px;
+  border: 1.5px solid rgba(180, 69, 58, 0.55);
+  border-radius: 4px;
+  color: rgba(180, 69, 58, 0.72);
+  background:
+    linear-gradient(rgba(180, 69, 58, 0.08), rgba(180, 69, 58, 0.08)),
+    radial-gradient(circle at 50% 48%, transparent 42%, rgba(180, 69, 58, 0.18) 43% 48%, transparent 49%);
+  box-shadow: inset 0 0 0 4px rgba(180, 69, 58, 0.12);
+  font-family: var(--sujing-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  line-height: 54px;
+  text-align: center;
+  transform: rotate(8deg);
+  opacity: 0.7;
+}
+
+.sujing-bento-home::after {
+  right: 8px;
+  bottom: 18px;
+  width: 72px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(154, 123, 79, 0.55), transparent);
+}
+
+.sujing-bento-home::before {
+  content: "溯";
 }
 
 .sujing-now-strip {
@@ -652,14 +723,17 @@ a.sujing-button-primary:hover {
 
 .sujing-bento-hero {
   position: relative;
-  height: 420px;
+  z-index: 1;
+  height: 440px;
   margin-top: 16px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 22px;
+  border-radius: 24px;
   color: #fff;
   background: #122026;
-  box-shadow: 0 28px 60px rgba(12, 24, 30, 0.18);
+  box-shadow:
+    0 28px 60px rgba(12, 24, 30, 0.2),
+    inset 0 0 0 1px rgba(154, 123, 79, 0.12);
   isolation: isolate;
 }
 
@@ -669,15 +743,17 @@ a.sujing-button-primary:hover {
   z-index: -2;
   display: block;
   width: 100%;
-  height: 100%;
+  height: 112%;
   margin: 0;
   object-fit: cover;
   object-position: center 46%;
+  transform: translate3d(0, var(--sujing-hero-shift, 0px), 0) scale(1.02);
   transition: transform 0.8s ease;
+  will-change: transform;
 }
 
 .sujing-bento-hero:hover > img {
-  transform: scale(1.03);
+  transform: translate3d(0, var(--sujing-hero-shift, 0px), 0) scale(1.045);
 }
 
 .sujing-bento-hero-shade {
@@ -685,8 +761,8 @@ a.sujing-button-primary:hover {
   inset: 0;
   z-index: -1;
   background:
-    linear-gradient(105deg, rgba(8, 16, 20, 0.92) 0%, rgba(8, 16, 20, 0.72) 42%, rgba(8, 16, 20, 0.22) 74%, rgba(8, 16, 20, 0.08) 100%),
-    linear-gradient(0deg, rgba(6, 12, 16, 0.55), transparent 48%);
+    linear-gradient(105deg, rgba(8, 16, 20, 0.9) 0%, rgba(8, 16, 20, 0.7) 40%, rgba(8, 16, 20, 0.2) 72%, rgba(8, 16, 20, 0.08) 100%),
+    linear-gradient(0deg, rgba(6, 12, 16, 0.58), transparent 48%);
 }
 
 .sujing-bento-hero-copy {
@@ -699,17 +775,18 @@ a.sujing-button-primary:hover {
 }
 
 .sujing-bento-hero .sujing-kicker {
-  color: #7fd6d1;
-  letter-spacing: 0.08em;
+  color: #d7c19a;
+  letter-spacing: 0.28em;
 }
 
 .sujing-bento-hero h1 {
   margin: 8px 0 14px;
   color: #fff;
-  font-size: 3.35rem;
-  font-weight: 850;
-  line-height: 1.02;
-  letter-spacing: 0.02em;
+  font-family: var(--sujing-display);
+  font-size: 3.55rem;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: 0.16em;
   text-shadow: 0 4px 24px rgba(0, 0, 0, 0.32);
 }
 
@@ -766,32 +843,56 @@ a.sujing-button-primary:hover {
 }
 
 .sujing-bento-card {
+  --sujing-glow-x: 50%;
+  --sujing-glow-y: 40%;
+  position: relative;
+  z-index: 1;
   min-width: 0;
   overflow: hidden;
-  border: 1px solid rgba(183, 200, 198, 0.7);
-  border-radius: 20px;
+  border: 1px solid rgba(174, 191, 188, 0.75);
+  border-radius: 22px;
   color: var(--sujing-ink);
-  background: rgba(255, 255, 255, 0.84);
+  background:
+    radial-gradient(circle at var(--sujing-glow-x) var(--sujing-glow-y), rgba(26, 122, 130, 0.08), transparent 42%),
+    rgba(251, 252, 251, 0.88);
   box-shadow: 0 16px 40px rgba(20, 40, 47, 0.07);
   transition:
-    color 0.22s ease,
-    border-color 0.22s ease,
-    background-color 0.22s ease,
-    box-shadow 0.22s ease,
-    transform 0.22s ease;
+    color 0.28s ease,
+    border-color 0.28s ease,
+    background-color 0.28s ease,
+    box-shadow 0.28s ease,
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sujing-bento-card::before {
+  position: absolute;
+  inset: 10px;
+  z-index: 2;
+  border: 1px solid rgba(154, 123, 79, 0.14);
+  border-radius: 16px;
+  pointer-events: none;
+  content: "";
+  opacity: 0;
+  transition: opacity 0.28s ease;
 }
 
 a.sujing-bento-card:hover {
   color: var(--sujing-ink);
-  border-color: rgba(23, 126, 137, 0.5);
-  box-shadow: 0 22px 52px rgba(20, 40, 47, 0.14);
+  border-color: rgba(26, 122, 130, 0.48);
+  box-shadow: 0 24px 54px rgba(20, 40, 47, 0.14);
   text-decoration: none !important;
-  transform: translateY(-4px);
+  transform: translateY(-5px);
+}
+
+a.sujing-bento-card:hover::before {
+  opacity: 1;
 }
 
 .sujing-bento-card h2 {
   color: var(--sujing-ink);
-  letter-spacing: 0;
+  font-family: var(--sujing-display);
+  font-weight: 700;
+  letter-spacing: 0.04em;
 }
 
 .sujing-bento-latest {
@@ -800,15 +901,19 @@ a.sujing-bento-card:hover {
   position: relative;
   grid-column: span 7;
   display: block;
-  min-height: 380px;
+  min-height: 390px;
   color: #fff;
   background: #152128;
   transform: perspective(1100px) rotateX(var(--sujing-tilt-x)) rotateY(var(--sujing-tilt-y));
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.12s ease;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.12s ease;
 }
 
 .sujing-bento-latest:hover {
   color: #fff;
+}
+
+.sujing-bento-latest::before {
+  border-color: rgba(215, 193, 154, 0.28);
 }
 
 .sujing-bento-card-copy {
@@ -817,7 +922,7 @@ a.sujing-bento-card:hover {
   display: flex;
   min-width: 0;
   height: 100%;
-  min-height: 380px;
+  min-height: 390px;
   flex-direction: column;
   justify-content: flex-end;
   padding: 30px 32px 28px;
@@ -834,7 +939,7 @@ a.sujing-bento-card:hover {
 
 .sujing-bento-card-heading .sujing-kicker {
   margin: 0;
-  color: #7fd6d1;
+  color: #d7c19a;
 }
 
 .sujing-bento-card-heading time {
@@ -847,8 +952,9 @@ a.sujing-bento-card:hover {
 .sujing-bento-latest h2 {
   margin: 16px 0 10px;
   color: #fff;
-  font-size: 1.78rem;
+  font-size: 1.82rem;
   line-height: 1.28;
+  letter-spacing: 0.08em;
   text-shadow: 0 2px 16px rgba(0, 0, 0, 0.28);
 }
 
@@ -867,9 +973,10 @@ a.sujing-bento-card:hover {
 .sujing-bento-link {
   margin-top: 18px;
   padding-top: 0;
-  color: #7fd6d1;
+  color: #d7c19a;
   font-size: 0.8rem;
   font-weight: 750;
+  letter-spacing: 0.08em;
 }
 
 .sujing-bento-link i {
@@ -942,10 +1049,12 @@ a.sujing-bento-card:hover {
   align-items: center;
   padding: 0 12px;
   border: 1px solid transparent;
-  border-radius: 14px;
+  border-radius: 12px;
   color: var(--sujing-ink);
-  background: rgba(233, 239, 238, 0.55);
-  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  background:
+    linear-gradient(90deg, rgba(154, 123, 79, 0.05), transparent 28%),
+    rgba(233, 239, 238, 0.48);
+  transition: color 0.22s ease, background-color 0.22s ease, border-color 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease;
 }
 
 .sujing-bento-tracks nav a:last-child {
@@ -955,16 +1064,19 @@ a.sujing-bento-card:hover {
 .sujing-bento-tracks nav a:hover {
   padding-left: 12px;
   color: var(--sujing-ink);
-  border-color: rgba(23, 126, 137, 0.28);
-  background: rgba(23, 126, 137, 0.1);
-  box-shadow: 0 8px 20px rgba(23, 126, 137, 0.08);
-  transform: translateX(2px);
+  border-color: rgba(154, 123, 79, 0.32);
+  background:
+    linear-gradient(90deg, rgba(26, 122, 130, 0.1), transparent 42%),
+    rgba(255, 255, 255, 0.72);
+  box-shadow: 0 8px 22px rgba(20, 40, 47, 0.07);
+  transform: translateX(3px);
 }
 
 .sujing-bento-tracks nav a > span {
-  color: var(--sujing-coral);
+  color: var(--sujing-gold);
   font-family: Consolas, monospace;
   font-size: 0.62rem;
+  letter-spacing: 0.04em;
 }
 
 .sujing-bento-tracks nav a > i:nth-child(2) {
@@ -1042,7 +1154,17 @@ a.sujing-bento-card:hover {
   overflow: hidden;
   border-radius: 14px;
   background: var(--sujing-surface-soft);
-  box-shadow: inset 0 0 0 1px rgba(23, 36, 43, 0.06);
+  box-shadow:
+    inset 0 0 0 1px rgba(154, 123, 79, 0.14),
+    0 8px 20px rgba(20, 40, 47, 0.06);
+  transition: box-shadow 0.28s ease, transform 0.28s ease;
+}
+
+.sujing-bento-gallery-grid > a:hover {
+  box-shadow:
+    inset 0 0 0 1px rgba(154, 123, 79, 0.36),
+    0 14px 28px rgba(20, 40, 47, 0.12);
+  transform: translateY(-2px);
 }
 
 .sujing-bento-gallery-grid > a:first-child {
@@ -1070,11 +1192,14 @@ a.sujing-bento-card:hover {
   left: 10px;
   overflow: hidden;
   padding: 7px 10px;
-  border-radius: 10px;
+  border: 1px solid rgba(215, 193, 154, 0.22);
+  border-radius: 8px;
   color: #fff;
-  background: rgba(9, 18, 22, 0.68);
+  background: rgba(9, 18, 22, 0.62);
+  font-family: var(--sujing-display);
   font-size: 0.72rem;
   font-weight: 700;
+  letter-spacing: 0.06em;
   text-overflow: ellipsis;
   white-space: nowrap;
   backdrop-filter: blur(8px);
@@ -1094,7 +1219,8 @@ a.sujing-bento-card:hover {
   flex-direction: column;
   padding: 26px;
   background:
-    linear-gradient(160deg, rgba(23, 126, 137, 0.08), transparent 42%),
+    linear-gradient(160deg, rgba(154, 123, 79, 0.08), transparent 38%),
+    linear-gradient(160deg, rgba(23, 126, 137, 0.06), transparent 52%),
     rgba(255, 255, 255, 0.86);
 }
 
@@ -1203,26 +1329,31 @@ a.sujing-bento-card:hover {
   gap: 13px;
   align-items: center;
   padding: 20px 22px;
-  border: 1px solid rgba(183, 200, 198, 0.7);
-  border-radius: 18px;
+  border: 1px solid rgba(154, 123, 79, 0.22);
+  border-radius: 16px;
   color: var(--sujing-ink);
-  background: rgba(255, 255, 255, 0.7);
-  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  background:
+    linear-gradient(145deg, rgba(154, 123, 79, 0.06), transparent 40%),
+    rgba(255, 255, 255, 0.72);
+  transition: color 0.22s ease, border-color 0.22s ease, background-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
 }
 
 .sujing-bento-destinations > a:hover {
   color: var(--sujing-ink);
-  border-color: var(--sujing-teal);
-  background: var(--sujing-teal-pale);
+  border-color: rgba(180, 69, 58, 0.42);
+  background:
+    linear-gradient(145deg, rgba(26, 122, 130, 0.08), transparent 45%),
+    var(--sujing-surface);
   box-shadow: var(--sujing-interactive-shadow);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
 }
 
 .sujing-bento-destinations > a > span {
   align-self: start;
-  color: var(--sujing-coral);
+  color: var(--sujing-gold);
   font-family: Consolas, monospace;
   font-size: 0.6rem;
+  letter-spacing: 0.06em;
 }
 
 .sujing-bento-destinations strong,
@@ -1232,7 +1363,9 @@ a.sujing-bento-card:hover {
 
 .sujing-bento-destinations strong {
   margin-bottom: 4px;
-  font-size: 0.9rem;
+  font-family: var(--sujing-display);
+  font-size: 0.94rem;
+  letter-spacing: 0.08em;
 }
 
 .sujing-bento-destinations small {
@@ -1954,11 +2087,13 @@ a.sujing-bento-card:hover {
   grid-template-rows: auto 1fr;
   margin: 0;
   overflow: hidden;
-  border: 1px solid var(--sujing-line);
-  border-radius: 8px;
+  border: 1px solid rgba(154, 123, 79, 0.22);
+  border-radius: 10px;
   background: var(--sujing-control);
-  box-shadow: 0 8px 24px rgba(20, 40, 47, 0.05);
-  transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.35),
+    0 8px 24px rgba(20, 40, 47, 0.05);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
 }
 
 .sujing-gallery-grid a {
@@ -1980,16 +2115,19 @@ a.sujing-bento-card:hover {
   height: 34px;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: 50%;
-  color: #fff;
+  border: 1px solid rgba(215, 193, 154, 0.55);
+  border-radius: 4px;
+  color: #d7c19a;
   background: rgba(17, 24, 28, 0.58);
   backdrop-filter: blur(8px);
-  content: "+";
-  font-size: 1.1rem;
+  content: "阅";
+  font-family: var(--sujing-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transform: translateY(8px) rotate(-6deg);
+  transition: opacity 0.28s ease, transform 0.28s ease;
 }
 
 .sujing-gallery-grid img {
@@ -2004,20 +2142,20 @@ a.sujing-bento-card:hover {
 
 .sujing-gallery-grid figure:hover,
 .sujing-gallery-grid figure:focus-within {
-  border-color: var(--sujing-teal);
+  border-color: rgba(180, 69, 58, 0.45);
   box-shadow: var(--sujing-interactive-shadow);
   transform: translateY(-3px);
 }
 
 .sujing-gallery-grid figure:hover img,
 .sujing-gallery-grid figure:focus-within img {
-  transform: scale(1.018);
+  transform: scale(1.03);
 }
 
 .sujing-gallery-grid figure:hover a::after,
 .sujing-gallery-grid a:focus-visible::after {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) rotate(-6deg);
 }
 
 .sujing-gallery-grid figcaption {
@@ -2026,12 +2164,14 @@ a.sujing-bento-card:hover {
   gap: 4px;
   align-content: start;
   padding: 12px 14px 14px;
-  border-top: 1px solid var(--sujing-line);
+  border-top: 1px solid rgba(154, 123, 79, 0.18);
 }
 
 .sujing-gallery-grid figcaption strong {
   color: var(--sujing-ink);
-  font-size: 0.9rem;
+  font-family: var(--sujing-display);
+  font-size: 0.92rem;
+  letter-spacing: 0.06em;
 }
 
 .sujing-gallery-grid figcaption span {
@@ -2046,7 +2186,7 @@ a.sujing-bento-card:hover {
   gap: 8px;
   margin-bottom: 46px;
   padding-bottom: 28px;
-  border-bottom: 1px solid var(--sujing-line);
+  border-bottom: 1px solid rgba(154, 123, 79, 0.28);
 }
 
 #page:has([data-sujing-gallery]) > .page-title,
@@ -2058,7 +2198,10 @@ a.sujing-bento-card:hover {
 .sujing-gallery-intro h1 {
   margin: 0 !important;
   color: var(--sujing-ink);
-  font-size: 2rem;
+  font-family: var(--sujing-display);
+  font-size: 2.05rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
 }
 
 .sujing-gallery-intro > p:last-child {
@@ -2254,7 +2397,9 @@ a.sujing-bento-card:hover {
 .sujing-command-header h2 {
   margin: 5px 0 0;
   color: var(--sujing-ink);
+  font-family: var(--sujing-display);
   font-size: 1.45rem;
+  letter-spacing: 0.12em;
 }
 
 .sujing-icon-button {
@@ -2632,13 +2777,19 @@ a.sujing-bento-card:hover {
 
 .sujing-motion [data-sujing-reveal] {
   opacity: 0;
-  transform: translateY(22px);
-  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  filter: blur(6px);
+  transform: translateY(28px) scale(0.985);
+  transition:
+    opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--sujing-reveal-delay, 0ms);
 }
 
 .sujing-motion [data-sujing-reveal].is-visible {
   opacity: 1;
-  transform: translateY(0);
+  filter: blur(0);
+  transform: translateY(0) scale(1);
 }
 
 @keyframes sujing-shimmer {
@@ -2658,6 +2809,8 @@ a.sujing-bento-card:hover {
   --sujing-line: #324248;
   --sujing-line-strong: #465b62;
   --sujing-teal-pale: #19383b;
+  --sujing-seal: #d07168;
+  --sujing-gold: #c4a574;
   --sujing-control: #202d33;
   --sujing-control-hover: #26383e;
   --sujing-control-active: #2c4147;
@@ -3102,6 +3255,11 @@ a.sujing-bento-card:hover {
     padding: 12px 0 58px;
   }
 
+  .sujing-bento-home::before,
+  .sujing-bento-home::after {
+    display: none;
+  }
+
   .sujing-now-strip {
     grid-template-columns: auto minmax(0, 1fr) 16px;
     gap: 10px;
@@ -3307,6 +3465,7 @@ a.sujing-bento-card:hover {
 
   .sujing-motion [data-sujing-reveal] {
     opacity: 1;
+    filter: none;
     transform: none;
   }
 

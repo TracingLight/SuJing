@@ -829,7 +829,10 @@
   const installMotion = () => {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const targets = document.querySelectorAll('[data-sujing-reveal]:not([data-sujing-motion-ready])');
-    targets.forEach((target) => { target.dataset.sujingMotionReady = 'true'; });
+    targets.forEach((target, index) => {
+      target.dataset.sujingMotionReady = 'true';
+      target.style.setProperty('--sujing-reveal-delay', `${Math.min(index * 70, 420)}ms`);
+    });
 
     if (reduced || !('IntersectionObserver' in window)) {
       targets.forEach((target) => target.classList.add('is-visible'));
@@ -853,8 +856,8 @@
         const rect = element.getBoundingClientRect();
         const x = (event.clientX - rect.left) / rect.width;
         const y = (event.clientY - rect.top) / rect.height;
-        element.style.setProperty('--sujing-tilt-x', `${((0.5 - y) * 3).toFixed(2)}deg`);
-        element.style.setProperty('--sujing-tilt-y', `${((x - 0.5) * 3).toFixed(2)}deg`);
+        element.style.setProperty('--sujing-tilt-x', `${((0.5 - y) * 4.2).toFixed(2)}deg`);
+        element.style.setProperty('--sujing-tilt-y', `${((x - 0.5) * 4.2).toFixed(2)}deg`);
         element.style.setProperty('--sujing-glow-x', `${(x * 100).toFixed(1)}%`);
         element.style.setProperty('--sujing-glow-y', `${(y * 100).toFixed(1)}%`);
       });
@@ -863,6 +866,48 @@
         element.style.removeProperty('--sujing-tilt-y');
         element.style.removeProperty('--sujing-glow-x');
         element.style.removeProperty('--sujing-glow-y');
+      });
+    });
+  };
+
+  const installHeroParallax = () => {
+    const hero = document.querySelector('.sujing-bento-hero');
+    const image = hero?.querySelector('img');
+    if (!hero || !image || hero.dataset.sujingParallaxReady) return;
+    hero.dataset.sujingParallaxReady = 'true';
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    let frame = null;
+    const update = () => {
+      frame = null;
+      const rect = hero.getBoundingClientRect();
+      const view = Math.max(window.innerHeight, 1);
+      const progress = Math.min(1, Math.max(0, 1 - (rect.bottom / (view + rect.height))));
+      hero.style.setProperty('--sujing-hero-shift', `${(progress * -28).toFixed(1)}px`);
+    };
+    const onScroll = () => {
+      if (frame !== null) return;
+      frame = window.requestAnimationFrame(update);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    update();
+  };
+
+  const installMagneticButtons = () => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    document.querySelectorAll('.sujing-button:not([data-sujing-magnet-ready])').forEach((button) => {
+      button.dataset.sujingMagnetReady = 'true';
+      button.addEventListener('pointermove', (event) => {
+        const rect = button.getBoundingClientRect();
+        const x = event.clientX - rect.left - rect.width / 2;
+        const y = event.clientY - rect.top - rect.height / 2;
+        button.style.setProperty('--sujing-magnet-x', `${(x * 0.18).toFixed(1)}px`);
+        button.style.setProperty('--sujing-magnet-y', `${(y * 0.22).toFixed(1)}px`);
+      });
+      button.addEventListener('pointerleave', () => {
+        button.style.setProperty('--sujing-magnet-x', '0px');
+        button.style.setProperty('--sujing-magnet-y', '0px');
       });
     });
   };
@@ -986,6 +1031,8 @@
     installMusicPage();
     installReadingProgress();
     installMotion();
+    installHeroParallax();
+    installMagneticButtons();
     updateReadingProgress();
   };
 
