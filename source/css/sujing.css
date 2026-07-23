@@ -785,6 +785,7 @@ a.sujing-bento-card:hover {
   color: var(--sujing-ink);
   border-color: rgba(23, 126, 137, 0.5);
   box-shadow: 0 22px 52px rgba(20, 40, 47, 0.14);
+  text-decoration: none !important;
   transform: translateY(-4px);
 }
 
