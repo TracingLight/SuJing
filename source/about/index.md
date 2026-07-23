@@ -1,31 +1,40 @@
 ---
 title: 关于
 date: 2026-07-21 08:00:00
+type: sujing-about
 aside: false
 comments: false
-top_img: /img/sujing-hero-b.webp
+top_img: false
 description: 关于溯光如初与溯境
 ---
 
-## 关于我
-
-我是溯光如初，方向是 **Unity 游戏客户端开发**。溯境是我的长期个人博客：它用于沉淀游戏开发、编程语言和计算机基础领域的学习与实践，也用于保存音乐、生活、兴趣和不同阶段的想法。
-
-目前关注的技术范围包括：
-
-- Unity 客户端架构、性能优化、资源管理与开发工具
-- C#、C++、Lua 及其在游戏工程中的应用
-- 数据结构与算法、操作系统、计算机网络、计算机组成原理
-- 设计模式、计算机图形学与渲染基础
-- Unreal Engine、Cocos 等游戏引擎生态
-
-文章会尽量区分事实、实验结果和个人判断。涉及具体版本、性能数据或平台行为时，以可复现和可核查为目标。
-
-技术是这里最主要的内容，但不是唯一内容。短讯、相册、歌单、生活随笔和兴趣记录都会作为溯境的一部分长期保留；求职展示是博客能够承担的用途之一，而不是它存在的全部理由。
-
-## 联系方式
-
-- GitHub：[TracingLight](https://github.com/TracingLight)
-- Email：[suguangruchu@gmail.com](mailto:suguangruchu@gmail.com)
-
-项目案例将在资料和验证材料整理完整后公开。
+<div class="sujing-about" data-sujing-reveal>
+  <header class="sujing-about-profile">
+    <img src="https://img.sujing.dev/avatar/2026/07/site-avatar-1ffd3ccb42df.webp" alt="溯光如初的头像" width="640" height="640">
+    <div>
+      <p class="sujing-kicker">ABOUT THE BUILDER</p>
+      <h1>溯光如初</h1>
+      <p class="sujing-about-role">Unity 游戏客户端开发 · 长期学习者</p>
+      <p>溯境用于沉淀游戏开发、编程语言和计算机基础领域的学习与实践，也保存生活、兴趣和不同阶段的想法。</p>
+      <div class="sujing-about-links">
+        <a href="https://github.com/TracingLight" target="_blank" rel="noopener noreferrer"><i class="fab fa-github" aria-hidden="true"></i>GitHub</a>
+        <a href="mailto:suguangruchu@gmail.com"><i class="fas fa-envelope" aria-hidden="true"></i>Email</a>
+      </div>
+    </div>
+  </header>
+  <section class="sujing-about-section">
+    <p class="sujing-kicker">TECHNICAL DIRECTION</p>
+    <h2>正在构建的能力坐标</h2>
+    <div class="sujing-about-grid">
+      <article><span>01</span><h3>Unity 客户端</h3><p>架构、性能优化、资源管理、开发工具与跨平台工程实践。</p></article>
+      <article><span>02</span><h3>编程语言</h3><p>C#、C++、Lua，以及它们在游戏工程中的应用方式。</p></article>
+      <article><span>03</span><h3>计算机基础</h3><p>算法、操作系统、计算机网络、组成原理与设计模式。</p></article>
+      <article><span>04</span><h3>图形与引擎</h3><p>计算机图形学、渲染基础及 Unreal Engine、Cocos 生态。</p></article>
+    </div>
+  </section>
+  <section class="sujing-about-principle">
+    <p class="sujing-kicker">WRITING PRINCIPLE</p>
+    <h2>事实、实验与判断分开书写。</h2>
+    <p>涉及具体版本、性能数据或平台行为时，以可复现和可核查为目标。项目案例会在背景、个人职责、技术难点和验证材料完整后公开。</p>
+  </section>
+</div>

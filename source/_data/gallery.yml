@@ -1,10 +1,48 @@
 title: 溯境相册
 albums:
-  - title: 溯境视觉
-    description: 为博客建立的第一组原创视觉资产。
-    cover: /img/sujing-hero-a.webp
+  - title: 世界构筑者
+    description: 在云海、旧城与星图之间，记录溯境世界的第一组视觉切片。
+    cover: https://img.sujing.dev/illustrations/2026/07/star-map-library-3c92ff529414.webp
     images:
-      - src: /img/sujing-hero-a.webp
-        alt: 月夜中的女性世界构筑者
-      - src: /img/sujing-hero-b.webp
-        alt: 晨光中的女性世界构筑者
+      - title: 月夜观星台
+        description: 星图在掌心展开，云海古城沉入月色。
+        src: https://img.sujing.dev/illustrations/2026/07/moonlit-observatory-6164a6bc1782.webp
+        alt: 黑发世界构筑者在月夜观星台展开星图，远处是云海古城与巨大满月
+        width: 1672
+        height: 941
+      - title: 晨光云海学院
+        description: 浮空书院在晨光中连接成一张山河图。
+        src: https://img.sujing.dev/illustrations/2026/07/cloud-sea-academy-82c085aca1dd.webp
+        alt: 黑发世界构筑者托起透明山河图，身后是晨光中的浮空东方书院
+        width: 1672
+        height: 941
+      - title: 雨夜旧城
+        description: 穿过灯火与雨声，收集一座城的微小回响。
+        src: https://img.sujing.dev/illustrations/2026/07/rainy-old-city-4e26d3cda5af.webp
+        alt: 黑发女性撑透明纸伞走在雨夜东方旧城，灯笼倒映在石板路上
+        width: 1536
+        height: 1024
+      - title: 秋日镜湖
+        description: 日落、雪山与枫叶在湖面重合。
+        src: https://img.sujing.dev/illustrations/2026/07/autumn-mirror-lake-699930a1f28f.webp
+        alt: 黑发女性坐在秋日镜湖边眺望落日雪山，身旁放着古籍和星盘
+        width: 1536
+        height: 1024
+      - title: 星图藏书阁
+        description: 书页升起，在藏书阁中央生长为知识树。
+        src: https://img.sujing.dev/illustrations/2026/07/star-map-library-3c92ff529414.webp
+        alt: 黑发世界构筑者在东方藏书阁操控由书页和星图组成的知识树
+        width: 1536
+        height: 1024
+      - title: 雪原遗迹
+        description: 在极光和遗迹之间寻找通往远城的路径。
+        src: https://img.sujing.dev/illustrations/2026/07/snowfield-ruins-d6e6eb8453ee.webp
+        alt: 披深紫斗篷的世界构筑者站在雪原遗迹中查看透明星图
+        width: 1536
+        height: 1024
+      - title: 雨夜开发室
+        description: 当幻想世界回到屏幕，漫长的构筑从这里开始。
+        src: https://img.sujing.dev/illustrations/2026/07/game-developer-room-c7c0a0919c8c.webp
+        alt: 黑发女性在雨夜工作室使用三台显示器开发游戏场景
+        width: 1536
+        height: 1024

@@ -1,6 +1,6 @@
 # Brand and navigation
 nav:
-  logo: /img/sujing-mark.svg
+  logo:
   display_title: true
   display_post_title: true
   fixed: true
@@ -8,12 +8,10 @@ nav:
 menu:
   首页: / || fas fa-compass
   文章: /articles/ || fas fa-book-open
-  分类: /categories/ || fas fa-folder-open
-  标签: /tags/ || fas fa-tags
+  主题: /categories/ || fas fa-folder-open
   记录||fas fa-feather-pointed:
     短讯: /notes/ || fas fa-bolt
     相册: /gallery/ || fas fa-images
-    音乐: /music/ || fas fa-music
   关于: /about/ || fas fa-user
 
 social:
@@ -23,27 +21,27 @@ social:
 # Visual identity
 favicon: /img/sujing-mark.svg
 avatar:
-  img: /img/sujing-hero-a.webp
+  img: https://img.sujing.dev/avatar/2026/07/site-avatar-1ffd3ccb42df.webp
   effect: false
 disable_top_img: false
-default_top_img: /img/sujing-hero-a.webp
-index_img: /img/sujing-hero-a.webp
-archive_img: /img/sujing-hero-a.webp
-tag_img: /img/sujing-hero-a.webp
-category_img: /img/sujing-hero-a.webp
+default_top_img: false
+index_img: false
+archive_img: false
+tag_img: false
+category_img: false
 footer_img: false
-background: '#eef2f3'
+background: '#f4f7f6'
 cover:
   index_enable: true
-  aside_enable: true
+  aside_enable: false
   archives_enable: true
   default_cover:
-    - /img/sujing-hero-b.webp
+    - https://img.sujing.dev/illustrations/2026/07/game-developer-room-c7c0a0919c8c.webp
 
-index_site_info_top: 43%
-index_top_img_height: 78vh
+index_site_info_top: 50%
+index_top_img_height: 0
 subtitle:
-  enable: true
+  enable: false
   effect: false
   source: false
   sub:
@@ -115,7 +113,7 @@ post_copyright:
 aside:
   enable: true
   hide: false
-  button: true
+  button: false
   mobile: false
   position: right
   display:
@@ -123,7 +121,7 @@ aside:
     tag: true
     category: true
   card_author:
-    enable: true
+    enable: false
     description: 游戏开发 · 技术笔记 · 生活与兴趣
     button:
       enable: true
@@ -131,26 +129,26 @@ aside:
       text: GitHub
       link: https://github.com/TracingLight
   card_announcement:
-    enable: true
+    enable: false
     content: 以游戏开发为主线，长期记录技术、经验、音乐与生活。
   card_recent_post:
-    enable: true
+    enable: false
     limit: 5
     sort: date
   card_newest_comments:
     enable: false
   card_categories:
-    enable: true
+    enable: false
     limit: 10
     expand: none
   card_tags:
-    enable: true
+    enable: false
     limit: 30
     color: false
     orderby: name
     order: 1
   card_archives:
-    enable: true
+    enable: false
     type: monthly
     format: YYYY年MM月
     order: -1
@@ -161,7 +159,7 @@ aside:
     orderBy: date
     order: 1
   card_webinfo:
-    enable: true
+    enable: false
     post_count: true
     last_push_date: true
 
@@ -177,7 +175,7 @@ search:
       enable: true
       hitsPerPage: 8
 share:
-  use: sharejs
+  use:
   sharejs:
     sites: wechat,weibo,qq
 comments:
@@ -197,9 +195,13 @@ mask:
   header: true
   footer: true
 display_mode: light
-enter_transitions: true
+enter_transitions: false
 rightside_scroll_percent: true
 rightside_config_animation: false
+rightside_item_order:
+  enable: true
+  hide:
+  show: toc
 busuanzi:
   site_uv: false
   site_pv: false
@@ -254,3 +256,7 @@ inject:
     - <link rel="stylesheet" href="/css/sujing.css">
   bottom:
     - <script src="/js/sujing.js" defer></script>
+
+CDN:
+  # Prefer cdnjs over jsDelivr for third-party assets in more network environments.
+  third_party_provider: cdnjs
