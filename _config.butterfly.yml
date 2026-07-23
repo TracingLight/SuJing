@@ -9,9 +9,8 @@ menu:
   首页: / || fas fa-compass
   文章: /articles/ || fas fa-book-open
   主题: /categories/ || fas fa-folder-open
-  记录||fas fa-feather-pointed:
-    短讯: /notes/ || fas fa-bolt
-    相册: /gallery/ || fas fa-images
+  短讯: /notes/ || fas fa-bolt
+  相册: /gallery/ || fas fa-images
   关于: /about/ || fas fa-user
 
 social:

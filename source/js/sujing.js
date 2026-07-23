@@ -136,6 +136,7 @@
           <a href="/archives/"><span>归档</span><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
           <a href="/notes/"><span>短讯</span><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
           <a href="/gallery/"><span>相册</span><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+          <a href="/categories/"><span>主题</span><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
           <a href="/about/"><span>关于</span><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
         </nav>
         <div class="sujing-command-taxonomy">
