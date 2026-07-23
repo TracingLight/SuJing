@@ -956,22 +956,68 @@
   const sealChars = ['溯', '境', '墨', '卷', '录'];
   let sealIndex = 0;
 
-  const createSealStamp = (event) => {
-    if (event.button !== 0 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const target = event.target.closest?.(
-      '.sujing-button-primary, a.sujing-bento-latest, .sujing-bento-destinations > a, .sujing-now-strip'
-    );
-    if (!target) return;
-
+  const spawnSealStamp = (x, y, char) => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const stamp = document.createElement('span');
     stamp.className = 'sujing-seal-stamp';
     stamp.setAttribute('aria-hidden', 'true');
-    stamp.textContent = sealChars[sealIndex % sealChars.length];
+    stamp.textContent = char || sealChars[sealIndex % sealChars.length];
     sealIndex += 1;
-    stamp.style.left = `${event.clientX}px`;
-    stamp.style.top = `${event.clientY}px`;
+    stamp.style.left = `${x}px`;
+    stamp.style.top = `${y}px`;
     stamp.addEventListener('animationend', () => stamp.remove(), { once: true });
     document.body.appendChild(stamp);
+  };
+
+  const createSealStamp = (event) => {
+    if (event.button !== 0) return;
+    const target = event.target.closest?.(
+      '.sujing-button-primary, a.sujing-bento-latest, .sujing-bento-destinations > a, .sujing-now-strip, #nav .nav-site-title'
+    );
+    if (!target) return;
+    const char = target.matches('#nav .nav-site-title') ? '溯' : undefined;
+    spawnSealStamp(event.clientX, event.clientY, char);
+  };
+
+  const installGalleryParallax = () => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    document.querySelectorAll('.sujing-bento-gallery-grid > a:not([data-sujing-img-parallax])').forEach((link) => {
+      link.dataset.sujingImgParallax = 'true';
+      link.addEventListener('pointermove', (event) => {
+        const rect = link.getBoundingClientRect();
+        const y = (event.clientY - rect.top) / Math.max(rect.height, 1);
+        link.style.setProperty('--sujing-img-shift', `${((0.5 - y) * 6).toFixed(2)}%`);
+      });
+      link.addEventListener('pointerleave', () => {
+        link.style.removeProperty('--sujing-img-shift');
+      });
+    });
+  };
+
+  const installPageLeaveInk = () => {
+    if (document.documentElement.dataset.sujingLeaveInk) return;
+    document.documentElement.dataset.sujingLeaveInk = 'true';
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    document.addEventListener('click', (event) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const link = event.target.closest?.('a[href]');
+      if (!link) return;
+      const href = link.getAttribute('href');
+      if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:')) return;
+      if (link.target === '_blank' || link.hasAttribute('download')) return;
+      if (link.closest('#sujing-command')) return;
+
+      let url;
+      try { url = new URL(link.href, window.location.href); } catch { return; }
+      if (url.origin !== window.location.origin) return;
+      if (`${url.pathname}${url.search}${url.hash}` === `${window.location.pathname}${window.location.search}${window.location.hash}`) return;
+
+      event.preventDefault();
+      document.body.classList.add('sujing-leaving');
+      window.setTimeout(() => { window.location.href = url.href; }, 180);
+    });
   };
 
   const rippleSelector = [
@@ -1098,6 +1144,8 @@
     installMagneticButtons();
     installAmbientInk();
     installScrollAtmosphere();
+    installGalleryParallax();
+    installPageLeaveInk();
     updateReadingProgress();
   };
 

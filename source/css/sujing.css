@@ -40,6 +40,13 @@ body {
   background: var(--sujing-paper);
   font-family: var(--sujing-sans);
   letter-spacing: 0.01em;
+  transition: opacity 0.28s ease, filter 0.28s ease;
+}
+
+body.sujing-leaving {
+  opacity: 0.34;
+  filter: blur(2px) saturate(0.88);
+  pointer-events: none;
 }
 
 ::selection {
@@ -212,6 +219,12 @@ input:focus-visible {
   box-shadow: 0 0 0 1px rgba(180, 69, 58, 0.25);
   clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
   content: "";
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), filter 0.35s ease;
+}
+
+#nav .nav-site-title:hover .site-name::before {
+  filter: drop-shadow(0 0 6px rgba(180, 69, 58, 0.45));
+  transform: rotate(18deg) scale(1.12);
 }
 
 #nav .menus_items > .menus_item {
@@ -1214,15 +1227,16 @@ a.sujing-bento-card:hover::before {
 .sujing-bento-gallery-grid img {
   display: block;
   width: 100%;
-  height: 100%;
+  height: 112%;
   margin: 0;
   object-fit: cover;
   object-position: center;
+  transform: translate3d(0, var(--sujing-img-shift, 0%), 0) scale(1.02);
   transition: transform 0.45s ease;
 }
 
 .sujing-bento-gallery-grid a:hover img {
-  transform: scale(1.045);
+  transform: translate3d(0, var(--sujing-img-shift, -2%), 0) scale(1.06);
 }
 
 .sujing-bento-gallery-grid span {
@@ -1634,15 +1648,19 @@ a.sujing-bento-card:hover::before {
 
 .post #article-container a {
   color: var(--sujing-teal);
+  background-image: linear-gradient(var(--sujing-seal), var(--sujing-seal));
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0 1.5px;
   text-decoration: none !important;
-  box-shadow: inset 0 -1px 0 rgba(23, 126, 137, 0.28);
-  transition: color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: none;
+  transition: color 0.22s ease, background-size 0.28s ease;
 }
 
 .post #article-container a:hover {
-  color: var(--sujing-coral);
+  color: var(--sujing-seal);
+  background-size: 100% 1.5px;
   text-decoration: none !important;
-  box-shadow: inset 0 -1px 0 rgba(215, 90, 74, 0.55);
 }
 
 .post #article-container blockquote {
@@ -1898,7 +1916,9 @@ a.sujing-bento-card:hover::before {
 .sujing-about-profile h1 {
   margin: 0 0 8px !important;
   color: var(--sujing-ink);
+  font-family: var(--sujing-display);
   font-size: 2.35rem;
+  letter-spacing: 0.14em;
 }
 
 .sujing-about-profile > div > p:not(.sujing-kicker) {
@@ -2059,7 +2079,7 @@ a.sujing-bento-card:hover::before {
   bottom: 10px;
   left: 47px;
   width: 1px;
-  background: var(--sujing-line-strong);
+  background: linear-gradient(180deg, transparent, var(--sujing-gold), var(--sujing-seal), transparent);
   content: "";
 }
 
@@ -2071,7 +2091,13 @@ a.sujing-bento-card:hover::before {
   align-items: start;
   margin: 0;
   padding: 22px 0;
-  border-bottom: 1px solid var(--sujing-line);
+  border-bottom: 1px solid rgba(154, 123, 79, 0.18);
+  transition: background-color 0.22s ease, padding-left 0.22s ease;
+}
+
+.sujing-note-item:hover {
+  padding-left: 6px;
+  background: linear-gradient(90deg, rgba(154, 123, 79, 0.06), transparent 55%);
 }
 
 .sujing-note-item > span {
@@ -2082,12 +2108,20 @@ a.sujing-bento-card:hover::before {
   height: 30px;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--sujing-teal);
-  border-radius: 50%;
-  color: var(--sujing-teal);
+  border: 1px solid var(--sujing-seal);
+  border-radius: 3px;
+  color: var(--sujing-seal);
   background: var(--sujing-paper);
-  font-family: Consolas, monospace;
+  font-family: var(--sujing-display);
   font-size: 0.62rem;
+  font-weight: 700;
+  transition: transform 0.22s ease, background-color 0.22s ease, color 0.22s ease;
+}
+
+.sujing-note-item:hover > span {
+  color: #fff;
+  background: var(--sujing-seal);
+  transform: rotate(-8deg) scale(1.06);
 }
 
 .sujing-note-item time {
@@ -2414,18 +2448,23 @@ a.sujing-bento-card:hover::before {
   max-height: min(720px, calc(100vh - 40px));
   padding: 28px;
   overflow-y: auto;
-  border: 1px solid rgba(183, 200, 198, 0.8);
-  border-radius: 8px;
-  background: rgba(248, 250, 249, 0.98);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(154, 123, 79, 0.35);
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, rgba(154, 123, 79, 0.08), transparent 18%),
+    rgba(248, 250, 249, 0.98);
+  box-shadow:
+    inset 0 0 0 1px rgba(154, 123, 79, 0.12),
+    0 24px 80px rgba(0, 0, 0, 0.28);
   opacity: 0;
-  transform: translate(-50%, -47%) scale(0.98);
-  transition: opacity 0.22s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translate(-50%, -46%) scale(0.96) rotateX(6deg);
+  transform-origin: center top;
+  transition: opacity 0.28s ease, transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 #sujing-command.show .sujing-command-panel {
   opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
+  transform: translate(-50%, -50%) scale(1) rotateX(0deg);
 }
 
 .sujing-command-header {
@@ -3643,6 +3682,11 @@ a.sujing-bento-card:hover::before {
   .sujing-interaction-ripple,
   .sujing-seal-stamp {
     display: none !important;
+  }
+
+  body.sujing-leaving {
+    opacity: 1;
+    filter: none;
   }
 
   .sujing-button:active,
