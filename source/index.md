@@ -33,14 +33,14 @@ type: sujing-home
 
   <div class="sujing-bento-grid">
     <a class="sujing-bento-card sujing-bento-latest" href="/2026/07/21/about-sujing/" data-sujing-latest-card data-sujing-reveal data-sujing-tilt>
+      <div class="sujing-bento-latest-media">
+        <img class="no-lightbox" data-sujing-latest-cover src="https://img.sujing.dev/illustrations/2026/07/game-developer-room-c7c0a0919c8c.webp" alt="溯境最新文章封面" width="1536" height="1024" loading="lazy">
+      </div>
       <div class="sujing-bento-card-copy">
         <div class="sujing-bento-card-heading"><p class="sujing-kicker">LATEST TRANSMISSION</p><time datetime="2026-07-21">2026.07.21</time></div>
         <h2>溯境：从这里开始</h2>
         <p>介绍溯境的内容方向、写作边界与后续规划。</p>
         <span class="sujing-bento-link">阅读最新文章 <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
-      </div>
-      <div class="sujing-bento-latest-media">
-        <img class="no-lightbox" data-sujing-latest-cover src="https://img.sujing.dev/illustrations/2026/07/game-developer-room-c7c0a0919c8c.webp" alt="溯境最新文章封面" width="1536" height="1024" loading="lazy">
       </div>
     </a>
     <section class="sujing-bento-card sujing-bento-tracks" aria-labelledby="sujing-tracks-title" data-sujing-reveal>
