@@ -507,40 +507,82 @@ html.sujing-starfield-dragging button {
   font-size: 1rem;
 }
 
-/* Image headers are restricted to interior content pages. */
+/* Interior headers: short ink-scroll band that dissolves into the starfield. */
 
 #page-header.post-bg,
 #page-header.not-home-page {
-  height: 360px;
-  background-position: center 18%;
+  height: 228px;
+  overflow: hidden;
+  background-position: center 32%;
   background-size: cover;
+  isolation: isolate;
 }
 
 #page-header.post-bg::before,
 #page-header.not-home-page::before {
-  background: linear-gradient(90deg, rgba(10, 20, 25, 0.78), rgba(10, 20, 25, 0.38) 58%, rgba(10, 20, 25, 0.3)) !important;
+  z-index: 0;
+  background:
+    linear-gradient(180deg,
+      rgba(8, 14, 18, 0.42) 0%,
+      rgba(8, 14, 18, 0.28) 36%,
+      rgba(8, 14, 18, 0.72) 72%,
+      rgba(8, 14, 18, 0.96) 100%),
+    linear-gradient(90deg,
+      rgba(8, 14, 18, 0.78) 0%,
+      rgba(8, 14, 18, 0.4) 52%,
+      rgba(8, 14, 18, 0.55) 100%) !important;
+}
+
+#page-header.post-bg::after,
+#page-header.not-home-page::after {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 1;
+  height: 88px;
+  pointer-events: none;
+  background: linear-gradient(180deg,
+    rgba(8, 14, 18, 0) 0%,
+    rgba(8, 14, 18, 0.55) 48%,
+    rgba(8, 14, 18, 0.96) 82%,
+    var(--sujing-night, #0c1418) 100%);
+  content: "";
 }
 
 #page-header #page-site-info,
 #page-header #post-info {
-  top: 55%;
+  top: auto;
+  bottom: 26px;
+  z-index: 2;
   width: min(var(--sujing-content), calc(100% - 48px));
   max-width: none;
+  padding: 0;
   text-align: left;
+  transform: none;
 }
 
 #page-header #site-title,
 #page-header .post-title {
   max-width: 820px;
   margin: 0;
-  font-size: 2.35rem;
+  color: #f2f6f5;
+  font-size: 1.82rem;
   line-height: 1.35;
-  text-shadow: 0 3px 24px rgba(0, 0, 0, 0.25);
+  letter-spacing: 0.06em;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.35);
 }
 
 #page-header #post-meta {
-  margin-top: 13px;
+  margin-top: 10px;
+  color: rgba(220, 230, 228, 0.88);
   text-align: left;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.28);
+}
+
+#page-header.post-bg + #content-inner,
+#page-header.not-home-page + #content-inner {
+  position: relative;
+  z-index: 2;
+  margin-top: -28px;
 }
 
 /* Layout shell */
@@ -1796,12 +1838,13 @@ a.sujing-bento-card:hover::before {
 
 .post #content-inner {
   align-items: flex-start;
+  padding-top: 18px;
 }
 
 .post #post {
   min-width: 0;
   max-width: 840px;
-  padding: 34px 28px;
+  padding: 28px 28px 34px;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -4427,23 +4470,34 @@ a.sujing-bento-card:hover::before {
 @media (max-width: 640px) {
   #page-header.post-bg,
   #page-header.not-home-page {
-    height: 260px;
-    background-position: center 16%;
+    height: 188px;
+    background-position: center 30%;
+  }
+
+  #page-header.post-bg::after,
+  #page-header.not-home-page::after {
+    height: 72px;
   }
 
   #page-header #page-site-info,
   #page-header #post-info {
-    top: 58%;
+    bottom: 18px;
     width: calc(100% - 36px);
   }
 
   #page-header #site-title,
   #page-header .post-title {
-    font-size: 1.65rem;
+    font-size: 1.42rem;
   }
 
   #page-header #post-meta {
-    font-size: 0.68rem;
+    margin-top: 8px;
+    font-size: 0.66rem;
+  }
+
+  #page-header.post-bg + #content-inner,
+  #page-header.not-home-page + #content-inner {
+    margin-top: -20px;
   }
 
   #content-inner {
