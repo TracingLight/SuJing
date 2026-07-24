@@ -1,8 +1,6 @@
 title: 溯境歌单
-tracks: []
-
-# Track format:
-# - title: Song title
-#   artist: Artist
-#   url: /media/music/song.mp3
-#   cover: /img/user/music/song-cover.webp
+tracks:
+  - title: 南山雪
+    artist: 叶里
+    url: /media/music/yeli-nanshanxue.flac
+    cover: /img/sujing-mark.svg
