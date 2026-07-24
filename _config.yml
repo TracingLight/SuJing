@@ -4,8 +4,8 @@
 
 # Site
 title: 溯境
-subtitle: '在代码与世界之间，也记录生活的回声'
-description: '溯光如初的长期个人博客，以游戏开发与 Unity 技术为主，也记录音乐、生活、兴趣与沿途经验。'
+subtitle: '写游戏开发，也写路上碰到的事'
+description: '溯光如初的个人博客。主要写 Unity 和游戏开发，偶尔也记点生活和兴趣。'
 keywords: Unity, 游戏开发, 客户端开发, CSharp, C++, Lua, 计算机图形学, 个人博客, 音乐, 生活记录
 author: 溯光如初
 email: suguangruchu@gmail.com

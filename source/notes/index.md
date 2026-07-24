@@ -9,9 +9,9 @@ description: 溯光如初的即时记录、近况与简短想法。
 ---
 
 <header class="sujing-gallery-intro" data-sujing-reveal>
-  <p class="sujing-kicker">即景札记</p>
+  <p class="sujing-kicker">短讯</p>
   <h1>短讯</h1>
-  <p>记录即时近况、简短想法与沿途碎片。不必成文，但值得留下痕迹。</p>
+  <p>短一点的近况和想法会放这里，不成文章也没关系。</p>
 </header>
 
 <div class="sujing-data-page" data-sujing-notes aria-busy="true" aria-live="polite">

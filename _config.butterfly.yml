@@ -45,7 +45,7 @@ subtitle:
   effect: false
   source: false
   sub:
-    - 在代码与世界之间，也记录生活的回声
+    - 写游戏开发，也写路上碰到的事
 
 index_layout: 4
 index_post_content:
@@ -249,7 +249,7 @@ footer:
   copyright:
     enable: true
     version: false
-  custom_text: 以代码构筑世界，以文字沉淀经验
+  custom_text: 写点技术，也留点生活痕迹
 
 inject:
   head:
