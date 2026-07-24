@@ -374,13 +374,58 @@
         { color: '138, 108, 68', opacity: 0.56 }
       ];
 
+  const spawnMeteor = (width, height, dark, { immediate = false } = {}) => {
+    const speed = (dark ? 5.2 : 4.4) + Math.random() * (dark ? 3.8 : 3.2);
+    const angle = (Math.PI * 0.18) + Math.random() * (Math.PI * 0.16);
+    const fromLeft = Math.random() < 0.55;
+    const vx = Math.cos(angle) * speed * (fromLeft ? 1 : -1);
+    const vy = Math.sin(angle) * speed;
+    const length = (dark ? 110 : 88) + Math.random() * (dark ? 140 : 110);
+    const margin = length + 40;
+    let x;
+    let y;
+    if (immediate) {
+      x = Math.random() * width;
+      y = Math.random() * height * 0.7;
+    } else if (fromLeft) {
+      x = -margin;
+      y = Math.random() * height * 0.72;
+    } else {
+      x = width + margin;
+      y = Math.random() * height * 0.72;
+    }
+    return {
+      meteor: true,
+      x,
+      y,
+      size: (dark ? 1.35 : 1.2) + Math.random() * 1.5,
+      vx,
+      vy,
+      baseVx: vx,
+      baseVy: vy,
+      opacity: (dark ? 0.92 : 0.78) + Math.random() * 0.08,
+      color: Math.floor(Math.random() * 4),
+      streak: false,
+      spark: false,
+      mote: false,
+      length,
+      phase: Math.random() * Math.PI * 2,
+      twinkle: 0.04 + Math.random() * 0.03,
+      wait: immediate ? 0 : 40 + Math.floor(Math.random() * (dark ? 160 : 220)),
+      active: immediate
+    };
+  };
+
   const createStarfieldParticles = () => {
     const area = window.innerWidth * window.innerHeight;
     const mobile = window.innerWidth <= 640;
     const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const width = window.innerWidth;
+    const height = window.innerHeight;
     const count = mobile
       ? Math.min(dark ? 72 : 88, Math.max(dark ? 42 : 52, Math.round(area / (dark ? 9000 : 7600))))
       : Math.min(dark ? 168 : 196, Math.max(dark ? 110 : 132, Math.round(area / (dark ? 9800 : 8200))));
+    const meteorCount = mobile ? (dark ? 3 : 2) : (dark ? 5 : 4);
     const contentWidth = Math.min(1180, Math.max(0, window.innerWidth - 32));
     const gutterWidth = Math.max(0, (window.innerWidth - contentWidth) / 2);
     const randomX = () => {
@@ -392,21 +437,34 @@
       const gutterX = padding + Math.random() * Math.max(1, gutterWidth - padding * 2);
       return Math.random() < 0.5 ? gutterX : window.innerWidth - gutterX;
     };
-    state.starfield.particles = Array.from({ length: count }, () => ({
-      x: randomX(),
-      y: Math.random() * window.innerHeight,
-      size: (dark ? 1.35 : 1.45) + Math.random() * (dark ? 2.2 : 2.35),
-      vx: -0.12 + Math.random() * (dark ? 0.34 : 0.28),
-      vy: (dark ? 0.16 : 0.1) + Math.random() * (dark ? 0.34 : 0.26),
-      opacity: (dark ? 0.78 : 0.86) + Math.random() * 0.18,
-      color: Math.floor(Math.random() * 4),
-      streak: Math.random() < (dark ? 0.3 : 0.18),
-      spark: Math.random() < (dark ? 0.48 : 0.42),
-      mote: !dark && Math.random() < 0.16,
-      length: 14 + Math.random() * 22,
-      phase: Math.random() * Math.PI * 2,
-      twinkle: (dark ? 0.02 : 0.014) + Math.random() * (dark ? 0.028 : 0.02)
-    }));
+    const stars = Array.from({ length: count }, () => {
+      const vx = (dark ? -0.28 : -0.22) + Math.random() * (dark ? 0.72 : 0.58);
+      const vy = (dark ? 0.28 : 0.2) + Math.random() * (dark ? 0.55 : 0.42);
+      return {
+        meteor: false,
+        x: randomX(),
+        y: Math.random() * height,
+        size: (dark ? 1.35 : 1.45) + Math.random() * (dark ? 2.2 : 2.35),
+        vx,
+        vy,
+        baseVx: vx,
+        baseVy: vy,
+        opacity: (dark ? 0.78 : 0.86) + Math.random() * 0.18,
+        color: Math.floor(Math.random() * 4),
+        streak: Math.random() < (dark ? 0.18 : 0.1),
+        spark: Math.random() < (dark ? 0.48 : 0.42),
+        mote: !dark && Math.random() < 0.16,
+        length: 18 + Math.random() * 28,
+        phase: Math.random() * Math.PI * 2,
+        twinkle: (dark ? 0.02 : 0.014) + Math.random() * (dark ? 0.028 : 0.02),
+        wait: 0,
+        active: true
+      };
+    });
+    const meteors = Array.from({ length: meteorCount }, (_, index) => (
+      spawnMeteor(width, height, dark, { immediate: index === 0 })
+    ));
+    state.starfield.particles = stars.concat(meteors);
   };
 
   const isStarfieldDragTarget = (target) => {
@@ -512,44 +570,120 @@
       const twinkle = (dark ? 0.76 : 0.84) + Math.sin(particle.phase) * (dark ? 0.24 : 0.16);
       const alpha = Math.min(1, swatch.opacity * particle.opacity * twinkle * (1 + point.boost * 0.45));
       const radius = particle.size * (dark ? 0.55 : 0.62);
-      context.beginPath();
-      context.fillStyle = `rgba(${swatch.color}, ${alpha})`;
-      context.arc(point.x, point.y, radius, 0, Math.PI * 2);
-      context.fill();
-      if (particle.mote) {
+      const speed = Math.hypot(particle.vx, particle.vy) || 1;
+      const ux = particle.vx / speed;
+      const uy = particle.vy / speed;
+
+      if (particle.meteor) {
+        if (particle.active && !reduced) {
+          const trail = particle.length;
+          const headX = point.x;
+          const headY = point.y;
+          const tailX = headX - ux * trail;
+          const tailY = headY - uy * trail;
+          const gradient = context.createLinearGradient(headX, headY, tailX, tailY);
+          gradient.addColorStop(0, `rgba(${swatch.color}, ${Math.min(1, alpha)})`);
+          gradient.addColorStop(0.22, `rgba(${swatch.color}, ${alpha * (dark ? 0.62 : 0.48)})`);
+          gradient.addColorStop(0.7, `rgba(${swatch.color}, ${alpha * 0.12})`);
+          gradient.addColorStop(1, `rgba(${swatch.color}, 0)`);
+          context.strokeStyle = gradient;
+          context.lineWidth = Math.max(1.1, particle.size * (dark ? 1.15 : 1));
+          context.lineCap = 'round';
+          context.beginPath();
+          context.moveTo(headX, headY);
+          context.lineTo(tailX, tailY);
+          context.stroke();
+          context.beginPath();
+          context.fillStyle = `rgba(${swatch.color}, ${Math.min(1, alpha * 1.05)})`;
+          context.arc(headX, headY, Math.max(1.1, particle.size * 0.72), 0, Math.PI * 2);
+          context.fill();
+          context.beginPath();
+          context.fillStyle = `rgba(255, 248, 236, ${alpha * (dark ? 0.55 : 0.35)})`;
+          context.arc(headX, headY, Math.max(0.7, particle.size * 0.38), 0, Math.PI * 2);
+          context.fill();
+        }
+      } else {
         context.beginPath();
-        context.fillStyle = `rgba(${swatch.color}, ${alpha * 0.18})`;
-        context.arc(point.x, point.y, radius * 3.2, 0, Math.PI * 2);
+        context.fillStyle = `rgba(${swatch.color}, ${alpha})`;
+        context.arc(point.x, point.y, radius, 0, Math.PI * 2);
         context.fill();
+        if (particle.mote) {
+          context.beginPath();
+          context.fillStyle = `rgba(${swatch.color}, ${alpha * 0.18})`;
+          context.arc(point.x, point.y, radius * 3.2, 0, Math.PI * 2);
+          context.fill();
+        }
+        if (particle.spark || particle.size > 2.2) {
+          context.beginPath();
+          context.fillStyle = `rgba(${swatch.color}, ${alpha * (dark ? 0.22 : 0.16)})`;
+          context.arc(point.x, point.y, radius * (dark ? 2.4 : 2.1), 0, Math.PI * 2);
+          context.fill();
+        }
+        if (particle.spark) {
+          context.fillStyle = `rgba(${swatch.color}, ${alpha * (dark ? 0.5 : 0.62)})`;
+          const arm = particle.size * (dark ? 1.9 : 2.1);
+          context.fillRect(point.x - arm, point.y - particle.size * 0.12, arm * 2, Math.max(0.55, particle.size * 0.28));
+          context.fillRect(point.x - particle.size * 0.12, point.y - arm, Math.max(0.55, particle.size * 0.28), arm * 2);
+        }
+        if (particle.streak && !reduced) {
+          const trail = particle.length;
+          const gradient = context.createLinearGradient(
+            point.x,
+            point.y,
+            point.x - ux * trail,
+            point.y - uy * trail
+          );
+          gradient.addColorStop(0, `rgba(${swatch.color}, ${alpha * (dark ? 0.7 : 0.5)})`);
+          gradient.addColorStop(1, `rgba(${swatch.color}, 0)`);
+          context.strokeStyle = gradient;
+          context.lineWidth = Math.max(0.65, particle.size * 0.48);
+          context.lineCap = 'round';
+          context.beginPath();
+          context.moveTo(point.x, point.y);
+          context.lineTo(point.x - ux * trail, point.y - uy * trail);
+          context.stroke();
+        }
       }
-      if (particle.spark || particle.size > 2.2) {
-        context.beginPath();
-        context.fillStyle = `rgba(${swatch.color}, ${alpha * (dark ? 0.22 : 0.16)})`;
-        context.arc(point.x, point.y, radius * (dark ? 2.4 : 2.1), 0, Math.PI * 2);
-        context.fill();
-      }
-      if (particle.spark) {
-        context.fillStyle = `rgba(${swatch.color}, ${alpha * (dark ? 0.5 : 0.62)})`;
-        const arm = particle.size * (dark ? 1.9 : 2.1);
-        context.fillRect(point.x - arm, point.y - particle.size * 0.12, arm * 2, Math.max(0.55, particle.size * 0.28));
-        context.fillRect(point.x - particle.size * 0.12, point.y - arm, Math.max(0.55, particle.size * 0.28), arm * 2);
-      }
-      if (particle.streak && !reduced) {
-        context.strokeStyle = `rgba(${swatch.color}, ${alpha * (dark ? 0.72 : 0.55)})`;
-        context.lineWidth = Math.max(0.65, particle.size * 0.48);
-        context.beginPath();
-        context.moveTo(point.x, point.y);
-        context.lineTo(point.x - particle.length, point.y - particle.length * 0.38);
-        context.stroke();
-      }
+
       if (!move) return;
+      particle.phase += particle.twinkle;
+
+      if (particle.meteor) {
+        if (!particle.active) {
+          particle.wait -= 1;
+          if (particle.wait <= 0) {
+            const next = spawnMeteor(width, height, dark);
+            Object.assign(particle, next, { active: true, wait: 0 });
+          }
+          return;
+        }
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        const margin = particle.length + 48;
+        if (
+          particle.x < -margin
+          || particle.x > width + margin
+          || particle.y < -margin
+          || particle.y > height + margin
+        ) {
+          particle.active = false;
+          particle.wait = 50 + Math.floor(Math.random() * (dark ? 180 : 240));
+        }
+        return;
+      }
+
       // While dragging, natural drift yields to the pull so the field feels attached to the cursor.
       const driftScale = pointer.dragging ? 0.22 : 1;
       particle.x += particle.vx * driftScale;
       particle.y += particle.vy * driftScale;
-      particle.vx *= pointer.dragging ? 0.965 : 0.992;
-      particle.vy *= pointer.dragging ? 0.965 : 0.992;
-      particle.phase += particle.twinkle;
+      if (pointer.dragging) {
+        particle.vx *= 0.965;
+        particle.vy *= 0.965;
+      } else {
+        // Ease back to base drift — never decay ambient motion to a standstill.
+        particle.vx += (particle.baseVx - particle.vx) * 0.05;
+        particle.vy += (particle.baseVy - particle.vy) * 0.05;
+      }
       if (particle.y > height + particle.length) particle.y = -particle.length;
       if (particle.y < -particle.length) particle.y = height + particle.length;
       if (particle.x < -particle.length) particle.x = width + particle.length;
@@ -574,7 +708,7 @@
         drawStarfield(false);
         return;
       }
-      if (time - state.starfield.lastFrame >= (state.starfield.pointer.dragging ? 16 : 33)) {
+      if (time - state.starfield.lastFrame >= (state.starfield.pointer.dragging ? 16 : 22)) {
         drawStarfield(true);
         state.starfield.lastFrame = time;
       }
