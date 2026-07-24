@@ -104,6 +104,18 @@
     if (restoreFocus) state.lastFocus?.focus?.();
   };
 
+  const setMusicOpen = (open) => {
+    const player = document.getElementById('sujing-music');
+    if (!player) return;
+    const toggle = player.querySelector('.sujing-music-toggle');
+    player.classList.toggle('show', open);
+    if (!toggle) return;
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    toggle.setAttribute('aria-label', open ? '关闭音乐播放器' : '打开音乐播放器');
+  };
+
+  const closeMusic = () => setMusicOpen(false);
+
   const renderCommandLinks = (container, items) => {
     container.innerHTML = items.length
       ? items.slice(0, 12).map((item) => (
@@ -151,6 +163,7 @@
 
   const openCommand = async (trigger) => {
     const element = ensureCommand();
+    closeMusic();
     state.lastFocus = trigger || document.activeElement;
     element.classList.add('show');
     element.setAttribute('aria-hidden', 'false');
@@ -775,14 +788,12 @@
 
     const toggle = player.querySelector('.sujing-music-toggle');
     toggle.addEventListener('click', () => {
-      const open = player.classList.toggle('show');
-      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      setMusicOpen(!player.classList.contains('show'));
     });
 
     if (dormant) {
       player.sujingSelectTrack = async () => {
-        player.classList.add('show');
-        toggle.setAttribute('aria-expanded', 'true');
+        setMusicOpen(true);
         toast('歌单整理中，稍后再来');
       };
       return player;
@@ -861,8 +872,7 @@
     });
     player.sujingSelectTrack = async (index) => {
       setTrack(index);
-      player.classList.add('show');
-      toggle.setAttribute('aria-expanded', 'true');
+      setMusicOpen(true);
       await safePlay();
     };
     return player;
@@ -1164,6 +1174,11 @@
       if (action === 'random') randomPost();
       if (action === 'theme') toggleTheme();
       if (!event.target.closest('#nav .menus_item')) closeNavDropdowns();
+
+      const music = document.getElementById('sujing-music');
+      if (music?.classList.contains('show') && !event.target.closest('#sujing-music')) {
+        closeMusic();
+      }
     });
 
     document.addEventListener('keydown', (event) => {
@@ -1172,6 +1187,7 @@
       const command = document.getElementById('sujing-command');
       const commandOpen = command?.classList.contains('show');
       const dropdownOpen = document.querySelector('#nav .menus_item.is-open');
+      const musicOpen = document.getElementById('sujing-music')?.classList.contains('show');
 
       if (event.key === 'Escape' && commandOpen) {
         event.preventDefault();
@@ -1181,6 +1197,11 @@
       if (event.key === 'Escape' && dropdownOpen) {
         event.preventDefault();
         closeNavDropdowns(null, true);
+        return;
+      }
+      if (event.key === 'Escape' && musicOpen) {
+        event.preventDefault();
+        closeMusic();
         return;
       }
       if (commandOpen && event.key === 'Tab') {
