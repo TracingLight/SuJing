@@ -17,7 +17,7 @@ hexo.extend.filter.register('after_render:html', (html) => {
   const rendered = html
     .replace(
       '<title>溯境 | 溯境</title>',
-      '<title>溯境 - 写游戏开发，也写路上碰到的事</title>'
+      '<title>溯境 - 写游戏，也记日常</title>'
     )
     .replace('<script type="application/ld+json"></script>', '')
     .replace(
