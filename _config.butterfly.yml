@@ -251,6 +251,10 @@ footer:
     version: false
   custom_text: 记录技术实践，也留下生活痕迹
 
+# Soft navigation keeps #sujing-music (on body) alive across page changes.
+pjax:
+  enable: true
+
 inject:
   head:
     - <link rel="stylesheet" href="/css/sujing.css">

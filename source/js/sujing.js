@@ -6,6 +6,7 @@
     dataPromise: null,
     lastFocus: null,
     trackIndex: 0,
+    musicPersistTimer: null,
     revealObserver: null,
     scrollFrame: null,
     starfield: {
@@ -25,6 +26,33 @@
       },
       bound: false
     }
+  };
+
+  const MUSIC_STATE_KEY = 'sujing-music-state';
+
+  const readMusicState = () => {
+    try {
+      return JSON.parse(sessionStorage.getItem(MUSIC_STATE_KEY) || 'null');
+    } catch {
+      return null;
+    }
+  };
+
+  const writeMusicState = (patch) => {
+    try {
+      const prev = readMusicState() || {};
+      sessionStorage.setItem(MUSIC_STATE_KEY, JSON.stringify({ ...prev, ...patch, updatedAt: Date.now() }));
+    } catch {
+      /* ignore quota / private mode */
+    }
+  };
+
+  const navigateTo = (href) => {
+    if (window.pjax?.loadUrl) {
+      window.pjax.loadUrl(href);
+      return;
+    }
+    window.location.href = href;
   };
 
   const escapeHtml = (value) => String(value ?? '')
@@ -88,7 +116,7 @@
       toast('暂时没有可随机访问的文章');
       return;
     }
-    window.location.href = pool[Math.floor(Math.random() * pool.length)].path;
+    navigateTo(pool[Math.floor(Math.random() * pool.length)].path);
   };
 
   const getFocusable = (container) => Array.from(container.querySelectorAll(
@@ -112,6 +140,7 @@
     if (!toggle) return;
     toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     toggle.setAttribute('aria-label', open ? '关闭音乐播放器' : '打开音乐播放器');
+    writeMusicState({ panelOpen: open });
   };
 
   const closeMusic = () => setMusicOpen(false);
@@ -803,31 +832,45 @@
     const playButton = player.querySelector('[data-music="play"]');
     const progress = player.querySelector('.sujing-music-progress');
     const progressBar = progress.querySelector('span');
+    const persistMusicState = (extra = {}) => {
+      writeMusicState({
+        trackIndex: state.trackIndex,
+        currentTime: Number.isFinite(audio.currentTime) ? audio.currentTime : 0,
+        playing: !audio.paused,
+        panelOpen: player.classList.contains('show'),
+        ...extra
+      });
+    };
     const setProgress = (ratio) => {
       const value = Math.min(100, Math.max(0, ratio * 100));
       progressBar.style.transform = `scaleX(${value / 100})`;
       progress.setAttribute('aria-valuenow', String(Math.round(value)));
     };
-    const setTrack = (index) => {
+    const setTrack = (index, { resetTime = true } = {}) => {
       state.trackIndex = (index + tracks.length) % tracks.length;
       const track = tracks[state.trackIndex];
       audio.src = track.url;
       player.querySelector('.sujing-music-info strong').textContent = track.title || '未命名曲目';
       player.querySelector('.sujing-music-info span').textContent = track.artist || '未知作者';
       player.querySelector('.sujing-music-cover').src = track.cover || '/img/sujing-mark.svg';
-      setProgress(0);
+      if (resetTime) setProgress(0);
+      persistMusicState({ trackIndex: state.trackIndex });
     };
     const safePlay = async () => {
       try {
         await audio.play();
       } catch (error) {
         console.warn('[Sujing] audio play blocked', error);
+        writeMusicState({ playing: false });
         toast('浏览器阻止了自动播放，请再点一次播放');
       }
     };
     const play = async () => {
       if (audio.paused) await safePlay();
-      else audio.pause();
+      else {
+        audio.pause();
+        persistMusicState({ playing: false });
+      }
     };
     const seekFromEvent = (event) => {
       if (!audio.duration) return;
@@ -835,9 +878,26 @@
       const ratio = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
       audio.currentTime = ratio * audio.duration;
       setProgress(ratio);
+      persistMusicState();
     };
 
-    setTrack(0);
+    const saved = readMusicState();
+    const startIndex = Number.isInteger(saved?.trackIndex) ? saved.trackIndex : 0;
+    setTrack(startIndex, { resetTime: false });
+    if (saved?.panelOpen) setMusicOpen(true);
+    if (Number.isFinite(saved?.currentTime) && saved.currentTime > 0) {
+      const restoreTime = () => {
+        if (!Number.isFinite(audio.duration) || audio.duration <= 0) return;
+        audio.currentTime = Math.min(saved.currentTime, Math.max(audio.duration - 0.25, 0));
+        setProgress(audio.duration ? audio.currentTime / audio.duration : 0);
+      };
+      if (audio.readyState >= 1) restoreTime();
+      else audio.addEventListener('loadedmetadata', restoreTime, { once: true });
+    }
+    if (saved?.playing) {
+      window.setTimeout(() => { safePlay(); }, 0);
+    }
+
     playButton.addEventListener('click', play);
     player.querySelector('[data-music="prev"]').addEventListener('click', () => {
       setTrack(state.trackIndex - 1);
@@ -850,10 +910,12 @@
     audio.addEventListener('play', () => {
       playButton.innerHTML = '<i class="fas fa-pause" aria-hidden="true"></i>';
       player.classList.add('is-playing');
+      persistMusicState({ playing: true });
     });
     audio.addEventListener('pause', () => {
       playButton.innerHTML = '<i class="fas fa-play" aria-hidden="true"></i>';
       player.classList.remove('is-playing');
+      persistMusicState({ playing: false });
     });
     audio.addEventListener('ended', () => {
       setTrack(state.trackIndex + 1);
@@ -861,6 +923,11 @@
     });
     audio.addEventListener('timeupdate', () => {
       setProgress(audio.duration ? audio.currentTime / audio.duration : 0);
+      if (state.musicPersistTimer) return;
+      state.musicPersistTimer = window.setTimeout(() => {
+        state.musicPersistTimer = null;
+        if (!audio.paused) persistMusicState({ playing: true });
+      }, 1000);
     });
     progress.addEventListener('pointerdown', (event) => {
       progress.setPointerCapture?.(event.pointerId);
@@ -869,6 +936,12 @@
     progress.addEventListener('pointermove', (event) => {
       if (event.buttons !== 1) return;
       seekFromEvent(event);
+    });
+    window.addEventListener('pagehide', () => {
+      persistMusicState({
+        playing: !audio.paused,
+        panelOpen: player.classList.contains('show')
+      });
     });
     player.sujingSelectTrack = async (index) => {
       setTrack(index);
@@ -1098,9 +1171,19 @@
   const installPageLeaveInk = () => {
     if (document.documentElement.dataset.sujingLeaveInk) return;
     document.documentElement.dataset.sujingLeaveInk = 'true';
+
+    document.addEventListener('pjax:send', () => {
+      document.body.classList.add('sujing-leaving');
+    });
+    document.addEventListener('pjax:complete', () => {
+      document.body.classList.remove('sujing-leaving');
+    });
+
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     document.addEventListener('click', (event) => {
+      // Soft nav (pjax) keeps the music player alive — do not force a full reload.
+      if (window.pjax) return;
       if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       const link = event.target.closest?.('a[href]');
       if (!link) return;
@@ -1108,6 +1191,7 @@
       if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:')) return;
       if (link.target === '_blank' || link.hasAttribute('download')) return;
       if (link.closest('#sujing-command')) return;
+      if (link.closest('#sujing-music')) return;
 
       let url;
       try { url = new URL(link.href, window.location.href); } catch { return; }
