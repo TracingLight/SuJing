@@ -901,7 +901,13 @@
       : `
       <button class="sujing-music-toggle" type="button" title="音乐" aria-label="打开音乐播放器" aria-expanded="false"><i class="fas fa-music" aria-hidden="true"></i></button>
       <section class="sujing-music-panel" aria-label="音乐播放器">
-        <div class="sujing-music-panel-head"><span>正在听</span></div>
+        <div class="sujing-music-panel-head">
+          <span>正在听</span>
+          <button type="button" data-music="list" title="展开或收起歌单" aria-label="展开或收起歌单" aria-expanded="true">
+            <i class="fas fa-list-ul" aria-hidden="true"></i>
+            <em>歌单 · ${tracks.length}</em>
+          </button>
+        </div>
         <img class="sujing-music-cover" alt="" src="${escapeHtml(tracks[0].cover || '/img/sujing-mark.svg')}">
         <div class="sujing-music-info"><strong></strong><span></span></div>
         <div class="sujing-music-controls">
@@ -912,9 +918,21 @@
         <div class="sujing-music-progress" role="slider" aria-label="播放进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
           <span></span>
         </div>
+        <div class="sujing-music-playlist" role="listbox" aria-label="歌单">
+          ${tracks.map((track, index) => `
+            <button type="button" class="sujing-music-track" role="option" data-track-index="${index}" aria-selected="false">
+              <span class="sujing-music-track-index">${String(index + 1).padStart(2, '0')}</span>
+              <span class="sujing-music-track-meta">
+                <strong>${escapeHtml(track.title || '未命名曲目')}</strong>
+                <small>${escapeHtml(track.artist || '未知作者')}</small>
+              </span>
+              <i class="fas fa-play" aria-hidden="true"></i>
+            </button>`).join('')}
+        </div>
         <audio preload="metadata"></audio>
       </section>`;
     document.body.appendChild(player);
+    player.classList.add('list-open');
 
     const toggle = player.querySelector('.sujing-music-toggle');
     toggle.addEventListener('click', () => {
@@ -931,8 +949,10 @@
 
     const audio = player.querySelector('audio');
     const playButton = player.querySelector('[data-music="play"]');
+    const listButton = player.querySelector('[data-music="list"]');
     const progress = player.querySelector('.sujing-music-progress');
     const progressBar = progress.querySelector('span');
+    const trackButtons = [...player.querySelectorAll('.sujing-music-track')];
     const persistMusicState = (extra = {}) => {
       writeMusicState({
         trackIndex: state.trackIndex,
@@ -947,6 +967,26 @@
       progressBar.style.transform = `scaleX(${value / 100})`;
       progress.setAttribute('aria-valuenow', String(Math.round(value)));
     };
+    const syncPlaylistActive = () => {
+      trackButtons.forEach((button) => {
+        const active = Number(button.dataset.trackIndex) === state.trackIndex;
+        button.classList.toggle('is-active', active);
+        button.setAttribute('aria-selected', active ? 'true' : 'false');
+        const icon = button.querySelector('i');
+        if (icon) {
+          icon.className = active && !audio.paused
+            ? 'fas fa-volume-high'
+            : 'fas fa-play';
+        }
+      });
+    };
+    const setListOpen = (open) => {
+      player.classList.toggle('list-open', open);
+      if (!listButton) return;
+      listButton.setAttribute('aria-expanded', open ? 'true' : 'false');
+      listButton.setAttribute('aria-label', open ? '收起歌单' : '展开歌单');
+      listButton.title = open ? '收起歌单' : '展开歌单';
+    };
     const setTrack = (index, { resetTime = true } = {}) => {
       state.trackIndex = (index + tracks.length) % tracks.length;
       const track = tracks[state.trackIndex];
@@ -955,6 +995,7 @@
       player.querySelector('.sujing-music-info span').textContent = track.artist || '未知作者';
       player.querySelector('.sujing-music-cover').src = track.cover || '/img/sujing-mark.svg';
       if (resetTime) setProgress(0);
+      syncPlaylistActive();
       persistMusicState({ trackIndex: state.trackIndex });
     };
     const safePlay = async () => {
@@ -1000,6 +1041,24 @@
     }
 
     playButton.addEventListener('click', play);
+    listButton?.addEventListener('click', () => {
+      setListOpen(!player.classList.contains('list-open'));
+    });
+    trackButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const index = Number(button.dataset.trackIndex);
+        if (index === state.trackIndex && !audio.paused) {
+          audio.pause();
+          return;
+        }
+        if (index === state.trackIndex) {
+          safePlay();
+          return;
+        }
+        setTrack(index);
+        safePlay();
+      });
+    });
     player.querySelector('[data-music="prev"]').addEventListener('click', () => {
       setTrack(state.trackIndex - 1);
       safePlay();
@@ -1011,11 +1070,13 @@
     audio.addEventListener('play', () => {
       playButton.innerHTML = '<i class="fas fa-pause" aria-hidden="true"></i>';
       player.classList.add('is-playing');
+      syncPlaylistActive();
       persistMusicState({ playing: true });
     });
     audio.addEventListener('pause', () => {
       playButton.innerHTML = '<i class="fas fa-play" aria-hidden="true"></i>';
       player.classList.remove('is-playing');
+      syncPlaylistActive();
       persistMusicState({ playing: false });
     });
     audio.addEventListener('ended', () => {
