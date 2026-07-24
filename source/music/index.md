@@ -11,7 +11,7 @@ description: 溯境歌单与正在聆听的音乐。
 <header class="sujing-gallery-intro" data-sujing-reveal>
   <p class="sujing-kicker">听录</p>
   <h1>音乐</h1>
-  <p>平时在听的歌会放这里。歌单还在整理，有了再开播。</p>
+  <p>正在听、值得反复听的曲目会放在这里。歌单整理完成后开放播放。</p>
 </header>
 
 <div class="sujing-data-page" data-sujing-music-page aria-busy="true" aria-live="polite">

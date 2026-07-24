@@ -2,7 +2,7 @@
 layout: page
 title: 溯境
 top_img: false
-description: 溯光如初的个人博客。主要写 Unity 和游戏开发，偶尔也记点生活和兴趣。
+description: 溯光如初的个人博客。以 Unity 与游戏开发为主，也记录生活与兴趣。
 aside: false
 comments: false
 type: sujing-home
@@ -11,7 +11,7 @@ type: sujing-home
 <div class="sujing-home sujing-bento-home" data-sujing-home>
   <a class="sujing-now-strip" href="/notes/" data-sujing-reveal>
     <span><i class="fas fa-feather" aria-hidden="true"></i> 短讯</span>
-    <strong data-sujing-home-note>站刚搭起来，后面会慢慢往里塞技术笔记和生活记录。</strong>
+    <strong data-sujing-home-note>溯境第一版已上线，后续将陆续补充技术笔记与生活记录。</strong>
     <time data-sujing-home-note-time datetime="2026-07-21">2026.07.21</time>
     <i class="fas fa-arrow-right" aria-hidden="true"></i>
   </a>
@@ -22,10 +22,10 @@ type: sujing-home
     <div class="sujing-bento-hero-copy">
       <p class="sujing-kicker">首页</p>
       <h1 id="sujing-home-title">溯境</h1>
-      <p>平时做 Unity 客户端，碰到值得留下的就写下来——技术、生活，或者慢慢想明白的事。</p>
+      <p>以 Unity 游戏客户端开发为主，记录技术实践，也留下生活与兴趣方面的笔记。</p>
       <div class="sujing-home-actions">
-        <a class="sujing-button sujing-button-primary" href="/articles/"><span>去看文章</span><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
-        <button class="sujing-button sujing-button-quiet" type="button" data-sujing-command-open><i class="fas fa-compass" aria-hidden="true"></i><span>随便逛逛</span></button>
+        <a class="sujing-button sujing-button-primary" href="/articles/"><span>阅读文章</span><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+        <button class="sujing-button sujing-button-quiet" type="button" data-sujing-command-open><i class="fas fa-compass" aria-hidden="true"></i><span>浏览站点</span></button>
       </div>
     </div>
     <div class="sujing-bento-hero-meta" aria-hidden="true"><span>游艺</span><span>绘事</span><span>日课</span></div>
@@ -39,7 +39,7 @@ type: sujing-home
       <div class="sujing-bento-card-copy">
         <div class="sujing-bento-card-heading"><p class="sujing-kicker">最新文章</p><time datetime="2026-07-21">2026.07.21</time></div>
         <h2>溯境：从这里开始</h2>
-        <p>这个站打算写什么，以及我会怎么写。</p>
+        <p>溯境的内容方向、写作方式与后续规划。</p>
         <span class="sujing-bento-link">继续阅读 <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
       </div>
     </a>
@@ -59,20 +59,20 @@ type: sujing-home
       </header>
       <div class="sujing-bento-gallery-empty" data-sujing-gallery-empty>
         <span class="sujing-empty-seal" aria-hidden="true">待</span>
-        <strong>还没放图</strong>
-        <p>图片后面再补，想先看结构也可以进相册页。</p>
+        <strong>相册筹备中</strong>
+        <p>图片稍后补充，也可先进入相册页查看结构。</p>
       </div>
     </section>
     <aside class="sujing-bento-side" aria-label="站点动态">
       <a class="sujing-bento-card sujing-bento-note" href="/notes/" data-sujing-reveal>
         <div><p class="sujing-kicker">短讯</p><time data-sujing-home-note-time datetime="2026-07-21">2026.07.21</time></div>
         <h2>最近一条</h2>
-        <p data-sujing-home-note>站刚搭起来，后面会慢慢往里塞技术笔记和生活记录。</p>
+        <p data-sujing-home-note>溯境第一版已上线，后续将陆续补充技术笔记与生活记录。</p>
         <span>查看短讯 <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
       </a>
       <a class="sujing-bento-card sujing-bento-profile" href="/about/" data-sujing-reveal>
         <img class="no-lightbox" src="https://img.sujing.dev/avatar/2026/07/site-avatar-1ffd3ccb42df.webp" alt="溯光如初的头像" width="512" height="512" loading="lazy">
-        <div><p class="sujing-kicker">关于</p><h2>溯光如初</h2><span>做 Unity 客户端，边做边学</span></div>
+        <div><p class="sujing-kicker">关于</p><h2>溯光如初</h2><span>Unity 游戏客户端开发</span></div>
         <i class="fas fa-arrow-right" aria-hidden="true"></i>
       </a>
     </aside>
@@ -80,8 +80,8 @@ type: sujing-home
 
   <nav class="sujing-bento-destinations" aria-label="内容目的地">
     <a href="/articles/" data-sujing-reveal data-sujing-tilt><span>01</span><div><strong>文章库</strong><small>技术笔记</small></div><i class="fas fa-book-open" aria-hidden="true"></i></a>
-    <a href="/music/" data-sujing-reveal data-sujing-tilt><span>02</span><div><strong>音乐</strong><small>正在听的歌</small></div><i class="fas fa-music" aria-hidden="true"></i></a>
-    <a href="/gallery/" data-sujing-reveal data-sujing-tilt><span>03</span><div><strong>相册</strong><small>图和截图</small></div><i class="fas fa-images" aria-hidden="true"></i></a>
-    <a href="/about/" data-sujing-reveal data-sujing-tilt><span>04</span><div><strong>关于</strong><small>我是谁</small></div><i class="fas fa-user" aria-hidden="true"></i></a>
+    <a href="/music/" data-sujing-reveal data-sujing-tilt><span>02</span><div><strong>音乐</strong><small>歌单与听录</small></div><i class="fas fa-music" aria-hidden="true"></i></a>
+    <a href="/gallery/" data-sujing-reveal data-sujing-tilt><span>03</span><div><strong>相册</strong><small>插画与截图</small></div><i class="fas fa-images" aria-hidden="true"></i></a>
+    <a href="/about/" data-sujing-reveal data-sujing-tilt><span>04</span><div><strong>关于</strong><small>作者介绍</small></div><i class="fas fa-user" aria-hidden="true"></i></a>
   </nav>
 </div>

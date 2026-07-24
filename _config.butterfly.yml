@@ -249,7 +249,7 @@ footer:
   copyright:
     enable: true
     version: false
-  custom_text: 写点技术，也留点生活痕迹
+  custom_text: 记录技术实践，也留下生活痕迹
 
 inject:
   head:

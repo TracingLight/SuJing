@@ -123,7 +123,7 @@
       <div class="sujing-command-mask" data-sujing-command-close></div>
       <section class="sujing-command-panel" role="dialog" aria-modal="true" aria-labelledby="sujing-command-title">
         <header class="sujing-command-header">
-          <div><span>快捷导航</span><h2 id="sujing-command-title">去哪逛逛</h2></div>
+          <div><span>快捷导航</span><h2 id="sujing-command-title">浏览站点</h2></div>
           <button class="sujing-icon-button" type="button" data-sujing-command-close title="关闭" aria-label="关闭快捷导航"><i class="fas fa-xmark" aria-hidden="true"></i></button>
         </header>
         <div class="sujing-command-actions">
@@ -645,7 +645,7 @@
     intro.setAttribute('data-sujing-reveal', '');
     intro.innerHTML = `
       <div><p class="sujing-kicker">文章</p><h1>文章库</h1></div>
-      <p>主要是游戏开发笔记。能写清怎么做、怎么验证的，就尽量写清楚。</p>`;
+      <p>以游戏开发笔记为主，尽量写清方法与验证过程。</p>`;
     recentPosts.prepend(intro);
   };
 
@@ -662,7 +662,7 @@
             <time datetime="${escapeHtml(note.date)}">${escapeHtml(formatDate(note.date))}</time>
             <p>${escapeHtml(note.content)}</p>
           </article>`).join('')}</div>`
-      : '<div class="sujing-data-empty" data-sujing-reveal><span class="sujing-empty-seal" aria-hidden="true">讯</span><h2>还没有短讯</h2><p>有近况或想法时会先记在这里。</p></div>';
+      : '<div class="sujing-data-empty" data-sujing-reveal><span class="sujing-empty-seal" aria-hidden="true">讯</span><h2>暂无短讯</h2><p>近况与简短想法会先出现在这里。</p></div>';
     installMotion();
   };
 
@@ -685,7 +685,7 @@
                 <figcaption><strong>${escapeHtml(image.title || album.title)}</strong>${image.description ? `<span>${escapeHtml(image.description)}</span>` : ''}</figcaption>
               </figure>`).join('')}</div>
           </section>`).join('')
-      : '<div class="sujing-data-empty" data-sujing-reveal><span class="sujing-empty-seal" aria-hidden="true">待</span><h2>还没放图</h2><p>图片后面再补。</p></div>';
+      : '<div class="sujing-data-empty" data-sujing-reveal><span class="sujing-empty-seal" aria-hidden="true">待</span><h2>相册筹备中</h2><p>图片稍后补充。</p></div>';
     installMotion();
     installFancyboxFallback(container);
   };
@@ -719,9 +719,9 @@
       <section class="sujing-music-panel" aria-label="音乐播放器">
         <div class="sujing-music-dormant">
           <span class="sujing-empty-seal" aria-hidden="true">音</span>
-          <strong>歌单还在整理</strong>
-          <p>有曲子了再在这里播。</p>
-          <a class="sujing-button sujing-button-quiet" href="/music/">去音乐页</a>
+          <strong>歌单整理中</strong>
+          <p>曲目补充后即可在此播放。</p>
+          <a class="sujing-button sujing-button-quiet" href="/music/">前往音乐页</a>
         </div>
       </section>`
       : `
@@ -845,7 +845,7 @@
     const tracks = data.music?.tracks || [];
     container.setAttribute('aria-busy', 'false');
     if (!tracks.length) {
-      container.innerHTML = '<div class="sujing-data-empty" data-sujing-reveal><span class="sujing-empty-seal" aria-hidden="true">音</span><h2>歌单还没整理好</h2><p>曲目放进 <code>source/media/music/</code>，再写进 <code>music.yml</code> 就能播。</p></div>';
+      container.innerHTML = '<div class="sujing-data-empty" data-sujing-reveal><span class="sujing-empty-seal" aria-hidden="true">音</span><h2>歌单整理中</h2><p>将曲目放入 <code>source/media/music/</code>，并写入 <code>music.yml</code> 后即可播放。</p></div>';
       installMotion();
       return;
     }

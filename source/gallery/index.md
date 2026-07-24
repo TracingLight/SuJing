@@ -11,7 +11,7 @@ description: 溯境的插画、项目截图与生活影像。
 <header class="sujing-gallery-intro" data-sujing-reveal>
   <p class="sujing-kicker">图录</p>
   <h1>相册</h1>
-  <p>插画、截图和生活照片会放这里，后面慢慢补。</p>
+  <p>插画、项目截图与生活照片会放在这里，内容陆续补充。</p>
 </header>
 
 <div class="sujing-data-page" data-sujing-gallery aria-busy="true" aria-live="polite">
