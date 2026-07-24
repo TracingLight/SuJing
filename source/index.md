@@ -78,10 +78,13 @@ type: sujing-home
     </aside>
   </div>
 
-  <nav class="sujing-bento-destinations" aria-label="内容目的地">
-    <a href="/articles/" data-sujing-reveal data-sujing-tilt><span>01</span><div><strong>文章库</strong><small>技术笔记</small></div><i class="fas fa-book-open" aria-hidden="true"></i></a>
-    <a href="/music/" data-sujing-reveal data-sujing-tilt><span>02</span><div><strong>音乐</strong><small>歌单与听录</small></div><i class="fas fa-music" aria-hidden="true"></i></a>
-    <a href="/gallery/" data-sujing-reveal data-sujing-tilt><span>03</span><div><strong>相册</strong><small>插画与截图</small></div><i class="fas fa-images" aria-hidden="true"></i></a>
-    <a href="/about/" data-sujing-reveal data-sujing-tilt><span>04</span><div><strong>关于</strong><small>作者介绍</small></div><i class="fas fa-user" aria-hidden="true"></i></a>
-  </nav>
+  <div class="sujing-bento-colophon">
+    <nav class="sujing-bento-destinations" aria-label="内容目的地">
+      <a href="/articles/" data-sujing-reveal data-sujing-tilt><span>01</span><div><strong>文章库</strong><small>技术笔记</small></div><i class="fas fa-book-open" aria-hidden="true"></i></a>
+      <a href="/music/" data-sujing-reveal data-sujing-tilt><span>02</span><div><strong>音乐</strong><small>歌单与听录</small></div><i class="fas fa-music" aria-hidden="true"></i></a>
+      <a href="/gallery/" data-sujing-reveal data-sujing-tilt><span>03</span><div><strong>相册</strong><small>插画与截图</small></div><i class="fas fa-images" aria-hidden="true"></i></a>
+      <a href="/about/" data-sujing-reveal data-sujing-tilt><span>04</span><div><strong>关于</strong><small>作者介绍</small></div><i class="fas fa-user" aria-hidden="true"></i></a>
+    </nav>
+    <span class="sujing-home-seal" aria-hidden="true">溯</span>
+  </div>
 </div>
