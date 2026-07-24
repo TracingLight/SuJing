@@ -2798,8 +2798,9 @@ a.sujing-bento-card:hover::before {
 
 #sujing-music {
   position: fixed;
-  right: 18px;
-  bottom: 76px;
+  left: 20px;
+  right: auto;
+  bottom: 24px;
   z-index: 1002;
 }
 
@@ -2841,7 +2842,8 @@ a.sujing-bento-card:hover::before {
 
 .sujing-music-panel {
   position: absolute;
-  right: 0;
+  left: 0;
+  right: auto;
   bottom: 58px;
   display: grid;
   width: 320px;
@@ -3655,14 +3657,15 @@ a.sujing-bento-card:hover::before {
   }
 
   #sujing-music {
-    right: 12px;
+    left: 14px;
+    bottom: 18px;
   }
 
   .sujing-music-panel {
     position: fixed;
-    right: 12px;
-    bottom: 70px;
-    left: 12px;
+    right: 14px;
+    bottom: 74px;
+    left: 14px;
     width: auto;
   }
 
