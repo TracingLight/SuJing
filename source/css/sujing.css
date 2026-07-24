@@ -3266,6 +3266,51 @@ a.sujing-bento-card:hover::before {
   color: #dce7e7;
 }
 
+.sujing-site-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  margin: 0 0 12px;
+  color: #c4d0d1;
+  font-family: var(--sujing-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.sujing-site-stats > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.sujing-site-stats i {
+  color: rgba(196, 165, 116, 0.88);
+  font-size: 0.72rem;
+}
+
+.sujing-site-stats [id^='busuanzi_value_'] {
+  color: #edf4f3;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+}
+
+.sujing-footer-note {
+  margin: 0;
+  color: #9aabae;
+  font-size: 0.78rem;
+  line-height: 1.7;
+}
+
+#post-info .post-meta-pv-cv,
+#post-meta .post-meta-pv-cv {
+  white-space: nowrap;
+}
+
+#busuanzi_value_page_pv {
+  font-variant-numeric: tabular-nums;
+}
+
 #rightside > div > button,
 #rightside > div > a {
   border: 1px solid rgba(212, 222, 220, 0.72);

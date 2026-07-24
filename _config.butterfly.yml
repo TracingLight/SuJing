@@ -203,9 +203,9 @@ rightside_item_order:
   hide:
   show: toc
 busuanzi:
-  site_uv: false
-  site_pv: false
-  page_pv: false
+  site_uv: true
+  site_pv: true
+  page_pv: true
 lazyload:
   enable: true
   field: site
@@ -249,7 +249,7 @@ footer:
   copyright:
     enable: true
     version: false
-  custom_text: 记录技术实践，也留下生活痕迹
+  custom_text: '<div class="sujing-site-stats" aria-label="站点访问统计"><span><i class="fas fa-user-group" aria-hidden="true"></i>访客 <span id="busuanzi_value_site_uv"><i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i></span></span><span><i class="fas fa-eye" aria-hidden="true"></i>访问 <span id="busuanzi_value_site_pv"><i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i></span></span></div><p class="sujing-footer-note">记录技术实践，也留下生活痕迹</p>'
 
 # Soft navigation keeps #sujing-music (on body) alive across page changes.
 pjax:
