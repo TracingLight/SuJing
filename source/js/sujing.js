@@ -123,7 +123,7 @@
       <div class="sujing-command-mask" data-sujing-command-close></div>
       <section class="sujing-command-panel" role="dialog" aria-modal="true" aria-labelledby="sujing-command-title">
         <header class="sujing-command-header">
-          <div><span>QUICK NAVIGATION / 01</span><h2 id="sujing-command-title">探索溯境</h2></div>
+          <div><span>寻径 · 卷一</span><h2 id="sujing-command-title">探索溯境</h2></div>
           <button class="sujing-icon-button" type="button" data-sujing-command-close title="关闭" aria-label="关闭快捷导航"><i class="fas fa-xmark" aria-hidden="true"></i></button>
         </header>
         <div class="sujing-command-actions">
@@ -136,6 +136,7 @@
           <a href="/archives/"><span>归档</span><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
           <a href="/notes/"><span>短讯</span><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
           <a href="/gallery/"><span>相册</span><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+          <a href="/music/"><span>音乐</span><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
           <a href="/categories/"><span>主题</span><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
           <a href="/about/"><span>关于</span><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
         </nav>
@@ -603,33 +604,9 @@
       });
     }
 
+    const empty = home.querySelector('[data-sujing-gallery-empty]');
     const images = (data.gallery?.albums || []).flatMap((album) => album.images || []);
-    const setImage = (image, item) => {
-      if (!image || !item?.src) return;
-      image.src = item.src;
-      image.alt = item.alt || item.title || '溯境图库插画';
-      if (Number(item.width)) image.width = Number(item.width);
-      if (Number(item.height)) image.height = Number(item.height);
-    };
-    const heroImage = images.find((image) => image.title === '月夜观星台') || images[0];
-    setImage(home.querySelector('[data-sujing-home-hero]'), heroImage);
-
-    const preferred = ['晨光云海学院', '雨夜旧城', '秋日镜湖']
-      .map((title) => images.find((image) => image.title === title))
-      .filter(Boolean);
-    const previews = preferred.length === 3 ? preferred : images.slice(1, 4);
-    home.querySelectorAll('[data-sujing-gallery-preview]').forEach((link, index) => {
-      const item = previews[index];
-      if (!item) return;
-      link.href = item.src;
-      link.dataset.fancybox = 'sujing-home-gallery';
-      link.dataset.caption = item.title || item.alt || '溯境图库';
-      link.setAttribute('aria-label', `查看${item.title || '图库图片'}`);
-      setImage(link.querySelector('img'), item);
-      const label = link.querySelector('span');
-      if (label) label.textContent = item.title || '世界切片';
-    });
-    installFancyboxFallback(home);
+    if (empty) empty.hidden = images.length > 0;
   };
 
   const installArticlesIntro = () => {
@@ -640,7 +617,7 @@
     intro.className = 'sujing-list-intro';
     intro.setAttribute('data-sujing-reveal', '');
     intro.innerHTML = `
-      <div><p class="sujing-kicker">TECHNICAL ARCHIVE</p><h1>文章库</h1></div>
+      <div><p class="sujing-kicker">术藏</p><h1>文章库</h1></div>
       <p>以游戏开发为主线，记录能够复现的实践、判断过程与阶段性结论。</p>`;
     recentPosts.prepend(intro);
   };
@@ -658,7 +635,7 @@
             <time datetime="${escapeHtml(note.date)}">${escapeHtml(formatDate(note.date))}</time>
             <p>${escapeHtml(note.content)}</p>
           </article>`).join('')}</div>`
-      : '<div class="sujing-data-empty"><i class="fas fa-bolt" aria-hidden="true"></i><h2>短讯正在整理</h2><p>新的即时记录会先出现在这里。</p></div>';
+      : '<div class="sujing-data-empty" data-sujing-reveal><span class="sujing-empty-seal" aria-hidden="true">讯</span><h2>短讯待录</h2><p>新的即时记录会先出现在这里。</p></div>';
     installMotion();
   };
 
@@ -672,7 +649,7 @@
     container.innerHTML = albums.length
       ? albums.map((album, albumIndex) => `
           <section class="sujing-album">
-            <header data-sujing-reveal><p class="sujing-kicker">ALBUM / ${String(albumIndex + 1).padStart(2, '0')}</p><h2>${escapeHtml(album.title)}</h2><p>${escapeHtml(album.description || '')}</p></header>
+            <header data-sujing-reveal><p class="sujing-kicker">册 ${String(albumIndex + 1).padStart(2, '0')}</p><h2>${escapeHtml(album.title)}</h2><p>${escapeHtml(album.description || '')}</p></header>
             <div class="sujing-gallery-grid">${(album.images || []).map((image) => `
               <figure data-sujing-reveal>
                 <a href="${escapeHtml(image.src)}" data-fancybox="sujing-gallery-${albumIndex}" data-caption="${escapeHtml(image.title || image.alt || album.title)}">
@@ -681,7 +658,7 @@
                 <figcaption><strong>${escapeHtml(image.title || album.title)}</strong>${image.description ? `<span>${escapeHtml(image.description)}</span>` : ''}</figcaption>
               </figure>`).join('')}</div>
           </section>`).join('')
-      : '<div class="sujing-data-empty"><i class="fas fa-images" aria-hidden="true"></i><h2>相册正在整理</h2></div>';
+      : '<div class="sujing-data-empty" data-sujing-reveal><span class="sujing-empty-seal" aria-hidden="true">待</span><h2>图册待补</h2><p>插画与影像稍后补入。结构已备，展卷可期。</p></div>';
     installMotion();
     installFancyboxFallback(container);
   };
@@ -704,13 +681,26 @@
     if (player) return player;
     const data = await loadSiteData();
     const tracks = Array.isArray(data.music?.tracks) ? data.music.tracks : [];
-    if (!tracks.length) return null;
+    const dormant = !tracks.length;
 
     player = document.createElement('aside');
     player.id = 'sujing-music';
-    player.innerHTML = `
-      <button class="sujing-music-toggle" type="button" title="音乐" aria-label="打开音乐播放器"><i class="fas fa-music" aria-hidden="true"></i></button>
+    if (dormant) player.classList.add('is-dormant');
+    player.innerHTML = dormant
+      ? `
+      <button class="sujing-music-toggle" type="button" title="音乐" aria-label="打开音乐播放器" aria-expanded="false"><i class="fas fa-music" aria-hidden="true"></i></button>
       <section class="sujing-music-panel" aria-label="音乐播放器">
+        <div class="sujing-music-dormant">
+          <span class="sujing-empty-seal" aria-hidden="true">音</span>
+          <strong>歌单整理中</strong>
+          <p>曲目补入后即可在此聆听。</p>
+          <a class="sujing-button sujing-button-quiet" href="/music/">前往音乐页</a>
+        </div>
+      </section>`
+      : `
+      <button class="sujing-music-toggle" type="button" title="音乐" aria-label="打开音乐播放器" aria-expanded="false"><i class="fas fa-music" aria-hidden="true"></i></button>
+      <section class="sujing-music-panel" aria-label="音乐播放器">
+        <div class="sujing-music-panel-head"><span>听录</span></div>
         <img class="sujing-music-cover" alt="" src="${escapeHtml(tracks[0].cover || '/img/sujing-mark.svg')}">
         <div class="sujing-music-info"><strong></strong><span></span></div>
         <div class="sujing-music-controls">
@@ -718,14 +708,37 @@
           <button type="button" data-music="play" title="播放" aria-label="播放"><i class="fas fa-play" aria-hidden="true"></i></button>
           <button type="button" data-music="next" title="下一首" aria-label="下一首"><i class="fas fa-forward-step" aria-hidden="true"></i></button>
         </div>
-        <input class="sujing-music-progress" type="range" min="0" max="100" value="0" aria-label="播放进度">
+        <div class="sujing-music-progress" role="slider" aria-label="播放进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+          <span></span>
+        </div>
         <audio preload="metadata"></audio>
       </section>`;
     document.body.appendChild(player);
 
+    const toggle = player.querySelector('.sujing-music-toggle');
+    toggle.addEventListener('click', () => {
+      const open = player.classList.toggle('show');
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+
+    if (dormant) {
+      player.sujingSelectTrack = async () => {
+        player.classList.add('show');
+        toggle.setAttribute('aria-expanded', 'true');
+        toast('歌单整理中，稍后再来');
+      };
+      return player;
+    }
+
     const audio = player.querySelector('audio');
     const playButton = player.querySelector('[data-music="play"]');
     const progress = player.querySelector('.sujing-music-progress');
+    const progressBar = progress.querySelector('span');
+    const setProgress = (ratio) => {
+      const value = Math.min(100, Math.max(0, ratio * 100));
+      progressBar.style.transform = `scaleX(${value / 100})`;
+      progress.setAttribute('aria-valuenow', String(Math.round(value)));
+    };
     const setTrack = (index) => {
       state.trackIndex = (index + tracks.length) % tracks.length;
       const track = tracks[state.trackIndex];
@@ -733,7 +746,7 @@
       player.querySelector('.sujing-music-info strong').textContent = track.title || '未命名曲目';
       player.querySelector('.sujing-music-info span').textContent = track.artist || '未知作者';
       player.querySelector('.sujing-music-cover').src = track.cover || '/img/sujing-mark.svg';
-      progress.value = 0;
+      setProgress(0);
     };
     const safePlay = async () => {
       try {
@@ -747,9 +760,15 @@
       if (audio.paused) await safePlay();
       else audio.pause();
     };
+    const seekFromEvent = (event) => {
+      if (!audio.duration) return;
+      const rect = progress.getBoundingClientRect();
+      const ratio = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+      audio.currentTime = ratio * audio.duration;
+      setProgress(ratio);
+    };
 
     setTrack(0);
-    player.querySelector('.sujing-music-toggle').addEventListener('click', () => player.classList.toggle('show'));
     playButton.addEventListener('click', play);
     player.querySelector('[data-music="prev"]').addEventListener('click', () => {
       setTrack(state.trackIndex - 1);
@@ -759,21 +778,33 @@
       setTrack(state.trackIndex + 1);
       safePlay();
     });
-    audio.addEventListener('play', () => { playButton.innerHTML = '<i class="fas fa-pause" aria-hidden="true"></i>'; });
-    audio.addEventListener('pause', () => { playButton.innerHTML = '<i class="fas fa-play" aria-hidden="true"></i>'; });
+    audio.addEventListener('play', () => {
+      playButton.innerHTML = '<i class="fas fa-pause" aria-hidden="true"></i>';
+      player.classList.add('is-playing');
+    });
+    audio.addEventListener('pause', () => {
+      playButton.innerHTML = '<i class="fas fa-play" aria-hidden="true"></i>';
+      player.classList.remove('is-playing');
+    });
     audio.addEventListener('ended', () => {
       setTrack(state.trackIndex + 1);
       safePlay();
     });
     audio.addEventListener('timeupdate', () => {
-      progress.value = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+      setProgress(audio.duration ? audio.currentTime / audio.duration : 0);
     });
-    progress.addEventListener('input', () => {
-      if (audio.duration) audio.currentTime = (Number(progress.value) / 100) * audio.duration;
+    progress.addEventListener('pointerdown', (event) => {
+      progress.setPointerCapture?.(event.pointerId);
+      seekFromEvent(event);
+    });
+    progress.addEventListener('pointermove', (event) => {
+      if (event.buttons !== 1) return;
+      seekFromEvent(event);
     });
     player.sujingSelectTrack = async (index) => {
       setTrack(index);
       player.classList.add('show');
+      toggle.setAttribute('aria-expanded', 'true');
       await safePlay();
     };
     return player;
@@ -787,7 +818,8 @@
     const tracks = data.music?.tracks || [];
     container.setAttribute('aria-busy', 'false');
     if (!tracks.length) {
-      container.innerHTML = '<div class="sujing-data-empty"><i class="fas fa-music" aria-hidden="true"></i><h2>歌单正在整理</h2><p>曲目确定后，这里会重新开放播放入口。</p></div>';
+      container.innerHTML = '<div class="sujing-data-empty" data-sujing-reveal><span class="sujing-empty-seal" aria-hidden="true">音</span><h2>歌单待录</h2><p>把曲目放入 <code>source/media/music/</code> 并写入 <code>music.yml</code> 后即可播放。</p></div>';
+      installMotion();
       return;
     }
     container.innerHTML = `<div class="sujing-track-list">${tracks.map((track, index) => `
@@ -856,8 +888,8 @@
         const rect = element.getBoundingClientRect();
         const x = (event.clientX - rect.left) / rect.width;
         const y = (event.clientY - rect.top) / rect.height;
-        element.style.setProperty('--sujing-tilt-x', `${((0.5 - y) * 4.2).toFixed(2)}deg`);
-        element.style.setProperty('--sujing-tilt-y', `${((x - 0.5) * 4.2).toFixed(2)}deg`);
+        element.style.setProperty('--sujing-tilt-x', `${((0.5 - y) * 2.4).toFixed(2)}deg`);
+        element.style.setProperty('--sujing-tilt-y', `${((x - 0.5) * 2.4).toFixed(2)}deg`);
         element.style.setProperty('--sujing-glow-x', `${(x * 100).toFixed(1)}%`);
         element.style.setProperty('--sujing-glow-y', `${(y * 100).toFixed(1)}%`);
       });
@@ -1138,6 +1170,7 @@
     installNotesPage();
     installGalleryPage();
     installMusicPage();
+    ensureMusicPlayer();
     installReadingProgress();
     installMotion();
     installHeroParallax();

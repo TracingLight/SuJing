@@ -9,9 +9,9 @@ description: 溯境的插画、项目截图与生活影像。
 ---
 
 <header class="sujing-gallery-intro" data-sujing-reveal>
-  <p class="sujing-kicker">VISUAL ARCHIVE / 01</p>
+  <p class="sujing-kicker">图录</p>
   <h1>相册</h1>
-  <p>收录世界观插画、项目切片与沿途影像。点击任意画面进入沉浸浏览。</p>
+  <p>收录世界观插画、项目切片与沿途影像。新图补入后将在此展卷。</p>
 </header>
 
 <div class="sujing-data-page" data-sujing-gallery aria-busy="true" aria-live="polite">

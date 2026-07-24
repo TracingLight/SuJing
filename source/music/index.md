@@ -4,12 +4,12 @@ date: 2026-07-21 11:30:00
 type: sujing-music-page
 aside: false
 comments: false
-top_img: https://img.sujing.dev/illustrations/2026/07/autumn-mirror-lake-699930a1f28f.webp
+top_img: false
 description: 溯境歌单与正在聆听的音乐。
 ---
 
 <header class="sujing-gallery-intro" data-sujing-reveal>
-  <p class="sujing-kicker">LISTENING LOG / 01</p>
+  <p class="sujing-kicker">听录</p>
   <h1>音乐</h1>
   <p>收集正在听、反复听、值得回头听的曲目。歌单整理完成后会在这里开放播放。</p>
 </header>

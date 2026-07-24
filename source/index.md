@@ -17,7 +17,7 @@ type: sujing-home
   </a>
 
   <section class="sujing-bento-hero" aria-labelledby="sujing-home-title" data-sujing-reveal>
-    <img class="no-lightbox" data-sujing-home-hero src="https://img.sujing.dev/illustrations/2026/07/moonlit-observatory-6164a6bc1782.webp" alt="黑发世界构筑者在月夜观星台展开星图，远处是云海古城与巨大满月" width="1672" height="941" loading="eager" fetchpriority="high">
+    <img class="no-lightbox" data-sujing-home-hero src="/img/user/illustrations/moonlit-observatory.webp" alt="黑发世界构筑者在月夜观星台展开星图，远处是云海古城与巨大满月" width="1672" height="941" loading="eager" fetchpriority="high">
     <div class="sujing-bento-hero-shade" aria-hidden="true"></div>
     <div class="sujing-bento-hero-copy">
       <p class="sujing-kicker">溯境 · 卷首</p>
@@ -57,16 +57,10 @@ type: sujing-home
         <div><p class="sujing-kicker">图录</p><h2 id="sujing-gallery-title">世界切片</h2></div>
         <a href="/gallery/">观览全册 <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
       </header>
-      <div class="sujing-bento-gallery-grid">
-        <a href="https://img.sujing.dev/illustrations/2026/07/cloud-sea-academy-82c085aca1dd.webp" data-sujing-gallery-preview="0" aria-label="查看晨光云海学院">
-          <img src="https://img.sujing.dev/illustrations/2026/07/cloud-sea-academy-82c085aca1dd.webp" alt="黑发世界构筑者托起透明山河图，身后是晨光中的浮空东方书院" width="1672" height="941" loading="lazy"><span>晨光云海学院</span>
-        </a>
-        <a href="https://img.sujing.dev/illustrations/2026/07/rainy-old-city-4e26d3cda5af.webp" data-sujing-gallery-preview="1" aria-label="查看雨夜旧城">
-          <img src="https://img.sujing.dev/illustrations/2026/07/rainy-old-city-4e26d3cda5af.webp" alt="黑发女性撑透明纸伞走在雨夜东方旧城，灯笼倒映在石板路上" width="1536" height="1024" loading="lazy"><span>雨夜旧城</span>
-        </a>
-        <a href="https://img.sujing.dev/illustrations/2026/07/autumn-mirror-lake-699930a1f28f.webp" data-sujing-gallery-preview="2" aria-label="查看秋日镜湖">
-          <img src="https://img.sujing.dev/illustrations/2026/07/autumn-mirror-lake-699930a1f28f.webp" alt="黑发女性坐在秋日镜湖边眺望落日雪山，身旁放着古籍和星盘" width="1536" height="1024" loading="lazy"><span>秋日镜湖</span>
-        </a>
+      <div class="sujing-bento-gallery-empty" data-sujing-gallery-empty>
+        <span class="sujing-empty-seal" aria-hidden="true">待</span>
+        <strong>图册待补</strong>
+        <p>新的世界切片稍后补入。亦可先入相册页观览结构。</p>
       </div>
     </section>
     <aside class="sujing-bento-side" aria-label="站点动态">
@@ -86,7 +80,7 @@ type: sujing-home
 
   <nav class="sujing-bento-destinations" aria-label="内容目的地">
     <a href="/articles/" data-sujing-reveal data-sujing-tilt><span>01</span><div><strong>文章库</strong><small>技术与长期写作</small></div><i class="fas fa-book-open" aria-hidden="true"></i></a>
-    <a href="/archives/" data-sujing-reveal data-sujing-tilt><span>02</span><div><strong>归档</strong><small>沿时间回看记录</small></div><i class="fas fa-clock-rotate-left" aria-hidden="true"></i></a>
+    <a href="/music/" data-sujing-reveal data-sujing-tilt><span>02</span><div><strong>音乐</strong><small>听录与歌单</small></div><i class="fas fa-music" aria-hidden="true"></i></a>
     <a href="/gallery/" data-sujing-reveal data-sujing-tilt><span>03</span><div><strong>相册</strong><small>视觉与生活切片</small></div><i class="fas fa-images" aria-hidden="true"></i></a>
     <a href="/about/" data-sujing-reveal data-sujing-tilt><span>04</span><div><strong>关于</strong><small>作者与建站方向</small></div><i class="fas fa-user" aria-hidden="true"></i></a>
   </nav>

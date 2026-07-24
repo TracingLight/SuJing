@@ -11,6 +11,7 @@ menu:
   主题: /categories/ || fas fa-folder-open
   短讯: /notes/ || fas fa-bolt
   相册: /gallery/ || fas fa-images
+  音乐: /music/ || fas fa-music
   关于: /about/ || fas fa-user
 
 social:

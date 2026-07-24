@@ -335,10 +335,13 @@ input:focus-visible {
   z-index: 1200;
   min-width: 148px;
   overflow: hidden;
-  border: 1px solid var(--sujing-line);
-  border-radius: 12px;
+  border: 1px solid rgba(154, 123, 79, 0.28);
+  border-radius: 10px;
   background: rgba(255, 255, 255, 0.97);
   box-shadow: 0 16px 40px rgba(17, 28, 34, 0.14);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s ease;
 }
 
 #nav .menus_item_child li a {
@@ -358,6 +361,7 @@ input:focus-visible {
     visibility: visible;
     opacity: 1;
     pointer-events: auto;
+    transform: translateY(0);
   }
 
   #nav .menus_item_child::before {
@@ -1193,6 +1197,36 @@ a.sujing-bento-card:hover::before {
   margin-left: 5px;
 }
 
+.sujing-bento-gallery-empty {
+  display: grid;
+  min-height: 286px;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  padding: 28px 22px;
+  border: 1px solid rgba(154, 123, 79, 0.28);
+  border-radius: 14px;
+  background:
+    linear-gradient(145deg, rgba(154, 123, 79, 0.08), transparent 48%),
+    rgba(233, 239, 238, 0.35);
+  text-align: center;
+}
+
+.sujing-bento-gallery-empty strong {
+  color: var(--sujing-ink);
+  font-family: var(--sujing-display);
+  font-size: 1.05rem;
+  letter-spacing: 0.16em;
+}
+
+.sujing-bento-gallery-empty p {
+  max-width: 22em;
+  margin: 0;
+  color: var(--sujing-muted);
+  font-size: 0.78rem;
+  line-height: 1.7;
+}
+
 .sujing-bento-gallery-grid {
   display: grid;
   height: 286px;
@@ -1408,9 +1442,10 @@ a.sujing-bento-card:hover::before {
 .sujing-bento-destinations > a > span {
   align-self: start;
   color: var(--sujing-gold);
-  font-family: Consolas, monospace;
-  font-size: 0.6rem;
-  letter-spacing: 0.06em;
+  font-family: var(--sujing-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
 }
 
 .sujing-bento-destinations strong,
@@ -1788,12 +1823,12 @@ a.sujing-bento-card:hover::before {
 .article-sort-title::before {
   display: block;
   margin-bottom: 8px;
-  color: var(--sujing-teal);
-  content: "ARCHIVE COORDINATES";
-  font-family: Consolas, monospace;
-  font-size: 0.65rem;
+  color: var(--sujing-gold);
+  content: "时序归档";
+  font-family: var(--sujing-display);
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.22em;
 }
 
 .article-sort {
@@ -2307,18 +2342,36 @@ a.sujing-bento-card:hover::before {
   gap: 13px;
   align-items: center;
   padding: 11px;
-  border: 1px solid var(--sujing-line);
-  border-radius: 7px;
+  border: 1px solid rgba(154, 123, 79, 0.22);
+  border-radius: 8px;
   color: var(--sujing-ink);
-  background: var(--sujing-paper);
+  background:
+    linear-gradient(90deg, rgba(154, 123, 79, 0.05), transparent 30%),
+    var(--sujing-paper);
   text-align: left;
   cursor: pointer;
+  transition: border-color 0.22s ease, background-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
+}
+
+.sujing-track-list button:hover,
+.sujing-track-list button.is-playing {
+  border-color: rgba(180, 69, 58, 0.4);
+  background:
+    linear-gradient(90deg, rgba(26, 122, 130, 0.1), transparent 42%),
+    var(--sujing-surface);
+  box-shadow: 0 10px 24px rgba(20, 40, 47, 0.08);
+  transform: translateY(-2px);
+}
+
+.sujing-track-list button.is-playing > i {
+  color: var(--sujing-seal);
 }
 
 .sujing-track-list img {
   width: 52px;
   height: 52px;
   margin: 0 !important;
+  border: 1px solid rgba(154, 123, 79, 0.22);
   border-radius: 4px !important;
   object-fit: cover;
 }
@@ -2328,9 +2381,32 @@ a.sujing-bento-card:hover::before {
   display: block;
 }
 
+.sujing-track-list strong {
+  font-family: var(--sujing-display);
+  letter-spacing: 0.04em;
+}
+
 .sujing-track-list small {
   margin-top: 3px;
   color: var(--sujing-muted);
+}
+
+.sujing-empty-seal {
+  display: inline-grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  margin-bottom: 12px;
+  border: 1.5px solid rgba(180, 69, 58, 0.55);
+  border-radius: 3px;
+  color: rgba(180, 69, 58, 0.82);
+  background: rgba(180, 69, 58, 0.06);
+  box-shadow: inset 0 0 0 3px rgba(180, 69, 58, 0.12);
+  font-family: var(--sujing-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  transform: rotate(8deg);
 }
 
 .sujing-data-empty {
@@ -2339,29 +2415,39 @@ a.sujing-bento-card:hover::before {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 34px;
-  border: 1px dashed var(--sujing-line-strong);
-  border-radius: 8px;
+  padding: 40px 28px;
+  border: 1px solid rgba(154, 123, 79, 0.28);
+  border-radius: 10px;
   color: var(--sujing-muted);
-  background: var(--sujing-paper);
+  background:
+    linear-gradient(145deg, rgba(154, 123, 79, 0.07), transparent 42%),
+    var(--sujing-paper);
   text-align: center;
+  box-shadow: inset 0 0 0 1px rgba(154, 123, 79, 0.08);
 }
 
 .sujing-data-empty > i {
-  margin-bottom: 15px;
-  color: var(--sujing-teal);
-  font-size: 1.6rem;
+  display: none;
 }
 
 .sujing-data-empty h2 {
   margin: 0 0 8px;
   color: var(--sujing-ink);
-  font-size: 1.25rem;
+  font-family: var(--sujing-display);
+  font-size: 1.3rem;
+  letter-spacing: 0.14em;
 }
 
 .sujing-data-empty p {
   margin: 0;
+  max-width: 36em;
   font-size: 0.84rem;
+  line-height: 1.7;
+}
+
+.sujing-data-empty code {
+  color: var(--sujing-teal);
+  font-size: 0.78em;
 }
 
 /* 404 */
@@ -2457,14 +2543,13 @@ a.sujing-bento-card:hover::before {
     inset 0 0 0 1px rgba(154, 123, 79, 0.12),
     0 24px 80px rgba(0, 0, 0, 0.28);
   opacity: 0;
-  transform: translate(-50%, -46%) scale(0.96) rotateX(6deg);
-  transform-origin: center top;
-  transition: opacity 0.28s ease, transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translate(-50%, -46%) scale(0.98);
+  transition: opacity 0.28s ease, transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 #sujing-command.show .sujing-command-panel {
   opacity: 1;
-  transform: translate(-50%, -50%) scale(1) rotateX(0deg);
+  transform: translate(-50%, -50%) scale(1);
 }
 
 .sujing-command-header {
@@ -2477,10 +2562,11 @@ a.sujing-bento-card:hover::before {
 }
 
 .sujing-command-header span {
-  color: var(--sujing-teal);
-  font-family: Consolas, monospace;
-  font-size: 0.62rem;
+  color: var(--sujing-gold);
+  font-family: var(--sujing-display);
+  font-size: 0.68rem;
   font-weight: 700;
+  letter-spacing: 0.2em;
 }
 
 .sujing-command-header h2 {
@@ -2525,8 +2611,8 @@ a.sujing-bento-card:hover::before {
   gap: 10px;
   align-items: center;
   padding: 13px;
-  border: 1px solid var(--sujing-line);
-  border-radius: 6px;
+  border: 1px solid rgba(154, 123, 79, 0.28);
+  border-radius: 8px;
   color: var(--sujing-ink-soft);
   background: var(--sujing-paper);
   text-align: left;
@@ -2674,7 +2760,7 @@ a.sujing-bento-card:hover::before {
   font-size: 0.74rem;
 }
 
-/* Player remains dormant until tracks exist. */
+/* Floating music player */
 
 #sujing-music {
   position: fixed;
@@ -2685,36 +2771,62 @@ a.sujing-bento-card:hover::before {
 
 .sujing-music-toggle {
   display: inline-flex;
-  width: 42px;
-  height: 42px;
+  width: 46px;
+  height: 46px;
   align-items: center;
   justify-content: center;
-  border: 0;
-  border-radius: 50%;
+  border: 1.5px solid rgba(154, 123, 79, 0.55);
+  border-radius: 4px;
   color: #fff;
-  background: var(--sujing-teal);
-  box-shadow: var(--sujing-shadow);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.14), transparent 46%),
+    var(--sujing-teal);
+  box-shadow:
+    inset 0 0 0 3px rgba(154, 123, 79, 0.18),
+    0 12px 28px rgba(20, 40, 47, 0.18);
   cursor: pointer;
+  transition: transform 0.22s ease, background-color 0.22s ease, border-color 0.22s ease;
+}
+
+.sujing-music-toggle:hover {
+  border-color: rgba(180, 69, 58, 0.55);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.16), transparent 46%),
+    var(--sujing-seal);
+  transform: translateY(-2px) rotate(-4deg);
+}
+
+#sujing-music.is-playing .sujing-music-toggle {
+  animation: sujing-music-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes sujing-music-pulse {
+  0%, 100% { box-shadow: inset 0 0 0 3px rgba(154, 123, 79, 0.18), 0 12px 28px rgba(20, 40, 47, 0.18); }
+  50% { box-shadow: inset 0 0 0 3px rgba(180, 69, 58, 0.28), 0 14px 32px rgba(180, 69, 58, 0.28); }
 }
 
 .sujing-music-panel {
   position: absolute;
   right: 0;
-  bottom: 52px;
+  bottom: 58px;
   display: grid;
-  width: 350px;
+  width: 320px;
   grid-template-columns: 56px minmax(0, 1fr) auto;
-  gap: 12px;
+  gap: 10px 12px;
   align-items: center;
-  padding: 13px;
-  border: 1px solid var(--sujing-line);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: var(--sujing-shadow);
+  padding: 14px;
+  border: 1px solid rgba(154, 123, 79, 0.35);
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, rgba(154, 123, 79, 0.1), transparent 22%),
+    rgba(251, 252, 251, 0.97);
+  box-shadow:
+    inset 0 0 0 1px rgba(154, 123, 79, 0.1),
+    0 18px 44px rgba(12, 24, 30, 0.18);
   visibility: hidden;
   opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+  transform: translateY(10px);
+  transition: opacity 0.24s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.24s ease;
 }
 
 #sujing-music.show .sujing-music-panel {
@@ -2723,10 +2835,20 @@ a.sujing-bento-card:hover::before {
   transform: translateY(0);
 }
 
+.sujing-music-panel-head {
+  grid-column: 1 / -1;
+  color: var(--sujing-gold);
+  font-family: var(--sujing-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+}
+
 .sujing-music-cover {
   width: 56px;
   height: 56px;
-  border-radius: 5px;
+  border: 1px solid rgba(154, 123, 79, 0.28);
+  border-radius: 4px;
   object-fit: cover;
 }
 
@@ -2740,7 +2862,9 @@ a.sujing-bento-card:hover::before {
 
 .sujing-music-info strong {
   color: var(--sujing-ink);
-  font-size: 0.82rem;
+  font-family: var(--sujing-display);
+  font-size: 0.88rem;
+  letter-spacing: 0.04em;
 }
 
 .sujing-music-info span {
@@ -2757,17 +2881,65 @@ a.sujing-bento-card:hover::before {
 .sujing-music-controls button {
   width: 30px;
   height: 30px;
-  border: 0;
-  border-radius: 50%;
+  border: 1px solid transparent;
+  border-radius: 4px;
   color: var(--sujing-ink-soft);
   background: transparent;
   cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.sujing-music-controls button:hover {
+  color: var(--sujing-seal);
+  border-color: rgba(180, 69, 58, 0.28);
+  background: rgba(180, 69, 58, 0.08);
 }
 
 .sujing-music-progress {
   grid-column: 1 / -1;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(154, 123, 79, 0.16);
+  cursor: pointer;
+}
+
+.sujing-music-progress > span {
+  display: block;
   width: 100%;
-  accent-color: var(--sujing-teal);
+  height: 100%;
+  background: linear-gradient(90deg, var(--sujing-teal), var(--sujing-gold), var(--sujing-seal));
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.sujing-music-dormant {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  padding: 4px 2px 2px;
+}
+
+.sujing-music-dormant strong {
+  color: var(--sujing-ink);
+  font-family: var(--sujing-display);
+  font-size: 1rem;
+  letter-spacing: 0.12em;
+}
+
+.sujing-music-dormant p {
+  margin: 0;
+  color: var(--sujing-muted);
+  font-size: 0.78rem;
+  line-height: 1.65;
+}
+
+.sujing-music-dormant .sujing-button {
+  min-height: 36px;
+  margin-top: 4px;
+  padding: 0 14px;
+  font-size: 0.76rem;
 }
 
 #sujing-toast {
@@ -2827,11 +2999,32 @@ a.sujing-bento-card:hover::before {
 }
 
 #footer-wrap {
+  position: relative;
   max-width: var(--sujing-content);
   margin: 0 auto;
-  padding: 34px 20px;
+  padding: 40px 20px 34px;
   color: #b9c7c9;
   text-align: left;
+}
+
+#footer-wrap::before {
+  display: block;
+  width: min(220px, 48%);
+  height: 1px;
+  margin-bottom: 18px;
+  background: linear-gradient(90deg, rgba(196, 165, 116, 0.7), transparent);
+  content: "";
+}
+
+#footer-wrap::after {
+  display: block;
+  margin-bottom: 10px;
+  color: #d7c19a;
+  font-family: var(--sujing-display);
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  content: "溯境";
 }
 
 #footer-wrap a {
