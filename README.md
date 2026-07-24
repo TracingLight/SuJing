@@ -32,6 +32,14 @@ npx hexo new post "文章标题"
 
 不要直接覆盖原始素材。我会根据用途生成适合首页横幅、文章封面、项目截图或正文插图的版本，并尽量转换为 WebP。
 
+## 访问统计
+
+全站访客 / 访问量与文章阅读量由自建 Cloudflare Worker + KV 提供，不依赖不蒜子。
+
+- 代码：`infra/site-stats/`
+- 公开接口：`https://stats.sujing.dev`
+- 部署：`npm run stats:deploy`
+
 ## R2 图床
 
 博客使用 Cloudflare R2 作为长期图片存储，Worker 提供只读图片地址。配置与代码位于 `infra/image-host/`，上传工具为 `tools/upload-image.js`。仓库中不保存 Cloudflare 密钥。

@@ -1,0 +1,18 @@
+{
+  "name": "sujing-site-stats",
+  "main": "src/index.mjs",
+  "compatibility_date": "2026-07-24",
+  "workers_dev": true,
+  "routes": [
+    {
+      "pattern": "stats.sujing.dev",
+      "custom_domain": true
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "STATS",
+      "id": "bffc6e24c4aa465c9db38029e111990e"
+    }
+  ]
+}

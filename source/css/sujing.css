@@ -3269,30 +3269,67 @@ a.sujing-bento-card:hover::before {
 .sujing-site-stats {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px 18px;
-  margin: 0 0 12px;
-  color: #c4d0d1;
-  font-family: var(--sujing-display);
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+  gap: 10px;
+  margin: 0 0 14px;
+  opacity: 0.72;
+  transform: translateY(4px);
+  transition: opacity 0.45s ease, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.sujing-site-stats > span {
-  display: inline-flex;
+.sujing-site-stats.is-ready {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.sujing-stat {
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: 18px auto auto;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
+  min-height: 34px;
+  padding: 0 12px 0 10px;
+  border: 1px solid rgba(196, 165, 116, 0.28);
+  border-radius: 4px;
+  color: #d7e2e2;
+  background:
+    linear-gradient(135deg, rgba(196, 165, 116, 0.12), transparent 42%),
+    rgba(255, 255, 255, 0.03);
+  box-shadow: inset 0 0 0 1px rgba(196, 165, 116, 0.06);
+  font-family: var(--sujing-display);
 }
 
-.sujing-site-stats i {
-  color: rgba(196, 165, 116, 0.88);
-  font-size: 0.72rem;
+.sujing-stat-mark {
+  width: 7px;
+  height: 7px;
+  border: 1px solid rgba(196, 165, 116, 0.85);
+  border-radius: 1px;
+  background: rgba(180, 69, 58, 0.55);
+  box-shadow: 0 0 0 2px rgba(180, 69, 58, 0.12);
+  transform: rotate(12deg);
 }
 
-.sujing-site-stats [id^='busuanzi_value_'] {
-  color: #edf4f3;
+.sujing-stat[data-stat='pv'] .sujing-stat-mark {
+  background: rgba(26, 122, 130, 0.72);
+  border-color: rgba(127, 214, 208, 0.7);
+  box-shadow: 0 0 0 2px rgba(26, 122, 130, 0.14);
+}
+
+.sujing-stat em {
+  color: rgba(196, 165, 116, 0.92);
+  font-style: normal;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.sujing-stat strong,
+.sujing-post-stats strong {
+  color: #f3f7f6;
+  font-size: 0.92rem;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
 }
 
 .sujing-footer-note {
@@ -3302,13 +3339,63 @@ a.sujing-bento-card:hover::before {
   line-height: 1.7;
 }
 
-#post-info .post-meta-pv-cv,
-#post-meta .post-meta-pv-cv {
+.sujing-post-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: 4px;
+  padding: 3px 9px 3px 7px;
+  border: 1px solid rgba(196, 165, 116, 0.34);
+  border-radius: 3px;
+  color: rgba(237, 244, 243, 0.92);
+  background:
+    linear-gradient(120deg, rgba(26, 122, 130, 0.18), transparent 55%),
+    rgba(12, 20, 24, 0.28);
+  font-family: var(--sujing-display);
+  opacity: 0.7;
+  transform: translateY(2px);
+  transition: opacity 0.4s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease;
   white-space: nowrap;
 }
 
-#busuanzi_value_page_pv {
-  font-variant-numeric: tabular-nums;
+.sujing-post-stats.is-ready {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.sujing-post-stats .sujing-stat-mark {
+  width: 6px;
+  height: 6px;
+  border-color: rgba(196, 165, 116, 0.9);
+  background: rgba(180, 69, 58, 0.62);
+}
+
+.sujing-post-stats em {
+  color: rgba(212, 188, 140, 0.95);
+  font-style: normal;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.sujing-post-stats strong {
+  font-size: 0.82rem;
+}
+
+[data-theme='light'] .sujing-post-stats {
+  color: var(--sujing-ink);
+  background:
+    linear-gradient(120deg, rgba(26, 122, 130, 0.1), transparent 55%),
+    rgba(255, 252, 248, 0.55);
+  border-color: rgba(154, 123, 79, 0.32);
+}
+
+[data-theme='light'] .sujing-post-stats em {
+  color: var(--sujing-gold);
+}
+
+[data-theme='light'] .sujing-post-stats strong {
+  color: var(--sujing-ink);
 }
 
 #rightside > div > button,

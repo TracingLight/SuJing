@@ -9,6 +9,8 @@
     musicPersistTimer: null,
     revealObserver: null,
     scrollFrame: null,
+    statsPath: '',
+    statsPending: false,
     starfield: {
       canvas: null,
       context: null,
@@ -1616,6 +1618,81 @@
     }, { passive: true });
   };
 
+  const STATS_ENDPOINT = 'https://stats.sujing.dev/v1/hit';
+
+  const formatStatNumber = (value) => {
+    const number = Number(value);
+    if (!Number.isFinite(number) || number < 0) return '—';
+    return Math.floor(number).toLocaleString('zh-CN');
+  };
+
+  const normalizeStatsPath = (pathname = window.location.pathname) => {
+    let path = String(pathname || '/').split('?')[0].split('#')[0];
+    if (!path.startsWith('/')) path = `/${path}`;
+    path = path.replace(/\/{2,}/g, '/');
+    if (path.length > 1 && path.endsWith('/')) path = path.slice(0, -1);
+    return path || '/';
+  };
+
+  const ensurePostStatsMount = () => {
+    const meta = document.querySelector('#post-info #post-meta');
+    if (!meta) return null;
+    let mount = meta.querySelector('[data-sujing-post-stats]');
+    if (mount) return mount;
+    const host = meta.querySelector('.meta-secondline') || meta;
+    mount = document.createElement('span');
+    mount.className = 'sujing-post-stats';
+    mount.dataset.sujingPostStats = 'true';
+    mount.setAttribute('aria-label', '本文阅读量');
+    mount.innerHTML = '<i class="sujing-stat-mark" aria-hidden="true"></i><em>阅读</em><strong data-sujing-stat="pagePv">—</strong>';
+    if (host.classList?.contains('meta-secondline') && host.childNodes.length) {
+      const sep = document.createElement('span');
+      sep.className = 'post-meta-separator';
+      sep.textContent = '|';
+      host.appendChild(sep);
+    }
+    host.appendChild(mount);
+    return mount;
+  };
+
+  const paintStats = (data) => {
+    document.querySelectorAll('[data-sujing-stat="siteUv"]').forEach((node) => {
+      node.textContent = formatStatNumber(data.siteUv);
+    });
+    document.querySelectorAll('[data-sujing-stat="sitePv"]').forEach((node) => {
+      node.textContent = formatStatNumber(data.sitePv);
+    });
+    document.querySelectorAll('[data-sujing-stat="pagePv"]').forEach((node) => {
+      node.textContent = formatStatNumber(data.pagePv);
+    });
+    document.querySelectorAll('[data-sujing-site-stats], [data-sujing-post-stats]').forEach((node) => {
+      node.classList.add('is-ready');
+    });
+  };
+
+  const installSiteStats = async () => {
+    ensurePostStatsMount();
+    const path = normalizeStatsPath();
+    if (state.statsPath === path && state.statsPending) return;
+    state.statsPath = path;
+    state.statsPending = true;
+    try {
+      const response = await fetch(STATS_ENDPOINT, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path })
+      });
+      if (!response.ok) throw new Error(`stats ${response.status}`);
+      const data = await response.json();
+      paintStats(data);
+    } catch (error) {
+      console.warn('[Sujing] site stats unavailable', error);
+    } finally {
+      state.statsPending = false;
+    }
+  };
+
   const init = () => {
     installBindings();
     closeCommand(false);
@@ -1638,6 +1715,7 @@
     installScrollAtmosphere();
     installGalleryParallax();
     installPageLeaveInk();
+    installSiteStats();
     updateReadingProgress();
   };
 

@@ -21,6 +21,7 @@
     "image:bucket": "npx wrangler r2 bucket create sujing-images",
     "image:deploy": "npx wrangler deploy --config infra/image-host/wrangler.jsonc",
     "image:upload": "node tools/upload-image.js",
+    "stats:deploy": "npx wrangler deploy --config infra/site-stats/wrangler.jsonc",
     "pages:deploy": "npm run check && wrangler pages deploy public --project-name sujing --branch main --commit-dirty=true",
     "server": "hexo server"
   },
