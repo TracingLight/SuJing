@@ -40,6 +40,15 @@ npx hexo new post "文章标题"
 - 公开接口：`https://stats.sujing.dev`
 - 部署：`npm run stats:deploy`
 
+## 留言评论
+
+文章页与关于页使用自建 Cloudflare Worker + D1 留言系统，前端样式在 `sujing.css` / `sujing.js`。
+
+- 代码：`infra/site-comments/`
+- 公开接口：`https://comments.sujing.dev`
+- 初始化表结构：`npm run comments:schema`
+- 部署：`npm run comments:deploy`
+
 ## R2 图床
 
 博客使用 Cloudflare R2 作为长期图片存储，Worker 提供只读图片地址。配置与代码位于 `infra/image-host/`，上传工具为 `tools/upload-image.js`。仓库中不保存 Cloudflare 密钥。

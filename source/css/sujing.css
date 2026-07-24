@@ -2003,6 +2003,391 @@ a.sujing-bento-card:hover::before {
   background: var(--sujing-paper) !important;
 }
 
+/* Comments */
+
+.sujing-comments {
+  position: relative;
+  margin: 36px 0 8px;
+  padding: 28px 26px 24px;
+  border: 1px solid var(--sujing-glass-border);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(154, 123, 79, 0.1), transparent 36%),
+    linear-gradient(180deg, rgba(26, 122, 130, 0.07), transparent 50%),
+    var(--sujing-glass-bg-strong);
+  box-shadow: var(--sujing-glass-shadow);
+  -webkit-backdrop-filter: blur(14px) saturate(var(--sujing-glass-saturate));
+  backdrop-filter: blur(14px) saturate(var(--sujing-glass-saturate));
+}
+
+.sujing-comments::before {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(180, 69, 58, 0.42);
+  border-radius: 3px;
+  color: rgba(180, 69, 58, 0.66);
+  font-family: var(--sujing-display);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 34px;
+  text-align: center;
+  content: "言";
+  box-shadow: inset 0 0 0 3px rgba(180, 69, 58, 0.1);
+  transform: rotate(8deg);
+  pointer-events: none;
+}
+
+.sujing-comments-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+  padding-right: 48px;
+}
+
+.sujing-comments-head h2 {
+  margin: 0;
+  color: var(--sujing-ink);
+  font-family: var(--sujing-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.sujing-comments-meta {
+  margin: 0;
+  color: var(--sujing-muted);
+  font-family: var(--sujing-display);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+}
+
+.sujing-comments-meta strong {
+  color: var(--sujing-gold);
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.sujing-comment-form {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 28px;
+  padding: 18px;
+  border: 1px solid rgba(154, 123, 79, 0.22);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent),
+    rgba(12, 20, 24, 0.08);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.sujing-comment-form:focus-within {
+  border-color: rgba(26, 122, 130, 0.42);
+  box-shadow: 0 0 0 3px rgba(26, 122, 130, 0.1);
+}
+
+.sujing-comment-form.is-replying {
+  border-color: rgba(180, 69, 58, 0.36);
+  box-shadow: 0 0 0 3px rgba(180, 69, 58, 0.08);
+}
+
+.sujing-comment-reply-hint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--sujing-seal);
+  font-family: var(--sujing-display);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.sujing-comment-reply-hint button {
+  margin-left: auto;
+  border: 0;
+  color: var(--sujing-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.sujing-comment-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.sujing-comment-form label {
+  display: grid;
+  gap: 7px;
+}
+
+.sujing-comment-form label > span {
+  color: var(--sujing-gold);
+  font-family: var(--sujing-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.sujing-comment-form input,
+.sujing-comment-form textarea {
+  width: 100%;
+  border: 1px solid rgba(154, 123, 79, 0.24);
+  border-radius: 6px;
+  color: var(--sujing-ink);
+  background: rgba(255, 252, 248, 0.04);
+  font: inherit;
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sujing-comment-form input {
+  min-height: 42px;
+  padding: 0 12px;
+}
+
+.sujing-comment-form textarea {
+  min-height: 120px;
+  padding: 12px;
+  resize: vertical;
+  line-height: 1.7;
+}
+
+.sujing-comment-form input:hover,
+.sujing-comment-form textarea:hover {
+  border-color: rgba(154, 123, 79, 0.4);
+}
+
+.sujing-comment-form input:focus,
+.sujing-comment-form textarea:focus {
+  outline: none;
+  border-color: rgba(26, 122, 130, 0.55);
+  background: rgba(26, 122, 130, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(26, 122, 130, 0.12);
+}
+
+.sujing-comment-honeypot {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.sujing-comment-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sujing-comment-actions [data-sujing-comment-count] {
+  color: var(--sujing-muted);
+  font-family: var(--sujing-display);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+}
+
+.sujing-comment-actions [data-sujing-comment-count][data-tone='warn'] {
+  color: var(--sujing-seal);
+}
+
+.sujing-comment-form .sujing-button.is-loading {
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+.sujing-comment-form .sujing-button.is-loading i {
+  animation: sujing-comment-feather 0.9s ease-in-out infinite;
+}
+
+@keyframes sujing-comment-feather {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-2px) rotate(-8deg); }
+}
+
+.sujing-comments-empty {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 8px 2px 4px;
+}
+
+.sujing-comments-empty[hidden] {
+  display: none !important;
+}
+
+.sujing-comments-empty strong {
+  color: var(--sujing-ink);
+  font-family: var(--sujing-display);
+  font-size: 1.05rem;
+  letter-spacing: 0.12em;
+}
+
+.sujing-comments-empty p {
+  margin: 0;
+  color: var(--sujing-muted);
+  font-size: 0.84rem;
+  line-height: 1.7;
+}
+
+.sujing-comments-list {
+  display: grid;
+  gap: 18px;
+}
+
+.sujing-comment-item {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.sujing-comment-avatar {
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(154, 123, 79, 0.28);
+  border-radius: 4px;
+  object-fit: cover;
+  background: rgba(26, 122, 130, 0.1);
+}
+
+.sujing-comment-body {
+  min-width: 0;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(154, 123, 79, 0.12);
+}
+
+.sujing-comment-body > header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 12px;
+  margin-bottom: 8px;
+}
+
+.sujing-comment-body > header strong {
+  color: var(--sujing-ink);
+  font-family: var(--sujing-display);
+  font-size: 0.92rem;
+  letter-spacing: 0.06em;
+}
+
+.sujing-comment-site {
+  color: var(--sujing-teal);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+}
+
+.sujing-comment-body > header time {
+  margin-left: auto;
+  color: var(--sujing-muted);
+  font-size: 0.72rem;
+}
+
+.sujing-comment-body > p {
+  margin: 0 0 10px;
+  color: var(--sujing-ink-soft);
+  font-size: 0.92rem;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.sujing-comment-reply {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--sujing-muted);
+  background: transparent;
+  font-family: var(--sujing-display);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.sujing-comment-reply:hover {
+  color: var(--sujing-seal);
+  border-color: rgba(180, 69, 58, 0.28);
+  background: rgba(180, 69, 58, 0.08);
+}
+
+.sujing-comment-children {
+  display: grid;
+  gap: 16px;
+  margin-top: 16px;
+  padding-left: 14px;
+  border-left: 1px solid rgba(154, 123, 79, 0.2);
+}
+
+[data-theme='light'] .sujing-comment-form {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.55), transparent),
+    rgba(255, 252, 248, 0.55);
+}
+
+[data-theme='light'] .sujing-comment-form input,
+[data-theme='light'] .sujing-comment-form textarea {
+  background: rgba(255, 255, 255, 0.72);
+}
+
+@media (max-width: 768px) {
+  .sujing-comments {
+    margin-top: 28px;
+    padding: 22px 16px 18px;
+  }
+
+  .sujing-comments::before {
+    top: 16px;
+    right: 14px;
+    width: 28px;
+    height: 28px;
+    font-size: 0.52rem;
+    line-height: 28px;
+  }
+
+  .sujing-comments-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+    padding-right: 40px;
+  }
+
+  .sujing-comments-head h2 {
+    font-size: 1.2rem;
+  }
+
+  .sujing-comment-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .sujing-comment-item {
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .sujing-comment-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .sujing-comment-children {
+    padding-left: 10px;
+  }
+}
+
 /* Archives, categories and tags */
 
 #archive,

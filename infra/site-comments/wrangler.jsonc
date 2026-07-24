@@ -1,0 +1,25 @@
+{
+  "name": "sujing-site-comments",
+  "main": "src/index.mjs",
+  "compatibility_date": "2026-07-24",
+  "workers_dev": true,
+  "routes": [
+    {
+      "pattern": "comments.sujing.dev",
+      "custom_domain": true
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "sujing-comments",
+      "database_id": "a794ecfb-d820-4c94-83f3-978a15ee7e97"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "RATE",
+      "id": "bffc6e24c4aa465c9db38029e111990e"
+    }
+  ]
+}

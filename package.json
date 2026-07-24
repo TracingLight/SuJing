@@ -22,6 +22,8 @@
     "image:deploy": "npx wrangler deploy --config infra/image-host/wrangler.jsonc",
     "image:upload": "node tools/upload-image.js",
     "stats:deploy": "npx wrangler deploy --config infra/site-stats/wrangler.jsonc",
+    "comments:schema": "npx wrangler d1 execute sujing-comments --remote --file=infra/site-comments/schema.sql",
+    "comments:deploy": "npx wrangler deploy --config infra/site-comments/wrangler.jsonc",
     "pages:deploy": "npm run check && wrangler pages deploy public --project-name sujing --branch main --commit-dirty=true",
     "server": "hexo server"
   },
