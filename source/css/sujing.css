@@ -1889,22 +1889,45 @@ a.sujing-bento-card:hover::before {
 }
 
 .article-sort-title {
+  position: relative;
   margin: 0 0 32px;
   padding: 0 0 20px;
   border-bottom: 1px solid var(--sujing-line);
   color: var(--sujing-ink);
+  font-family: var(--sujing-display);
   font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
 }
 
+/* Override Butterfly's absolute 10px timeline dot — it was crushing our kicker text. */
 .article-sort-title::before {
+  position: static;
+  top: auto;
+  left: auto;
+  z-index: auto;
   display: block;
-  margin-bottom: 8px;
+  width: auto;
+  height: auto;
+  margin: 0 0 10px;
+  border: 0;
+  border-radius: 0;
   color: var(--sujing-gold);
+  background: transparent;
   content: "时序归档";
   font-family: var(--sujing-display);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.22em;
+  line-height: 1.4;
+}
+
+.article-sort-title::after {
+  display: none;
+}
+
+.article-sort-title:hover::before {
+  border-color: transparent;
 }
 
 .article-sort {
