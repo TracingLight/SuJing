@@ -313,26 +313,30 @@
 
   const starfieldPalette = () => document.documentElement.getAttribute('data-theme') === 'dark'
     ? [
-        { color: '237, 244, 243', opacity: 0.8 },
-        { color: '82, 184, 181', opacity: 0.76 },
-        { color: '215, 90, 74', opacity: 0.6 }
+        { color: '245, 250, 248', opacity: 0.95 },
+        { color: '127, 214, 208', opacity: 0.9 },
+        { color: '232, 168, 120', opacity: 0.72 },
+        { color: '214, 120, 112', opacity: 0.68 }
       ]
     : [
-        { color: '23, 126, 137', opacity: 0.6 },
-        { color: '23, 36, 43', opacity: 0.4 },
-        { color: '215, 90, 74', opacity: 0.46 }
+        { color: '26, 122, 130', opacity: 0.72 },
+        { color: '26, 38, 44', opacity: 0.5 },
+        { color: '180, 69, 58', opacity: 0.52 },
+        { color: '154, 123, 79', opacity: 0.48 }
       ];
 
   const createStarfieldParticles = () => {
     const area = window.innerWidth * window.innerHeight;
     const mobile = window.innerWidth <= 640;
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
     const count = mobile
-      ? Math.min(48, Math.max(32, Math.round(area / 11500)))
-      : Math.min(120, Math.max(84, Math.round(area / 13000)));
+      ? Math.min(72, Math.max(42, Math.round(area / 9000)))
+      : Math.min(168, Math.max(110, Math.round(area / 9800)));
     const contentWidth = Math.min(1180, Math.max(0, window.innerWidth - 32));
     const gutterWidth = Math.max(0, (window.innerWidth - contentWidth) / 2);
     const randomX = () => {
-      if (mobile || gutterWidth < 72 || Math.random() >= 0.78) {
+      // Keep some particles in gutters, but mostly across the full viewport so they read on content pages.
+      if (mobile || gutterWidth < 72 || Math.random() >= 0.42) {
         return Math.random() * window.innerWidth;
       }
       const padding = Math.min(18, gutterWidth * 0.15);
@@ -342,16 +346,16 @@
     state.starfield.particles = Array.from({ length: count }, () => ({
       x: randomX(),
       y: Math.random() * window.innerHeight,
-      size: 1.1 + Math.random() * 1.65,
-      vx: -0.14 + Math.random() * 0.3,
-      vy: 0.2 + Math.random() * 0.3,
-      opacity: 0.72 + Math.random() * 0.28,
-      color: Math.floor(Math.random() * 3),
-      streak: Math.random() < 0.23,
-      spark: Math.random() < 0.38,
-      length: 12 + Math.random() * 18,
+      size: (dark ? 1.35 : 1.15) + Math.random() * (dark ? 2.2 : 1.85),
+      vx: -0.16 + Math.random() * 0.34,
+      vy: 0.16 + Math.random() * 0.34,
+      opacity: 0.78 + Math.random() * 0.22,
+      color: Math.floor(Math.random() * 4),
+      streak: Math.random() < (dark ? 0.3 : 0.22),
+      spark: Math.random() < (dark ? 0.48 : 0.36),
+      length: 14 + Math.random() * 22,
       phase: Math.random() * Math.PI * 2,
-      twinkle: 0.018 + Math.random() * 0.022
+      twinkle: 0.02 + Math.random() * 0.028
     }));
   };
 
@@ -381,8 +385,8 @@
     });
 
     if (!reduced) {
-      const maximumDistance = width <= 640 ? 76 : 96;
-      const maximumLinks = width <= 640 ? 6 : 18;
+      const maximumDistance = width <= 640 ? 88 : 118;
+      const maximumLinks = width <= 640 ? 10 : 28;
       let links = 0;
       context.lineWidth = 0.7;
       for (let first = 0; first < renderPoints.length && links < maximumLinks; first += 1) {
@@ -392,8 +396,8 @@
           const b = renderPoints[second];
           const distance = Math.hypot(a.x - b.x, a.y - b.y);
           if (distance > maximumDistance) continue;
-          const alpha = (1 - distance / maximumDistance) * (document.documentElement.getAttribute('data-theme') === 'dark' ? 0.2 : 0.13);
-          context.strokeStyle = `rgba(82, 184, 181, ${alpha})`;
+          const alpha = (1 - distance / maximumDistance) * (document.documentElement.getAttribute('data-theme') === 'dark' ? 0.34 : 0.16);
+          context.strokeStyle = `rgba(127, 214, 208, ${alpha})`;
           context.beginPath();
           context.moveTo(a.x, a.y);
           context.lineTo(b.x, b.y);
@@ -408,13 +412,22 @@
       const swatch = palette[particle.color % palette.length];
       const twinkle = 0.76 + Math.sin(particle.phase) * 0.24;
       const alpha = Math.min(1, swatch.opacity * particle.opacity * twinkle * (1 + point.boost * 0.45));
+      const radius = particle.size * 0.55;
+      context.beginPath();
       context.fillStyle = `rgba(${swatch.color}, ${alpha})`;
-      context.fillRect(point.x, point.y, particle.size, particle.size);
+      context.arc(point.x, point.y, radius, 0, Math.PI * 2);
+      context.fill();
+      if (particle.spark || particle.size > 2.2) {
+        context.beginPath();
+        context.fillStyle = `rgba(${swatch.color}, ${alpha * 0.22})`;
+        context.arc(point.x, point.y, radius * 2.4, 0, Math.PI * 2);
+        context.fill();
+      }
       if (particle.spark) {
-        context.fillStyle = `rgba(${swatch.color}, ${alpha * 0.42})`;
-        const arm = particle.size * 1.8;
-        context.fillRect(point.x - arm, point.y + particle.size * 0.35, arm * 2 + particle.size, Math.max(0.5, particle.size * 0.3));
-        context.fillRect(point.x + particle.size * 0.35, point.y - arm, Math.max(0.5, particle.size * 0.3), arm * 2 + particle.size);
+        context.fillStyle = `rgba(${swatch.color}, ${alpha * 0.5})`;
+        const arm = particle.size * 1.9;
+        context.fillRect(point.x - arm, point.y - particle.size * 0.12, arm * 2, Math.max(0.55, particle.size * 0.28));
+        context.fillRect(point.x - particle.size * 0.12, point.y - arm, Math.max(0.55, particle.size * 0.28), arm * 2);
       }
       if (particle.streak && !reduced) {
         context.strokeStyle = `rgba(${swatch.color}, ${alpha * 0.72})`;
@@ -520,7 +533,10 @@
         if (event.relatedTarget) return;
         state.starfield.pointer.active = false;
       }, { passive: true });
-      state.starfield.themeObserver = new MutationObserver(() => drawStarfield(false));
+      state.starfield.themeObserver = new MutationObserver(() => {
+        createStarfieldParticles();
+        drawStarfield(false);
+      });
       state.starfield.themeObserver.observe(document.documentElement, {
         attributes: true,
         attributeFilter: ['data-theme']
