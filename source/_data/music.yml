@@ -1,10 +1,6 @@
 title: 溯境歌单
-tracks: []
-
-# 将音频放到 source/media/music/（建议 mp3，单文件 < 25MB）
-# 封面可选：source/img/user/music/
-#
-# - title: 南山雪
-#   artist: 叶里
-#   url: /media/music/yeli-nanshanxue.mp3
-#   cover: /img/sujing-mark.svg
+tracks:
+  - title: 南山雪
+    artist: 叶里
+    url: /media/music/nanshanxue.mp3
+    cover: /img/sujing-mark.svg
