@@ -319,10 +319,11 @@
         { color: '214, 120, 112', opacity: 0.68 }
       ]
     : [
-        { color: '26, 122, 130', opacity: 0.72 },
-        { color: '26, 38, 44', opacity: 0.5 },
-        { color: '180, 69, 58', opacity: 0.52 },
-        { color: '154, 123, 79', opacity: 0.48 }
+        /* Ink-dust palette for paper: denser teal / seal / gold that survives multiply. */
+        { color: '22, 96, 102', opacity: 0.78 },
+        { color: '32, 48, 54', opacity: 0.42 },
+        { color: '168, 62, 54', opacity: 0.58 },
+        { color: '138, 108, 68', opacity: 0.56 }
       ];
 
   const createStarfieldParticles = () => {
@@ -330,13 +331,13 @@
     const mobile = window.innerWidth <= 640;
     const dark = document.documentElement.getAttribute('data-theme') === 'dark';
     const count = mobile
-      ? Math.min(72, Math.max(42, Math.round(area / 9000)))
-      : Math.min(168, Math.max(110, Math.round(area / 9800)));
+      ? Math.min(dark ? 72 : 88, Math.max(dark ? 42 : 52, Math.round(area / (dark ? 9000 : 7600))))
+      : Math.min(dark ? 168 : 196, Math.max(dark ? 110 : 132, Math.round(area / (dark ? 9800 : 8200))));
     const contentWidth = Math.min(1180, Math.max(0, window.innerWidth - 32));
     const gutterWidth = Math.max(0, (window.innerWidth - contentWidth) / 2);
     const randomX = () => {
       // Keep some particles in gutters, but mostly across the full viewport so they read on content pages.
-      if (mobile || gutterWidth < 72 || Math.random() >= 0.42) {
+      if (mobile || gutterWidth < 72 || Math.random() >= (dark ? 0.42 : 0.35)) {
         return Math.random() * window.innerWidth;
       }
       const padding = Math.min(18, gutterWidth * 0.15);
@@ -346,16 +347,17 @@
     state.starfield.particles = Array.from({ length: count }, () => ({
       x: randomX(),
       y: Math.random() * window.innerHeight,
-      size: (dark ? 1.35 : 1.15) + Math.random() * (dark ? 2.2 : 1.85),
-      vx: -0.16 + Math.random() * 0.34,
-      vy: 0.16 + Math.random() * 0.34,
-      opacity: 0.78 + Math.random() * 0.22,
+      size: (dark ? 1.35 : 1.45) + Math.random() * (dark ? 2.2 : 2.35),
+      vx: -0.12 + Math.random() * (dark ? 0.34 : 0.28),
+      vy: (dark ? 0.16 : 0.1) + Math.random() * (dark ? 0.34 : 0.26),
+      opacity: (dark ? 0.78 : 0.86) + Math.random() * 0.18,
       color: Math.floor(Math.random() * 4),
-      streak: Math.random() < (dark ? 0.3 : 0.22),
-      spark: Math.random() < (dark ? 0.48 : 0.36),
+      streak: Math.random() < (dark ? 0.3 : 0.18),
+      spark: Math.random() < (dark ? 0.48 : 0.42),
+      mote: !dark && Math.random() < 0.16,
       length: 14 + Math.random() * 22,
       phase: Math.random() * Math.PI * 2,
-      twinkle: 0.02 + Math.random() * 0.028
+      twinkle: (dark ? 0.02 : 0.014) + Math.random() * (dark ? 0.028 : 0.02)
     }));
   };
 
@@ -384,11 +386,12 @@
       };
     });
 
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
     if (!reduced) {
-      const maximumDistance = width <= 640 ? 88 : 118;
-      const maximumLinks = width <= 640 ? 10 : 28;
+      const maximumDistance = width <= 640 ? 88 : (dark ? 118 : 108);
+      const maximumLinks = width <= 640 ? 10 : (dark ? 28 : 34);
       let links = 0;
-      context.lineWidth = 0.7;
+      context.lineWidth = dark ? 0.7 : 0.85;
       for (let first = 0; first < renderPoints.length && links < maximumLinks; first += 1) {
         for (let second = first + 1; second < renderPoints.length && links < maximumLinks; second += 1) {
           if ((first * 17 + second * 31) % 7 !== 0) continue;
@@ -396,8 +399,10 @@
           const b = renderPoints[second];
           const distance = Math.hypot(a.x - b.x, a.y - b.y);
           if (distance > maximumDistance) continue;
-          const alpha = (1 - distance / maximumDistance) * (document.documentElement.getAttribute('data-theme') === 'dark' ? 0.34 : 0.16);
-          context.strokeStyle = `rgba(127, 214, 208, ${alpha})`;
+          const alpha = (1 - distance / maximumDistance) * (dark ? 0.34 : 0.22);
+          context.strokeStyle = dark
+            ? `rgba(127, 214, 208, ${alpha})`
+            : `rgba(26, 122, 130, ${alpha})`;
           context.beginPath();
           context.moveTo(a.x, a.y);
           context.lineTo(b.x, b.y);
@@ -410,27 +415,33 @@
     particles.forEach((particle, index) => {
       const point = renderPoints[index];
       const swatch = palette[particle.color % palette.length];
-      const twinkle = 0.76 + Math.sin(particle.phase) * 0.24;
+      const twinkle = (dark ? 0.76 : 0.84) + Math.sin(particle.phase) * (dark ? 0.24 : 0.16);
       const alpha = Math.min(1, swatch.opacity * particle.opacity * twinkle * (1 + point.boost * 0.45));
-      const radius = particle.size * 0.55;
+      const radius = particle.size * (dark ? 0.55 : 0.62);
       context.beginPath();
       context.fillStyle = `rgba(${swatch.color}, ${alpha})`;
       context.arc(point.x, point.y, radius, 0, Math.PI * 2);
       context.fill();
+      if (particle.mote) {
+        context.beginPath();
+        context.fillStyle = `rgba(${swatch.color}, ${alpha * 0.18})`;
+        context.arc(point.x, point.y, radius * 3.2, 0, Math.PI * 2);
+        context.fill();
+      }
       if (particle.spark || particle.size > 2.2) {
         context.beginPath();
-        context.fillStyle = `rgba(${swatch.color}, ${alpha * 0.22})`;
-        context.arc(point.x, point.y, radius * 2.4, 0, Math.PI * 2);
+        context.fillStyle = `rgba(${swatch.color}, ${alpha * (dark ? 0.22 : 0.16)})`;
+        context.arc(point.x, point.y, radius * (dark ? 2.4 : 2.1), 0, Math.PI * 2);
         context.fill();
       }
       if (particle.spark) {
-        context.fillStyle = `rgba(${swatch.color}, ${alpha * 0.5})`;
-        const arm = particle.size * 1.9;
+        context.fillStyle = `rgba(${swatch.color}, ${alpha * (dark ? 0.5 : 0.62)})`;
+        const arm = particle.size * (dark ? 1.9 : 2.1);
         context.fillRect(point.x - arm, point.y - particle.size * 0.12, arm * 2, Math.max(0.55, particle.size * 0.28));
         context.fillRect(point.x - particle.size * 0.12, point.y - arm, Math.max(0.55, particle.size * 0.28), arm * 2);
       }
       if (particle.streak && !reduced) {
-        context.strokeStyle = `rgba(${swatch.color}, ${alpha * 0.72})`;
+        context.strokeStyle = `rgba(${swatch.color}, ${alpha * (dark ? 0.72 : 0.55)})`;
         context.lineWidth = Math.max(0.65, particle.size * 0.48);
         context.beginPath();
         context.moveTo(point.x, point.y);
