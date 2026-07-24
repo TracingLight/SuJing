@@ -727,7 +727,7 @@
       : `
       <button class="sujing-music-toggle" type="button" title="音乐" aria-label="打开音乐播放器" aria-expanded="false"><i class="fas fa-music" aria-hidden="true"></i></button>
       <section class="sujing-music-panel" aria-label="音乐播放器">
-        <div class="sujing-music-panel-head"><span>听录</span></div>
+        <div class="sujing-music-panel-head"><span>正在听</span></div>
         <img class="sujing-music-cover" alt="" src="${escapeHtml(tracks[0].cover || '/img/sujing-mark.svg')}">
         <div class="sujing-music-info"><strong></strong><span></span></div>
         <div class="sujing-music-controls">
