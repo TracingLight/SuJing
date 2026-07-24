@@ -701,37 +701,35 @@ a.sujing-button-primary:hover {
 }
 
 .sujing-bento-home::before {
-  top: 8px;
-  right: 8px;
-  width: 54px;
-  height: 54px;
-  border: 1.5px solid rgba(180, 69, 58, 0.55);
-  border-radius: 4px;
-  color: rgba(180, 69, 58, 0.72);
+  /* Colophon seal — bottom-right, clear of the now-strip and hero. */
+  right: 4px;
+  bottom: 28px;
+  width: 48px;
+  height: 48px;
+  border: 1.5px solid rgba(180, 69, 58, 0.5);
+  border-radius: 3px;
+  color: rgba(180, 69, 58, 0.68);
   background:
-    linear-gradient(rgba(180, 69, 58, 0.08), rgba(180, 69, 58, 0.08)),
-    radial-gradient(circle at 50% 48%, transparent 42%, rgba(180, 69, 58, 0.18) 43% 48%, transparent 49%);
-  box-shadow: inset 0 0 0 4px rgba(180, 69, 58, 0.12);
+    linear-gradient(rgba(180, 69, 58, 0.07), rgba(180, 69, 58, 0.07)),
+    radial-gradient(circle at 50% 48%, transparent 42%, rgba(180, 69, 58, 0.16) 43% 48%, transparent 49%);
+  box-shadow: inset 0 0 0 3px rgba(180, 69, 58, 0.1);
   font-family: var(--sujing-display);
-  font-size: 0.62rem;
+  font-size: 0.58rem;
   font-weight: 700;
-  letter-spacing: 0.18em;
-  line-height: 54px;
+  letter-spacing: 0.16em;
+  line-height: 48px;
   text-align: center;
-  transform: rotate(8deg);
-  opacity: 0.7;
+  transform: rotate(9deg);
+  opacity: 0.62;
+  content: "溯";
 }
 
 .sujing-bento-home::after {
-  right: 8px;
-  bottom: 18px;
-  width: 72px;
+  right: 58px;
+  bottom: 50px;
+  width: 56px;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(154, 123, 79, 0.55), transparent);
-}
-
-.sujing-bento-home::before {
-  content: "溯";
+  background: linear-gradient(90deg, transparent, rgba(154, 123, 79, 0.5), transparent);
 }
 
 .sujing-now-strip {
