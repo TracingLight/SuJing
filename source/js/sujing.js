@@ -632,8 +632,39 @@
     }
 
     const empty = home.querySelector('[data-sujing-gallery-empty]');
-    const images = (data.gallery?.albums || []).flatMap((album) => album.images || []);
+    const grid = home.querySelector('[data-sujing-gallery-grid]');
+    const images = (data.gallery?.albums || [])
+      .flatMap((album) => (album.images || []).map((image) => ({
+        ...image,
+        albumTitle: album.title,
+        albumHref: album.href || '/gallery/'
+      })))
+      .slice(0, 3);
+
     if (empty) empty.hidden = images.length > 0;
+    if (!grid) return;
+
+    if (!images.length) {
+      grid.hidden = true;
+      grid.innerHTML = '';
+      return;
+    }
+
+    grid.hidden = false;
+    grid.innerHTML = images.map((image) => {
+      const href = escapeHtml(image.href || image.src || '/gallery/');
+      const src = escapeHtml(image.src || '');
+      const title = escapeHtml(image.title || image.alt || image.albumTitle || '相册');
+      const alt = escapeHtml(image.alt || image.title || image.albumTitle || '相册预览');
+      const width = Number(image.width) || 1200;
+      const height = Number(image.height) || 800;
+      return `
+        <a href="${href}">
+          <img class="no-lightbox" src="${src}" alt="${alt}" width="${width}" height="${height}" loading="lazy">
+          <span>${title}</span>
+        </a>`;
+    }).join('');
+    installGalleryParallax();
   };
 
   const installArticlesIntro = () => {

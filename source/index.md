@@ -62,6 +62,7 @@ type: sujing-home
         <strong>相册筹备中</strong>
         <p>图片稍后补充，也可先进入相册页查看结构。</p>
       </div>
+      <div class="sujing-bento-gallery-grid" data-sujing-gallery-grid hidden></div>
     </section>
     <aside class="sujing-bento-side" aria-label="站点动态">
       <a class="sujing-bento-card sujing-bento-note" href="/notes/" data-sujing-reveal>
