@@ -48,6 +48,6 @@
     "hexo-wordcount": "^6.0.1"
   },
   "devDependencies": {
-    "wrangler": "^4.112.0"
+    "wrangler": "^4.114.0"
   }
 }
