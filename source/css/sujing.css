@@ -1447,6 +1447,130 @@ a.sujing-bento-card:hover::before {
   font-size: 0.7rem;
 }
 
+.sujing-ledger {
+  position: relative;
+  margin-top: 16px;
+  padding: 22px 24px 20px;
+  border: 1px solid var(--sujing-glass-border);
+  border-radius: 18px;
+  background:
+    linear-gradient(120deg, rgba(154, 123, 79, 0.1), transparent 34%),
+    linear-gradient(180deg, rgba(26, 122, 130, 0.08), transparent 48%),
+    var(--sujing-glass-bg-strong);
+  box-shadow: var(--sujing-glass-shadow);
+  -webkit-backdrop-filter: blur(14px) saturate(var(--sujing-glass-saturate));
+  backdrop-filter: blur(14px) saturate(var(--sujing-glass-saturate));
+  opacity: 0.88;
+  transform: translateY(6px);
+  transition: opacity 0.45s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sujing-ledger.is-ready,
+.sujing-ledger.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.sujing-ledger::before {
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(180, 69, 58, 0.42);
+  border-radius: 3px;
+  color: rgba(180, 69, 58, 0.62);
+  font-family: var(--sujing-display);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 34px;
+  text-align: center;
+  content: "录";
+  box-shadow: inset 0 0 0 3px rgba(180, 69, 58, 0.1);
+  transform: rotate(8deg);
+  pointer-events: none;
+}
+
+.sujing-ledger-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+  padding-right: 48px;
+}
+
+.sujing-ledger-head h2 {
+  margin: 0;
+  color: var(--sujing-ink);
+  font-family: var(--sujing-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.sujing-ledger-since {
+  margin: 0;
+  color: var(--sujing-muted);
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+}
+
+.sujing-ledger-since time {
+  color: var(--sujing-gold);
+  font-family: var(--sujing-display);
+  font-weight: 700;
+}
+
+.sujing-ledger-grid {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid rgba(154, 123, 79, 0.18);
+}
+
+.sujing-ledger-grid > li {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  min-height: 78px;
+  padding: 16px 14px 4px;
+}
+
+.sujing-ledger-grid > li + li::before {
+  position: absolute;
+  top: 22px;
+  bottom: 14px;
+  left: 0;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(154, 123, 79, 0.34), transparent);
+  content: "";
+}
+
+.sujing-ledger-grid em {
+  color: var(--sujing-gold);
+  font-family: var(--sujing-display);
+  font-size: 0.68rem;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.sujing-ledger-grid strong {
+  color: var(--sujing-ink);
+  font-family: var(--sujing-display);
+  font-size: 1.18rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+}
+
 .sujing-bento-colophon {
   position: relative;
   margin-top: 14px;
@@ -3851,6 +3975,14 @@ a.sujing-bento-card:hover::before {
   .sujing-bento-destinations {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .sujing-ledger-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .sujing-ledger-grid > li:nth-child(4n + 1)::before {
+    display: none;
+  }
 }
 
 @media (max-width: 768px) {
@@ -4111,6 +4243,48 @@ a.sujing-bento-card:hover::before {
 
   .sujing-bento-colophon {
     padding-right: 0;
+  }
+
+  .sujing-ledger {
+    padding: 18px 16px 14px;
+  }
+
+  .sujing-ledger::before {
+    top: 14px;
+    right: 14px;
+    width: 28px;
+    height: 28px;
+    font-size: 0.52rem;
+    line-height: 28px;
+  }
+
+  .sujing-ledger-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+    padding-right: 40px;
+  }
+
+  .sujing-ledger-head h2 {
+    font-size: 1.18rem;
+  }
+
+  .sujing-ledger-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sujing-ledger-grid > li {
+    min-height: 68px;
+    padding: 14px 12px 2px;
+  }
+
+  .sujing-ledger-grid > li:nth-child(2n + 1)::before {
+    display: none;
+  }
+
+  .sujing-ledger-grid strong {
+    font-size: 1.05rem;
   }
 
   .sujing-home-seal {

@@ -84,7 +84,24 @@
         })
         .catch((error) => {
           console.error('[Sujing]', error);
-          return { posts: [], categories: [], tags: [], music: { tracks: [] }, notes: [], gallery: { albums: [] } };
+          return {
+            posts: [],
+            categories: [],
+            tags: [],
+            music: { tracks: [] },
+            notes: [],
+            gallery: { albums: [] },
+            stats: {
+              posts: 0,
+              categories: 0,
+              tags: 0,
+              notes: 0,
+              tracks: 0,
+              albums: 0,
+              words: 0,
+              since: '2026-07-21'
+            }
+          };
         });
     }
     return state.dataPromise;
@@ -874,6 +891,69 @@
     ));
   };
 
+  const formatLedgerNumber = (value) => {
+    const number = Number(value);
+    if (!Number.isFinite(number) || number < 0) return '—';
+    return Math.floor(number).toLocaleString('zh-CN');
+  };
+
+  const formatWordCount = (value) => {
+    const number = Number(value);
+    if (!Number.isFinite(number) || number < 0) return '—';
+    if (number < 10000) return Math.floor(number).toLocaleString('zh-CN');
+    const wan = number / 10000;
+    return `${wan >= 10 ? wan.toFixed(0) : wan.toFixed(1).replace(/\.0$/, '')} 万`;
+  };
+
+  const formatRuntime = (since) => {
+    const start = new Date(`${String(since || '').slice(0, 10)}T00:00:00+08:00`);
+    if (Number.isNaN(start.getTime())) return '—';
+    const days = Math.max(0, Math.floor((Date.now() - start.getTime()) / 86400000));
+    if (days < 30) return `${days} 天`;
+    if (days < 365) {
+      const months = Math.floor(days / 30);
+      const rest = days % 30;
+      return rest ? `${months} 月 ${rest} 天` : `${months} 月`;
+    }
+    const years = Math.floor(days / 365);
+    const restDays = days % 365;
+    const months = Math.floor(restDays / 30);
+    if (months) return `${years} 年 ${months} 月`;
+    return `${years} 年`;
+  };
+
+  const paintHomeLedger = (data) => {
+    const ledger = document.querySelector('[data-sujing-ledger]');
+    if (!ledger) return;
+    const stats = data.stats || {
+      posts: data.posts?.length || 0,
+      categories: data.categories?.length || 0,
+      tags: data.tags?.length || 0,
+      notes: data.notes?.length || 0,
+      words: 0,
+      since: '2026-07-21'
+    };
+    const values = {
+      posts: formatLedgerNumber(stats.posts),
+      categories: formatLedgerNumber(stats.categories),
+      tags: formatLedgerNumber(stats.tags),
+      notes: formatLedgerNumber(stats.notes),
+      words: formatWordCount(stats.words),
+      runtime: formatRuntime(stats.since)
+    };
+    Object.entries(values).forEach(([key, text]) => {
+      ledger.querySelectorAll(`[data-sujing-ledger="${key}"]`).forEach((node) => {
+        node.textContent = text;
+      });
+    });
+    const sinceNode = ledger.querySelector('[data-sujing-ledger-since]');
+    if (sinceNode && stats.since) {
+      sinceNode.dateTime = stats.since;
+      sinceNode.textContent = formatDate(stats.since);
+    }
+    ledger.classList.add('is-ready');
+  };
+
   const installHomeContent = async () => {
     const home = document.querySelector('[data-sujing-home]');
     if (!home) return;
@@ -909,6 +989,8 @@
         time.textContent = formatDate(latestNote.date);
       });
     }
+
+    paintHomeLedger(data);
 
     const empty = home.querySelector('[data-sujing-gallery-empty]');
     const grid = home.querySelector('[data-sujing-gallery-grid]');

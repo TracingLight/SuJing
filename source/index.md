@@ -79,6 +79,26 @@ type: sujing-home
     </aside>
   </div>
 
+  <section class="sujing-ledger" data-sujing-ledger data-sujing-reveal aria-labelledby="sujing-ledger-title">
+    <header class="sujing-ledger-head">
+      <div>
+        <p class="sujing-kicker">境录</p>
+        <h2 id="sujing-ledger-title">站点概览</h2>
+      </div>
+      <p class="sujing-ledger-since">自 <time data-sujing-ledger-since datetime="2026-07-21">2026.07.21</time> 起笔</p>
+    </header>
+    <ul class="sujing-ledger-grid">
+      <li><em>文章</em><strong data-sujing-ledger="posts">—</strong></li>
+      <li><em>分类</em><strong data-sujing-ledger="categories">—</strong></li>
+      <li><em>标签</em><strong data-sujing-ledger="tags">—</strong></li>
+      <li><em>字数</em><strong data-sujing-ledger="words">—</strong></li>
+      <li><em>运行</em><strong data-sujing-ledger="runtime">—</strong></li>
+      <li><em>短讯</em><strong data-sujing-ledger="notes">—</strong></li>
+      <li><em>访客</em><strong data-sujing-stat="siteUv">—</strong></li>
+      <li><em>访问</em><strong data-sujing-stat="sitePv">—</strong></li>
+    </ul>
+  </section>
+
   <div class="sujing-bento-colophon">
     <nav class="sujing-bento-destinations" aria-label="内容目的地">
       <a href="/articles/" data-sujing-reveal data-sujing-tilt><span>01</span><div><strong>文章库</strong><small>技术笔记</small></div><i class="fas fa-book-open" aria-hidden="true"></i></a>
