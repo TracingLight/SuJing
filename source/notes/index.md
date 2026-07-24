@@ -11,7 +11,7 @@ description: 溯光如初的即时记录、近况与简短想法。
 <header class="sujing-gallery-intro" data-sujing-reveal>
   <p class="sujing-kicker">短讯</p>
   <h1>短讯</h1>
-  <p>即时近况与简短想法会放在这里，不必写成完整文章。</p>
+  <p>即时近况与简短想法会放在这里。</p>
 </header>
 
 <div class="sujing-data-page" data-sujing-notes aria-busy="true" aria-live="polite">
