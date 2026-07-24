@@ -134,6 +134,18 @@ input:focus-visible {
   mix-blend-mode: multiply;
 }
 
+html.sujing-starfield-dragging,
+html.sujing-starfield-dragging body {
+  cursor: grabbing;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+html.sujing-starfield-dragging a,
+html.sujing-starfield-dragging button {
+  cursor: grabbing;
+}
+
 [data-theme='dark'] #sujing-starfield {
   opacity: 1;
   mix-blend-mode: screen;

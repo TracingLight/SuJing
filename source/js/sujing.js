@@ -22,7 +22,13 @@
       pointer: {
         x: -9999,
         y: -9999,
-        active: false
+        lastX: -9999,
+        lastY: -9999,
+        vx: 0,
+        vy: 0,
+        active: false,
+        dragging: false,
+        pointerId: null
       },
       bound: false
     }
@@ -403,6 +409,50 @@
     }));
   };
 
+  const isStarfieldDragTarget = (target) => {
+    if (!(target instanceof Element)) return false;
+    return Boolean(target.closest([
+      'a',
+      'button',
+      'input',
+      'textarea',
+      'select',
+      'label',
+      'summary',
+      '[role="button"]',
+      '[contenteditable="true"]',
+      '#sujing-music',
+      '#sujing-command',
+      '#nav',
+      '#rightside',
+      '.sujing-button',
+      '.sujing-icon-button',
+      '.menus_item_child'
+    ].join(',')));
+  };
+
+  const applyStarfieldDrag = (dx, dy) => {
+    const pointer = state.starfield.pointer;
+    const particles = state.starfield.particles;
+    if (!pointer.dragging || !particles.length) return;
+    const radius = window.innerWidth <= 640 ? 150 : 210;
+    const pull = 0.92;
+    particles.forEach((particle) => {
+      const distance = Math.hypot(particle.x - pointer.x, particle.y - pointer.y);
+      if (!distance || distance >= radius) return;
+      const influence = (1 - distance / radius) ** 1.35;
+      particle.x += dx * influence * pull;
+      particle.y += dy * influence * pull;
+      particle.vx += dx * influence * 0.055;
+      particle.vy += dy * influence * 0.055;
+      const speed = Math.hypot(particle.vx, particle.vy);
+      if (speed > 2.8) {
+        particle.vx = (particle.vx / speed) * 2.8;
+        particle.vy = (particle.vy / speed) * 2.8;
+      }
+    });
+  };
+
   const drawStarfield = (move = false) => {
     const { canvas, context, particles } = state.starfield;
     if (!canvas || !context) return;
@@ -414,7 +464,9 @@
     context.clearRect(0, 0, width, height);
 
     const renderPoints = particles.map((particle) => {
-      if (!pointer.active || reduced) return { x: particle.x, y: particle.y, boost: 0 };
+      if (!pointer.active || reduced || pointer.dragging) {
+        return { x: particle.x, y: particle.y, boost: pointer.dragging ? 0.35 : 0 };
+      }
       const dx = particle.x - pointer.x;
       const dy = particle.y - pointer.y;
       const distance = Math.hypot(dx, dy);
@@ -491,10 +543,15 @@
         context.stroke();
       }
       if (!move) return;
-      particle.x += particle.vx;
-      particle.y += particle.vy;
+      // While dragging, natural drift yields to the pull so the field feels attached to the cursor.
+      const driftScale = pointer.dragging ? 0.22 : 1;
+      particle.x += particle.vx * driftScale;
+      particle.y += particle.vy * driftScale;
+      particle.vx *= pointer.dragging ? 0.965 : 0.992;
+      particle.vy *= pointer.dragging ? 0.965 : 0.992;
       particle.phase += particle.twinkle;
       if (particle.y > height + particle.length) particle.y = -particle.length;
+      if (particle.y < -particle.length) particle.y = height + particle.length;
       if (particle.x < -particle.length) particle.x = width + particle.length;
       if (particle.x > width + particle.length) particle.x = -particle.length;
     });
@@ -517,7 +574,7 @@
         drawStarfield(false);
         return;
       }
-      if (time - state.starfield.lastFrame >= 33) {
+      if (time - state.starfield.lastFrame >= (state.starfield.pointer.dragging ? 16 : 33)) {
         drawStarfield(true);
         state.starfield.lastFrame = time;
       }
@@ -574,17 +631,61 @@
       state.starfield.motionQuery.addEventListener('change', runStarfield);
       state.starfield.pointerQuery.addEventListener('change', () => {
         state.starfield.pointer.active = false;
+        state.starfield.pointer.dragging = false;
+        document.documentElement.classList.remove('sujing-starfield-dragging');
         drawStarfield(false);
       });
+      window.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0) return;
+        if (!state.starfield.pointerQuery?.matches || state.starfield.motionQuery?.matches) return;
+        if (isStarfieldDragTarget(event.target)) return;
+        const pointer = state.starfield.pointer;
+        pointer.dragging = true;
+        pointer.pointerId = event.pointerId;
+        pointer.x = event.clientX;
+        pointer.y = event.clientY;
+        pointer.lastX = event.clientX;
+        pointer.lastY = event.clientY;
+        pointer.vx = 0;
+        pointer.vy = 0;
+        pointer.active = true;
+        document.documentElement.classList.add('sujing-starfield-dragging');
+      }, { passive: true });
       window.addEventListener('pointermove', (event) => {
         if (!state.starfield.pointerQuery?.matches || state.starfield.motionQuery?.matches) return;
-        state.starfield.pointer.x = event.clientX;
-        state.starfield.pointer.y = event.clientY;
-        state.starfield.pointer.active = true;
+        const pointer = state.starfield.pointer;
+        const prevX = pointer.x;
+        const prevY = pointer.y;
+        pointer.x = event.clientX;
+        pointer.y = event.clientY;
+        pointer.active = true;
+        if (!pointer.dragging) return;
+        if (pointer.pointerId !== null && event.pointerId !== pointer.pointerId) return;
+        const dx = pointer.x - (Number.isFinite(prevX) ? prevX : pointer.x);
+        const dy = pointer.y - (Number.isFinite(prevY) ? prevY : pointer.y);
+        pointer.vx = dx;
+        pointer.vy = dy;
+        pointer.lastX = prevX;
+        pointer.lastY = prevY;
+        applyStarfieldDrag(dx, dy);
       }, { passive: true });
+      const endStarfieldDrag = (event) => {
+        const pointer = state.starfield.pointer;
+        if (!pointer.dragging) return;
+        if (event && pointer.pointerId !== null && event.pointerId !== pointer.pointerId) return;
+        // Release with a short flick of inertia.
+        if (Math.hypot(pointer.vx, pointer.vy) > 0.4) {
+          applyStarfieldDrag(pointer.vx * 1.15, pointer.vy * 1.15);
+        }
+        pointer.dragging = false;
+        pointer.pointerId = null;
+        document.documentElement.classList.remove('sujing-starfield-dragging');
+      };
+      window.addEventListener('pointerup', endStarfieldDrag, { passive: true });
+      window.addEventListener('pointercancel', endStarfieldDrag, { passive: true });
       window.addEventListener('pointerout', (event) => {
         if (event.relatedTarget) return;
-        state.starfield.pointer.active = false;
+        if (!state.starfield.pointer.dragging) state.starfield.pointer.active = false;
       }, { passive: true });
       state.starfield.themeObserver = new MutationObserver(() => {
         createStarfieldParticles();
