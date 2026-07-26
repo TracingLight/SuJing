@@ -867,6 +867,26 @@
     input.remove();
   };
 
+  const installPostAtmosphere = () => {
+    const root = document.documentElement;
+    const header = document.querySelector('#page-header.post-bg');
+    document.getElementById('sujing-post-cover-stage')?.remove();
+
+    root.classList.remove('sujing-post-atmosphere');
+    root.style.removeProperty('--sujing-post-cover');
+    if (!header) return;
+
+    const inline = header.style.backgroundImage || header.getAttribute('style') || '';
+    const matched = inline.match(/url\((['"]?)(.*?)\1\)/i);
+    const image = matched?.[2]
+      ? `url("${matched[2]}")`
+      : window.getComputedStyle(header).backgroundImage;
+
+    if (!image || image === 'none') return;
+    root.style.setProperty('--sujing-post-cover', image);
+    root.classList.add('sujing-post-atmosphere');
+  };
+
   const installPostTools = async () => {
     const copyright = document.querySelector('.post-copyright');
     if (!copyright || document.querySelector('.sujing-post-tools')) return;
@@ -974,6 +994,12 @@
       if (title) title.textContent = latest.title || '最新文章';
       if (description) description.textContent = latest.description || '继续阅读最新记录。';
       if (cover && latest.cover) {
+        // Butterfly lazyload 会缓存 data-lazy-src；点击时可能把 src 打回旧占位图
+        cover.classList.add('nolazyload', 'entered', 'loaded');
+        cover.removeAttribute('data-lazy-src');
+        cover.removeAttribute('data-src');
+        cover.removeAttribute('data-original');
+        cover.loading = 'eager';
         cover.src = latest.cover;
         cover.alt = `${latest.title || '最新文章'}封面`;
       }
@@ -1217,6 +1243,10 @@
       persistMusicState({ trackIndex: state.trackIndex });
     };
     const safePlay = async () => {
+      if (!audio.src) {
+        toast('当前曲目缺少音频地址');
+        return;
+      }
       try {
         await audio.play();
       } catch (error) {
@@ -1225,6 +1255,10 @@
         toast('浏览器阻止了自动播放，请再点一次播放');
       }
     };
+    audio.addEventListener('error', () => {
+      writeMusicState({ playing: false });
+      toast('音频加载失败，请检查曲目地址');
+    });
     const play = async () => {
       if (audio.paused) await safePlay();
       else {
@@ -1357,6 +1391,189 @@
     });
   };
 
+  const installArchivePage = async () => {
+    const root = document.querySelector('[data-sujing-archive]');
+    if (!root || root.dataset.ready) return;
+    root.dataset.ready = 'true';
+
+    const stage = root.querySelector('[data-sujing-archive-stage]');
+    const status = root.querySelector('[data-sujing-archive-status]');
+    const totalEl = root.querySelector('[data-sujing-archive-total]');
+    const qInput = root.querySelector('[data-sujing-archive-q]');
+    const clearBtn = root.querySelector('[data-sujing-archive-clear]');
+    const catBox = root.querySelector('[data-sujing-archive-categories]');
+    const tagBox = root.querySelector('[data-sujing-archive-tags]');
+    const viewButtons = [...root.querySelectorAll('[data-sujing-archive-view]')];
+    if (!stage || !qInput || !catBox || !tagBox) return;
+
+    const params = new URLSearchParams(window.location.search);
+    let query = params.get('q') || '';
+    let category = params.get('cat') || '';
+    let tag = params.get('tag') || '';
+    let view = params.get('view') === 'matrix' ? 'matrix' : 'timeline';
+    let searchTimer = 0;
+
+    const data = await loadSiteData();
+    const posts = Array.isArray(data.posts) ? data.posts : [];
+    const categories = Array.isArray(data.categories) ? data.categories : [];
+    const tags = Array.isArray(data.tags) ? data.tags : [];
+
+    if (totalEl) totalEl.textContent = String(posts.length);
+    qInput.value = query;
+    root.setAttribute('aria-busy', 'false');
+
+    const syncUrl = () => {
+      const next = new URLSearchParams();
+      const trimmed = query.trim();
+      if (trimmed) next.set('q', trimmed);
+      if (category) next.set('cat', category);
+      if (tag) next.set('tag', tag);
+      if (view !== 'timeline') next.set('view', view);
+      const qs = next.toString();
+      const url = `${window.location.pathname}${qs ? `?${qs}` : ''}${window.location.hash || ''}`;
+      window.history.replaceState(null, '', url);
+    };
+
+    const renderChips = (box, items, selected) => {
+      const chips = [
+        `<button type="button" class="sujing-archive-chip${!selected ? ' is-active' : ''}" data-value="" aria-pressed="${selected ? 'false' : 'true'}">全部</button>`,
+        ...items.map((item) => {
+          const active = selected === item.name;
+          return `<button type="button" class="sujing-archive-chip${active ? ' is-active' : ''}" data-value="${escapeHtml(item.name)}" aria-pressed="${active ? 'true' : 'false'}">${escapeHtml(item.name)}<em>${Number(item.count) || 0}</em></button>`;
+        })
+      ];
+      box.innerHTML = chips.join('');
+    };
+
+    const postMetaLine = (post) => {
+      const cats = (post.categories || []).slice(0, 2).map((name) => escapeHtml(name)).join(' · ');
+      const tagsLine = (post.tags || []).slice(0, 3).map((name) => `#${escapeHtml(name)}`).join(' ');
+      return [cats, tagsLine].filter(Boolean).join('  ·  ');
+    };
+
+    const coverOf = (post) => escapeHtml(post.cover || '/img/sujing-mark.svg');
+
+    const renderTimeline = (list) => {
+      const groups = new Map();
+      list.forEach((post) => {
+        const year = String(new Date(post.date).getFullYear() || '未知');
+        if (!groups.has(year)) groups.set(year, []);
+        groups.get(year).push(post);
+      });
+      const years = [...groups.keys()].sort((a, b) => b.localeCompare(a));
+      return `<div class="sujing-archive-timeline">${years.map((year) => `
+        <section class="sujing-archive-year" data-sujing-reveal>
+          <header class="sujing-archive-year-head">
+            <span>${escapeHtml(year)}</span>
+            <small>${groups.get(year).length} 篇</small>
+          </header>
+          <ol class="sujing-archive-year-list">
+            ${groups.get(year).map((post) => `
+              <li>
+                <a class="sujing-archive-entry" href="${escapeHtml(post.path)}" data-sujing-reveal>
+                  <time datetime="${escapeHtml(post.date)}">${escapeHtml(formatDate(post.date).slice(5) || formatDate(post.date))}</time>
+                  <span class="sujing-archive-entry-body">
+                    <strong>${escapeHtml(post.title || '未命名')}</strong>
+                    ${post.description ? `<em>${escapeHtml(post.description)}</em>` : ''}
+                    ${postMetaLine(post) ? `<small>${postMetaLine(post)}</small>` : ''}
+                  </span>
+                  <span class="sujing-archive-entry-cover" aria-hidden="true">
+                    <img src="${coverOf(post)}" alt="" loading="lazy" width="96" height="64">
+                  </span>
+                </a>
+              </li>`).join('')}
+          </ol>
+        </section>`).join('')}</div>`;
+    };
+
+    const renderMatrix = (list) => `<div class="sujing-archive-matrix">${list.map((post) => `
+      <a class="sujing-archive-card" href="${escapeHtml(post.path)}" data-sujing-reveal>
+        <span class="sujing-archive-card-media" aria-hidden="true">
+          <img src="${coverOf(post)}" alt="" loading="lazy" width="480" height="300">
+        </span>
+        <span class="sujing-archive-card-body">
+          <time datetime="${escapeHtml(post.date)}">${escapeHtml(formatDate(post.date))}</time>
+          <strong>${escapeHtml(post.title || '未命名')}</strong>
+          ${post.description ? `<em>${escapeHtml(post.description)}</em>` : ''}
+          ${postMetaLine(post) ? `<small>${postMetaLine(post)}</small>` : ''}
+        </span>
+      </a>`).join('')}</div>`;
+
+    const matches = (post) => {
+      if (category && !(post.categories || []).includes(category)) return false;
+      if (tag && !(post.tags || []).includes(tag)) return false;
+      const q = query.trim().toLowerCase();
+      if (!q) return true;
+      const hay = [
+        post.title,
+        post.description,
+        ...(post.categories || []),
+        ...(post.tags || [])
+      ].join(' ').toLowerCase();
+      return hay.includes(q);
+    };
+
+    const render = () => {
+      const list = posts.filter(matches);
+      const parts = [];
+      if (query.trim()) parts.push(`「${query.trim()}」`);
+      if (category) parts.push(`分类 ${category}`);
+      if (tag) parts.push(`标签 ${tag}`);
+      const filterText = parts.length ? parts.join(' · ') : '全部文章';
+      if (status) {
+        status.textContent = list.length
+          ? `${filterText} · 共 ${list.length} 篇 · ${view === 'matrix' ? '矩阵' : '时间轴'}`
+          : `${filterText} · 无匹配结果`;
+      }
+      if (clearBtn) clearBtn.hidden = !query.trim();
+      viewButtons.forEach((button) => {
+        const active = button.dataset.sujingArchiveView === view;
+        button.setAttribute('aria-pressed', active ? 'true' : 'false');
+        button.classList.toggle('is-active', active);
+      });
+      root.dataset.view = view;
+      renderChips(catBox, categories, category);
+      renderChips(tagBox, tags, tag);
+      stage.innerHTML = list.length
+        ? (view === 'matrix' ? renderMatrix(list) : renderTimeline(list))
+        : '<div class="sujing-data-empty" data-sujing-reveal><span class="sujing-empty-seal" aria-hidden="true">卷</span><h2>卷宗未命中</h2><p>换个关键词，或清除分类与标签后再试。</p></div>';
+      syncUrl();
+      installMotion();
+    };
+
+    qInput.addEventListener('input', () => {
+      query = qInput.value;
+      window.clearTimeout(searchTimer);
+      searchTimer = window.setTimeout(render, 160);
+    });
+    clearBtn?.addEventListener('click', () => {
+      query = '';
+      qInput.value = '';
+      qInput.focus();
+      render();
+    });
+    catBox.addEventListener('click', (event) => {
+      const button = event.target.closest('button[data-value]');
+      if (!button) return;
+      category = button.dataset.value || '';
+      render();
+    });
+    tagBox.addEventListener('click', (event) => {
+      const button = event.target.closest('button[data-value]');
+      if (!button) return;
+      tag = button.dataset.value || '';
+      render();
+    });
+    viewButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        view = button.dataset.sujingArchiveView === 'matrix' ? 'matrix' : 'timeline';
+        render();
+      });
+    });
+
+    render();
+  };
+
   const installReadingProgress = () => {
     document.getElementById('sujing-reading-progress')?.remove();
     const article = document.querySelector('.post #article-container');
@@ -1429,6 +1646,8 @@
     if (!hero || !image || hero.dataset.sujingParallaxReady) return;
     hero.dataset.sujingParallaxReady = 'true';
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    // 手机端不做视差，避免主图被额外位移/裁切
+    if (window.matchMedia('(max-width: 768px), (hover: none)').matches) return;
 
     let frame = null;
     const update = () => {
@@ -1710,11 +1929,26 @@
 
   const normalizeStatsPath = (pathname = window.location.pathname) => {
     let path = String(pathname || '/').split('?')[0].split('#')[0];
+    // 与 Worker 对齐：最多两轮百分号解码，避免双重编码路径分裂计数
+    for (let i = 0; i < 2; i += 1) {
+      if (!path.includes('%')) break;
+      try {
+        const decoded = decodeURIComponent(path);
+        if (decoded === path) break;
+        path = decoded;
+      } catch {
+        break;
+      }
+    }
     if (!path.startsWith('/')) path = `/${path}`;
     path = path.replace(/\/{2,}/g, '/');
     if (path.length > 1 && path.endsWith('/')) path = path.slice(0, -1);
     return path || '/';
   };
+
+  const isLocalPreviewHost = () => (
+    location.hostname === '127.0.0.1' || location.hostname === 'localhost'
+  );
 
   const ensurePostStatsMount = () => {
     const meta = document.querySelector('#post-info #post-meta');
@@ -1754,6 +1988,14 @@
 
   const installSiteStats = async () => {
     ensurePostStatsMount();
+    // 本机预览不计线上访问量，避免开发刷脏数据
+    if (isLocalPreviewHost()) {
+      document.querySelectorAll('[data-sujing-site-stats], [data-sujing-post-stats]').forEach((node) => {
+        node.classList.add('is-local');
+        node.setAttribute('title', '本机预览不计入线上统计');
+      });
+      return;
+    }
     const path = normalizeStatsPath();
     if (state.statsPath === path && state.statsPending) return;
     state.statsPath = path;
@@ -1768,8 +2010,14 @@
       if (!response.ok) throw new Error(`stats ${response.status}`);
       const data = await response.json();
       paintStats(data);
+      document.querySelectorAll('[data-sujing-site-stats], [data-sujing-post-stats]').forEach((node) => {
+        node.classList.remove('is-error');
+      });
     } catch (error) {
       console.warn('[Sujing] site stats unavailable', error);
+      document.querySelectorAll('[data-sujing-site-stats], [data-sujing-post-stats]').forEach((node) => {
+        node.classList.add('is-error');
+      });
     } finally {
       state.statsPending = false;
     }
@@ -1778,10 +2026,14 @@
   const COMMENTS_ENDPOINT = 'https://comments.sujing.dev/v1/comments';
   const COMMENT_PROFILE_KEY = 'sujing-comment-profile';
   const COMMENT_MAX = 800;
+  const COMMENT_MAX_REPLY_DEPTH = 2;
 
   const readCommentProfile = () => {
     try {
-      return JSON.parse(window.sessionStorage.getItem(COMMENT_PROFILE_KEY) || '{}') || {};
+      const raw = window.localStorage.getItem(COMMENT_PROFILE_KEY)
+        || window.sessionStorage.getItem(COMMENT_PROFILE_KEY)
+        || '{}';
+      return JSON.parse(raw) || {};
     } catch {
       return {};
     }
@@ -1789,10 +2041,28 @@
 
   const writeCommentProfile = (profile) => {
     try {
-      window.sessionStorage.setItem(COMMENT_PROFILE_KEY, JSON.stringify(profile));
+      window.localStorage.setItem(COMMENT_PROFILE_KEY, JSON.stringify(profile));
+      window.sessionStorage.removeItem(COMMENT_PROFILE_KEY);
     } catch {
       // ignore
     }
+  };
+
+  const isValidCommentEmail = (value) => {
+    if (!value) return true;
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  };
+
+  const setCommentFormError = (form, message) => {
+    const box = form?.querySelector('[data-sujing-comment-error]');
+    if (!box) return;
+    if (!message) {
+      box.hidden = true;
+      box.textContent = '';
+      return;
+    }
+    box.hidden = false;
+    box.textContent = message;
   };
 
   const formatCommentTime = (stamp) => {
@@ -1806,10 +2076,53 @@
     return formatDate(date.toISOString());
   };
 
-  const avatarUrl = (hash, nickname) => {
-    if (hash) return `https://cravatar.cn/avatar/${hash}?d=mp&s=96`;
-    const seed = encodeURIComponent(nickname || '溯');
-    return `https://api.dicebear.com/9.x/initials/svg?seed=${seed}&backgroundColor=177e89,b4453a,9a7b4f`;
+  // 有图后往 /img/avatars/ 放文件，并在 index.json 里写路径；非空则按昵称稳定随机取一张
+  let commentAvatarLibrary = null;
+  const loadCommentAvatarLibrary = async () => {
+    if (commentAvatarLibrary) return commentAvatarLibrary;
+    try {
+      const response = await fetch(`/img/avatars/index.json?t=${Date.now()}`, { cache: 'no-store' });
+      if (!response.ok) throw new Error('no avatar library');
+      const data = await response.json();
+      commentAvatarLibrary = Array.isArray(data)
+        ? data.map((item) => String(item || '').trim()).filter(Boolean)
+        : [];
+    } catch {
+      commentAvatarLibrary = [];
+    }
+    return commentAvatarLibrary;
+  };
+
+  const nicknameInitial = (nickname) => {
+    const text = String(nickname || '溯').trim();
+    if (!text) return '溯';
+    return [...text][0] || '溯';
+  };
+
+  const hashSeed = (value) => {
+    let hash = 2166136261;
+    const input = String(value || '');
+    for (let i = 0; i < input.length; i += 1) {
+      hash ^= input.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+    return hash >>> 0;
+  };
+
+  const pickLibraryAvatar = (library, seed) => {
+    if (!library?.length) return '';
+    return library[hashSeed(seed) % library.length];
+  };
+
+  const renderCommentAvatar = (comment, library) => {
+    const seed = `${comment.nickname || ''}|${comment.id || ''}`;
+    const fromLib = pickLibraryAvatar(library, seed);
+    if (fromLib) {
+      return `<img class="sujing-comment-avatar no-lightbox nolazyload" src="${escapeHtml(fromLib)}" alt="" width="48" height="48" loading="lazy">`;
+    }
+    const initial = nicknameInitial(comment.nickname);
+    const tone = hashSeed(seed) % 3;
+    return `<span class="sujing-comment-avatar is-initial tone-${tone}" aria-hidden="true">${escapeHtml(initial)}</span>`;
   };
 
   const commentsAnchor = () => {
@@ -1837,28 +2150,32 @@
     return roots;
   };
 
-  const renderCommentItem = (comment, depth = 0) => {
+  const renderCommentItem = (comment, depth = 0, library = []) => {
     const website = comment.website
       ? `<a class="sujing-comment-site" href="${escapeHtml(comment.website)}" target="_blank" rel="noopener noreferrer nofollow">主页</a>`
       : '';
-    const children = (comment.children || []).map((child) => renderCommentItem(child, depth + 1)).join('');
+    const children = (comment.children || []).map((child) => renderCommentItem(child, depth + 1, library)).join('');
+    const canReply = depth < COMMENT_MAX_REPLY_DEPTH;
+    const replyBtn = canReply
+      ? `<button type="button" class="sujing-comment-reply" data-comment-reply="${escapeHtml(comment.id)}" data-comment-name="${escapeHtml(comment.nickname)}">回复</button>`
+      : '';
     return `
       <article class="sujing-comment-item" data-comment-id="${escapeHtml(comment.id)}" data-depth="${depth}" data-sujing-reveal>
-        <img class="sujing-comment-avatar no-lightbox" src="${escapeHtml(avatarUrl(comment.emailHash, comment.nickname))}" alt="" width="48" height="48" loading="lazy">
+        ${renderCommentAvatar(comment, library)}
         <div class="sujing-comment-body">
           <header>
             <strong>${escapeHtml(comment.nickname)}</strong>
             ${website}
             <time datetime="${new Date(comment.createdAt).toISOString()}">${escapeHtml(formatCommentTime(comment.createdAt))}</time>
           </header>
-          <p>${escapeHtml(comment.content)}</p>
-          <button type="button" class="sujing-comment-reply" data-comment-reply="${escapeHtml(comment.id)}" data-comment-name="${escapeHtml(comment.nickname)}">回复</button>
+          <p class="sujing-comment-text">${escapeHtml(comment.content)}</p>
+          ${replyBtn}
           ${children ? `<div class="sujing-comment-children">${children}</div>` : ''}
         </div>
       </article>`;
   };
 
-  const renderCommentsList = (root, comments) => {
+  const renderCommentsList = async (root, comments) => {
     const list = root.querySelector('[data-sujing-comments-list]');
     const empty = root.querySelector('[data-sujing-comments-empty]');
     const count = root.querySelector('[data-sujing-comments-count]');
@@ -1870,7 +2187,8 @@
     }
     if (empty) empty.hidden = true;
     if (list) {
-      list.innerHTML = buildCommentTree(comments).map((item) => renderCommentItem(item)).join('');
+      const library = await loadCommentAvatarLibrary();
+      list.innerHTML = buildCommentTree(comments).map((item) => renderCommentItem(item, 0, library)).join('');
       installMotion();
     }
   };
@@ -1892,7 +2210,9 @@
 
     if (nickname && profile.nickname) nickname.value = profile.nickname;
     if (email && profile.email) email.value = profile.email;
-    if (website && profile.website) website.value = profile.website;
+    if (website && profile.website) {
+      website.value = String(profile.website).replace(/^https?:\/\//i, '');
+    }
 
     const syncCounter = () => {
       if (!content || !counter) return;
@@ -1900,7 +2220,13 @@
       counter.textContent = `${length} / ${COMMENT_MAX}`;
       counter.dataset.tone = length > COMMENT_MAX - 40 ? 'warn' : 'ok';
     };
-    content?.addEventListener('input', syncCounter);
+    content?.addEventListener('input', () => {
+      setCommentFormError(form, '');
+      syncCounter();
+    });
+    [nickname, email, website].forEach((input) => {
+      input?.addEventListener('input', () => setCommentFormError(form, ''));
+    });
     syncCounter();
 
     const clearReply = () => {
@@ -1917,6 +2243,7 @@
     root.addEventListener('click', (event) => {
       const button = event.target.closest?.('[data-comment-reply]');
       if (!button || !root.contains(button)) return;
+      if (form.dataset.disabled === 'true') return;
       if (parentInput) parentInput.value = button.dataset.commentReply || '';
       if (replyHint) {
         replyHint.hidden = false;
@@ -1929,24 +2256,33 @@
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
-      if (submit?.disabled) return;
+      if (submit?.disabled || form.dataset.disabled === 'true') return;
+      setCommentFormError(form, '');
+      const rawWebsite = website?.value.trim() || '';
       const payload = {
         path,
         nickname: nickname?.value.trim() || '',
         email: email?.value.trim() || '',
-        website: website?.value.trim() || '',
-        content: content?.value.trim() || '',
+        website: rawWebsite && !/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(rawWebsite)
+          ? `https://${rawWebsite}`
+          : rawWebsite,
+        content: content?.value.replace(/\s+$/g, '').replace(/^\s+/g, '') || '',
         parentId: parentInput?.value || '',
         company: form.querySelector('[name="company"]')?.value || ''
       };
-      if (payload.nickname.length < 2) {
-        toast('请填写昵称');
+      if (payload.nickname.length < 1) {
+        setCommentFormError(form, '请填写昵称');
         nickname?.focus();
         return;
       }
-      if (payload.content.length < 2) {
-        toast('请写一点想说的话');
+      if (payload.content.length < 1) {
+        setCommentFormError(form, '请写一点想说的话');
         content?.focus();
+        return;
+      }
+      if (!isValidCommentEmail(payload.email)) {
+        setCommentFormError(form, '邮箱格式不太对');
+        email?.focus();
         return;
       }
       submit.disabled = true;
@@ -1963,10 +2299,20 @@
         syncCounter();
         toast('留言已送出');
       } catch (error) {
-        const message = error?.message === 'rate_limited'
-          ? '发送太频繁，稍后再试'
-          : '留言发送失败，请稍后再试';
-        toast(message);
+        const code = error?.message || '';
+        const message = ({
+          rate_limited: '发送太频繁，稍后再试',
+          invalid_website: '主页地址不太对，可填域名或完整链接',
+          invalid_email: '邮箱格式不太对',
+          invalid_nickname: '请填写昵称',
+          invalid_content: '请写一点想说的话',
+          invalid_path: '当前页面无法留言',
+          invalid_parent: '回复目标已失效，请取消回复后重试',
+          spam_links: '链接有点多，精简后再发',
+          reply_too_deep: '回复层级已到上限',
+          ignored: '发送未完成，请重试'
+        })[code] || '留言发送失败，请稍后再试';
+        setCommentFormError(form, message);
       } finally {
         submit.disabled = false;
         submit.classList.remove('is-loading');
@@ -1977,6 +2323,28 @@
   const installComments = async () => {
     const anchor = commentsAnchor();
     if (!anchor) return;
+    // 本机预览不读写线上留言，避免开发环境污染 / CORS 半通状态
+    if (isLocalPreviewHost()) {
+      const root = document.createElement('section');
+      root.className = 'sujing-comments is-local';
+      root.dataset.sujingComments = 'true';
+      root.innerHTML = `
+        <header class="sujing-comments-head" data-sujing-reveal>
+          <div>
+            <p class="sujing-kicker">留言</p>
+            <h2 id="sujing-comments-title">写在文后</h2>
+          </div>
+        </header>
+        <div class="sujing-comments-empty" data-sujing-comments-empty>
+          <span class="sujing-empty-seal" aria-hidden="true">言</span>
+          <strong>本机预览不加载留言</strong>
+          <p>留言接口只在线上域名可用；本地写作与预览不受影响。</p>
+        </div>`;
+      document.querySelectorAll('[data-sujing-comments]').forEach((node) => node.remove());
+      anchor.insertAdjacentElement('afterend', root);
+      installMotion();
+      return;
+    }
     const path = normalizeStatsPath();
     const existing = document.querySelector('[data-sujing-comments]');
     if (existing?.dataset.path === path && existing.isConnected) return;
@@ -1994,7 +2362,7 @@
           <p class="sujing-kicker">留言</p>
           <h2 id="sujing-comments-title">写在文后</h2>
         </div>
-        <p class="sujing-comments-meta"><strong data-sujing-comments-count>0</strong> 条</p>
+        <p class="sujing-comments-meta">共 <strong data-sujing-comments-count>0</strong> 条</p>
       </header>
       <form class="sujing-comment-form" data-sujing-comment-form data-sujing-reveal novalidate>
         <div class="sujing-comment-reply-hint" data-sujing-reply-hint hidden>
@@ -2004,14 +2372,15 @@
         <div class="sujing-comment-fields">
           <label><span>昵称</span><input name="nickname" type="text" maxlength="24" autocomplete="nickname" required placeholder="怎么称呼你"></label>
           <label><span>邮箱</span><input name="email" type="email" maxlength="80" autocomplete="email" placeholder="可选，用于头像"></label>
-          <label><span>主页</span><input name="website" type="url" maxlength="120" autocomplete="url" placeholder="可选"></label>
+          <label><span>主页</span><input name="website" type="text" maxlength="120" autocomplete="url" inputmode="url" placeholder="可选"></label>
         </div>
         <label class="sujing-comment-content">
           <span>内容</span>
           <textarea name="content" rows="4" maxlength="${COMMENT_MAX}" required placeholder="欢迎留下想法、补充或疑问。"></textarea>
         </label>
         <input name="parentId" type="hidden" value="">
-        <input name="company" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" class="sujing-comment-honeypot">
+        <input name="company" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" class="sujing-comment-honeypot" value="">
+        <p class="sujing-comment-error" data-sujing-comment-error hidden></p>
         <div class="sujing-comment-actions">
           <span data-sujing-comment-count>0 / ${COMMENT_MAX}</span>
           <button class="sujing-button sujing-button-primary" type="submit"><span>送出留言</span><i class="fas fa-feather-pointed" aria-hidden="true"></i></button>
@@ -2024,13 +2393,30 @@
       </div>
       <div class="sujing-comments-list" data-sujing-comments-list></div>`;
 
+    const form = root.querySelector('[data-sujing-comment-form]');
+    const setFormDisabled = (disabled, reason) => {
+      if (!form) return;
+      form.dataset.disabled = disabled ? 'true' : 'false';
+      form.querySelectorAll('input, textarea, button').forEach((node) => {
+        if (node.classList.contains('sujing-comment-honeypot')) return;
+        node.disabled = disabled;
+      });
+      if (disabled) {
+        form.classList.add('is-disabled');
+        setCommentFormError(form, reason || '');
+      } else {
+        form.classList.remove('is-disabled');
+        setCommentFormError(form, '');
+      }
+    };
+
     const load = async () => {
       const response = await fetch(`${COMMENTS_ENDPOINT}?path=${encodeURIComponent(path)}`, {
         credentials: 'include'
       });
       if (!response.ok) throw new Error(`comments ${response.status}`);
       const data = await response.json();
-      renderCommentsList(root, Array.isArray(data.comments) ? data.comments : []);
+      await renderCommentsList(root, Array.isArray(data.comments) ? data.comments : []);
     };
 
     bindCommentForm(root, {
@@ -2043,6 +2429,7 @@
           body: JSON.stringify(payload)
         });
         const data = await response.json().catch(() => ({}));
+        if (data.ignored || data.ok === false) throw new Error('ignored');
         if (!response.ok) throw new Error(data.error || 'failed');
         await load();
       }
@@ -2052,12 +2439,17 @@
       await load();
     } catch (error) {
       console.warn('[Sujing] comments unavailable', error);
-      root.querySelector('[data-sujing-comments-empty]')?.removeAttribute('hidden');
       const empty = root.querySelector('[data-sujing-comments-empty]');
       if (empty) {
-        empty.querySelector('strong').textContent = '留言暂不可用';
-        empty.querySelector('p').textContent = '接口稍后恢复，先把想说的记下来也好。';
+        empty.hidden = false;
+        const local = location.hostname === '127.0.0.1' || location.hostname === 'localhost';
+        empty.querySelector('strong').textContent = local ? '本机预览不加载留言' : '留言暂不可用';
+        empty.querySelector('p').textContent = local
+          ? '留言接口只在线上域名可用；本地写作与预览不受影响。'
+          : '接口稍后恢复，先把想说的记下来也好。';
       }
+      const local = location.hostname === '127.0.0.1' || location.hostname === 'localhost';
+      setFormDisabled(true, local ? '本机预览不可发送留言' : '留言接口暂不可用，稍后再试');
     }
     installMotion();
   };
@@ -2071,10 +2463,12 @@
     installStarfield();
     installHomeContent();
     installArticlesIntro();
+    installPostAtmosphere();
     installPostTools();
     installNotesPage();
     installGalleryPage();
     installMusicPage();
+    installArchivePage();
     ensureMusicPlayer();
     installReadingProgress();
     installMotion();

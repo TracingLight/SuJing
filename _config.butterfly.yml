@@ -3,11 +3,13 @@ nav:
   logo:
   display_title: true
   display_post_title: true
-  fixed: true
+  # false：滚动时顶栏不吸顶、不跟下来（Butterfly 默认）
+  fixed: false
 
 menu:
   首页: / || fas fa-compass
   文章: /articles/ || fas fa-book-open
+  归档: /archives/ || fas fa-box-archive
   主题: /categories/ || fas fa-folder-open
   短讯: /notes/ || fas fa-bolt
   相册: /gallery/ || fas fa-images
@@ -66,6 +68,10 @@ post_meta:
     categories: true
     tags: true
     label: true
+
+# 1：下一篇 → 更早的文章（Butterfly 默认，时间线反直觉）
+# 2：下一篇 → 更新的文章；上一篇 → 更早的文章
+post_pagination: 2
 
 # Reading and code
 code_blocks:

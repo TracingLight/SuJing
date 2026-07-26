@@ -24,22 +24,22 @@ type: sujing-home
       <h1 id="sujing-home-title">溯境</h1>
       <p>以 Unity 游戏客户端开发为主，记录技术实践，也留下生活与兴趣方面的笔记。</p>
       <div class="sujing-home-actions">
-        <a class="sujing-button sujing-button-primary" href="/articles/"><span>阅读文章</span><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
-        <button class="sujing-button sujing-button-quiet" type="button" data-sujing-command-open><i class="fas fa-compass" aria-hidden="true"></i><span>浏览站点</span></button>
+        <a class="sujing-button sujing-button-primary" href="/archives/"><span>浏览卷宗</span><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+        <a class="sujing-button sujing-button-quiet" href="/articles/"><i class="fas fa-book-open" aria-hidden="true"></i><span>文章库</span></a>
       </div>
     </div>
     <div class="sujing-bento-hero-meta" aria-hidden="true"><span>游艺</span><span>绘事</span><span>日课</span></div>
   </section>
 
   <div class="sujing-bento-grid">
-    <a class="sujing-bento-card sujing-bento-latest" href="/2026/07/21/about-sujing/" data-sujing-latest-card data-sujing-reveal data-sujing-tilt>
+    <a class="sujing-bento-card sujing-bento-latest" href="/2026/07/25/开发随笔-c-面向对象-初步了解c-面向对象的知识/" data-sujing-latest-card data-sujing-reveal data-sujing-tilt>
       <div class="sujing-bento-latest-media">
-        <img class="no-lightbox" data-sujing-latest-cover src="/img/sujing-hero-b.webp" alt="溯境最新文章封面" width="1536" height="1024" loading="lazy">
+        <img class="no-lightbox nolazyload" data-sujing-latest-cover src="/img/covers/e-c-a-a-3.webp" alt="类与影：面向对象的第一课封面" width="1536" height="1024" loading="eager" fetchpriority="low">
       </div>
       <div class="sujing-bento-card-copy">
-        <div class="sujing-bento-card-heading"><p class="sujing-kicker">最新文章</p><time datetime="2026-07-21">2026.07.21</time></div>
-        <h2>溯境：从这里开始</h2>
-        <p>溯境的内容方向、写作方式与后续规划。</p>
+        <div class="sujing-bento-card-heading"><p class="sujing-kicker">最新文章</p><time datetime="2026-07-25">2026.07.25</time></div>
+        <h2>类与影：面向对象的第一课</h2>
+        <p>初步了解C++面向对象的知识</p>
         <span class="sujing-bento-link">继续阅读 <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
       </div>
     </a>
@@ -101,9 +101,9 @@ type: sujing-home
 
   <div class="sujing-bento-colophon">
     <nav class="sujing-bento-destinations" aria-label="内容目的地">
-      <a href="/articles/" data-sujing-reveal data-sujing-tilt><span>01</span><div><strong>文章库</strong><small>技术笔记</small></div><i class="fas fa-book-open" aria-hidden="true"></i></a>
-      <a href="/music/" data-sujing-reveal data-sujing-tilt><span>02</span><div><strong>音乐</strong><small>歌单与听录</small></div><i class="fas fa-music" aria-hidden="true"></i></a>
-      <a href="/gallery/" data-sujing-reveal data-sujing-tilt><span>03</span><div><strong>相册</strong><small>插画与截图</small></div><i class="fas fa-images" aria-hidden="true"></i></a>
+      <a href="/archives/" data-sujing-reveal data-sujing-tilt><span>01</span><div><strong>卷宗</strong><small>文章归档</small></div><i class="fas fa-box-archive" aria-hidden="true"></i></a>
+      <a href="/articles/" data-sujing-reveal data-sujing-tilt><span>02</span><div><strong>文章库</strong><small>技术笔记</small></div><i class="fas fa-book-open" aria-hidden="true"></i></a>
+      <a href="/music/" data-sujing-reveal data-sujing-tilt><span>03</span><div><strong>音乐</strong><small>歌单与听录</small></div><i class="fas fa-music" aria-hidden="true"></i></a>
       <a href="/about/" data-sujing-reveal data-sujing-tilt><span>04</span><div><strong>关于</strong><small>作者介绍</small></div><i class="fas fa-user" aria-hidden="true"></i></a>
     </nav>
     <span class="sujing-home-seal" aria-hidden="true">溯</span>
