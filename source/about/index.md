@@ -1,10 +1,11 @@
 ---
 title: 关于
-date: 2026-07-21 08:00:00
+date: '2026-07-21 16:00:00'
 type: sujing-about
 aside: false
 top_img: false
-description: 关于溯光如初和这个站
+description: 关于溯光如初与溯境：Unity 游戏客户端、技术学习与生活记录。
+comments: true
 ---
 
 <div class="sujing-about" data-sujing-reveal>
@@ -13,27 +14,61 @@ description: 关于溯光如初和这个站
     <div>
       <p class="sujing-kicker">关于</p>
       <h1>溯光如初</h1>
-      <p class="sujing-about-role">Unity 游戏客户端开发</p>
-      <p>本站以游戏开发与技术学习为主，也会记录生活与兴趣相关的内容。</p>
+      <p class="sujing-about-role">HELLO, I'M 溯光如初</p>
+      <p>你好，我是溯光如初。专注于 Unity 游戏客户端开发，也持续补齐计算机基础、图形学与跨引擎视野。溯境是我的个人站点：主线写技术实践，同时留下音乐、相册与生活痕迹。</p>
       <div class="sujing-about-links">
         <a href="https://github.com/TracingLight" target="_blank" rel="noopener noreferrer"><i class="fab fa-github" aria-hidden="true"></i>GitHub</a>
         <a href="mailto:suguangruchu@gmail.com"><i class="fas fa-envelope" aria-hidden="true"></i>Email</a>
+        <a href="/archives/"><i class="fas fa-box-archive" aria-hidden="true"></i>文章卷宗</a>
       </div>
     </div>
   </header>
+
   <section class="sujing-about-section">
-    <p class="sujing-kicker">现阶段</p>
-    <h2>当前关注</h2>
-    <div class="sujing-about-grid">
-      <article><span>01</span><h3>Unity 客户端</h3><p>架构、性能、资源管理、工具链，以及跨平台实践中的常见问题。</p></article>
-      <article><span>02</span><h3>编程语言</h3><p>C#、C++、Lua，以及它们在游戏项目中的协作方式。</p></article>
-      <article><span>03</span><h3>计算机基础</h3><p>算法、操作系统、网络、组成原理与设计模式，按需要持续补齐。</p></article>
-      <article><span>04</span><h3>图形与引擎</h3><p>图形学与渲染基础，并了解 Unreal、Cocos 等引擎的实践路径。</p></article>
-    </div>
+    <p class="sujing-kicker">主线</p>
+    <h2>游戏开发与学习方向</h2>
+    <ul class="sujing-about-list">
+      <li>
+        <strong>Unity 客户端</strong>
+        <span>架构拆分、资源管理、性能排查、编辑器工具链，以及跨平台打包与常见坑位。</span>
+      </li>
+      <li>
+        <strong>语言与协作</strong>
+        <span>C#、C++、Lua 在游戏项目中的职责边界，以及热更新、配置与运行时协作方式。</span>
+      </li>
+      <li>
+        <strong>计算机基础</strong>
+        <span>算法、操作系统、网络、组成原理与设计模式，按项目需要持续补齐。</span>
+      </li>
+      <li>
+        <strong>图形与引擎</strong>
+        <span>渲染与图形学基础；也会对照了解 Unreal、Cocos 等引擎的实践路径。</span>
+      </li>
+    </ul>
   </section>
+
+  <section class="sujing-about-section">
+    <p class="sujing-kicker">能力</p>
+    <h2>工程与表达</h2>
+    <ul class="sujing-about-list">
+      <li>
+        <strong>客户端工程</strong>
+        <span>面向可维护性写代码：模块边界、资源流水线、性能数据与可复现的排查过程。</span>
+      </li>
+      <li>
+        <strong>工具与效率</strong>
+        <span>用编辑器扩展、自动化脚本和清晰日志减少重复劳动，让验证比猜测更省时间。</span>
+      </li>
+      <li>
+        <strong>写作与记录</strong>
+        <span>技术文尽量写清方法、条件与结论，音乐、相册与短讯则保留更轻的日常侧面。</span>
+      </li>
+    </ul>
+  </section>
+
   <section class="sujing-about-principle">
-    <p class="sujing-kicker">写作原则</p>
+    <p class="sujing-kicker">原则</p>
     <h2>实测结果与个人判断分开表述。</h2>
-    <p>涉及版本号、性能数据或平台行为时，会尽量写明复现条件。项目案例待背景、职责与验证材料齐全后再公开。</p>
+    <p>涉及版本号、性能数据或平台行为时，会尽量写明复现条件。项目案例待背景、职责与验证材料齐全后再公开。欢迎交流 Unity、客户端工程与相关学习路径。</p>
   </section>
 </div>
