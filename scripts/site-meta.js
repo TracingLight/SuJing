@@ -12,8 +12,6 @@ const assetVersion = (relativePath) => crypto
 
 const sujingCssVersion = assetVersion('source/css/sujing.css');
 const sujingJsVersion = assetVersion('source/js/sujing.js');
-const sujingAdminCssVersion = assetVersion('source/css/sujing-admin.css');
-const sujingAdminJsVersion = assetVersion('source/js/sujing-admin.js');
 
 hexo.extend.filter.register('after_render:html', (html) => {
   const rendered = html
@@ -27,16 +25,8 @@ hexo.extend.filter.register('after_render:html', (html) => {
       `href="/css/sujing.css?v=${sujingCssVersion}"`
     )
     .replace(
-      'href="/css/sujing-admin.css"',
-      `href="/css/sujing-admin.css?v=${sujingAdminCssVersion}"`
-    )
-    .replace(
       'src="/js/sujing.js"',
       `src="/js/sujing.js?v=${sujingJsVersion}"`
-    )
-    .replace(
-      'src="/js/sujing-admin.js"',
-      `src="/js/sujing-admin.js?v=${sujingAdminJsVersion}"`
     );
 
   if (!rendered.includes('type-sujing-home') || !rendered.includes('data-sujing-home')) {
