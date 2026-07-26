@@ -1,13 +1,28 @@
 const ALLOWED_ORIGINS = new Set([
   'https://sujing.dev',
   'https://www.sujing.dev',
-  'https://sujing.pages.dev',
-  'http://localhost:4000',
-  'http://127.0.0.1:4000'
+  'https://sujing.pages.dev'
 ]);
 
 const VISITOR_COOKIE = 'sujing_vid';
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 400;
+const HIT_RATE_LIMIT = 120;
+const HIT_RATE_WINDOW = 60 * 60;
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) return false;
+  if (ALLOWED_ORIGINS.has(origin)) return true;
+  try {
+    const url = new URL(origin);
+    return url.protocol === 'https:'
+      && (
+        url.hostname === 'sujing.pages.dev'
+        || url.hostname.endsWith('.sujing.pages.dev')
+      );
+  } catch {
+    return false;
+  }
+};
 
 const corsHeaders = (origin) => {
   const headers = new Headers({
@@ -18,7 +33,7 @@ const corsHeaders = (origin) => {
     'Cache-Control': 'no-store',
     'X-Content-Type-Options': 'nosniff'
   });
-  if (origin && ALLOWED_ORIGINS.has(origin)) {
+  if (isAllowedOrigin(origin)) {
     headers.set('Access-Control-Allow-Origin', origin);
     headers.set('Vary', 'Origin');
   }
@@ -64,10 +79,20 @@ const createVisitorId = () => {
 const normalizePath = (value) => {
   if (typeof value !== 'string' || !value) return '/';
   let path = value.split('?')[0].split('#')[0].trim();
+  for (let i = 0; i < 2; i += 1) {
+    if (!path.includes('%')) break;
+    try {
+      const decoded = decodeURIComponent(path);
+      if (decoded === path) break;
+      path = decoded;
+    } catch {
+      break;
+    }
+  }
   if (!path.startsWith('/')) path = `/${path}`;
   path = path.replace(/\/{2,}/g, '/');
   if (path.length > 1 && path.endsWith('/')) path = path.slice(0, -1);
-  if (path.length > 180) return null;
+  if ([...path].length > 240) return null;
   if (/[\u0000-\u001f\u007f]/.test(path)) return null;
   if (path.includes('\\') || path.includes('..')) return null;
   return path || '/';
@@ -79,6 +104,21 @@ const shouldSkipPath = (path) => {
   if (path.startsWith('/css/') || path.startsWith('/js/') || path.startsWith('/img/')) return true;
   if (/\.(?:js|css|map|png|jpe?g|webp|gif|svg|ico|mp3|flac|woff2?|ttf|txt|xml|json)$/i.test(path)) return true;
   return false;
+};
+
+const clientIp = (request) => (
+  request.headers.get('CF-Connecting-IP')
+  || request.headers.get('X-Forwarded-For')?.split(',')[0]?.trim()
+  || 'unknown'
+);
+
+const enforceHitRateLimit = async (env, request) => {
+  const ip = clientIp(request);
+  const key = `hit-rate:${ip}`;
+  const current = Number(await env.STATS.get(key)) || 0;
+  if (current >= HIT_RATE_LIMIT) return false;
+  await env.STATS.put(key, String(current + 1), { expirationTtl: HIT_RATE_WINDOW });
+  return true;
 };
 
 const readCount = async (env, key) => {
@@ -104,6 +144,15 @@ const collectStats = async (env, path) => ({
 });
 
 const handleHit = async (request, env, origin) => {
+  // 无 Origin / 非白名单：拒绝写入，避免 curl 刷量；本机预览也不计入线上
+  if (!isAllowedOrigin(origin)) {
+    return jsonResponse({ error: 'origin_not_allowed' }, 403, origin);
+  }
+
+  if (!(await enforceHitRateLimit(env, request))) {
+    return jsonResponse({ error: 'rate_limited' }, 429, origin);
+  }
+
   let body = {};
   try {
     body = await request.json();

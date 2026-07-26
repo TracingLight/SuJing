@@ -9,3 +9,7 @@ _multiconfig.yml
 .playwright-cli/
 output/
 tmp/
+.sujing-admin.json
+.sujing-admin-token
+.sujing-comments-admin.json
+.sujing-llm.json

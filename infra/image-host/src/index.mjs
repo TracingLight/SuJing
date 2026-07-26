@@ -18,7 +18,17 @@ const textResponse = (body, status, extraHeaders = {}) => {
 
 const getObjectKey = (url) => {
   try {
-    const key = decodeURIComponent(url.pathname.slice(1));
+    let key = url.pathname.slice(1);
+    for (let i = 0; i < 2; i += 1) {
+      if (!key.includes('%')) break;
+      try {
+        const decoded = decodeURIComponent(key);
+        if (decoded === key) break;
+        key = decoded;
+      } catch {
+        break;
+      }
+    }
     if (!key || key.includes('\\') || key.split('/').includes('..')) return null;
     return key;
   } catch {
