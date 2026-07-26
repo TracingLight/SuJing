@@ -24,6 +24,8 @@ npx hexo new post "文章标题"
 
 文章位于 `source/_posts/`。发布前补全分类、标签、摘要和封面，并确认文章中涉及的版本、数据与结论可以复核。
 
+本站 Markdown / Butterfly 标签说明见：[docs/写博客-Markdown语法.md](docs/写博客-Markdown语法.md)（含与常见 Markdown 的差异，以及预览与线上渲染不一致处）。
+
 ## 图片素材
 
 - 用户提供的原始图片放入 `assets/user/`
