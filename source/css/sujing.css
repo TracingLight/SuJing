@@ -532,12 +532,14 @@ html.sujing-starfield-dragging button {
 /* Interior headers: panoramic cover like a full banner, soft dissolve into page. */
 
 #page-header.post-bg {
+  --sujing-cover-x: 50%;
+  --sujing-cover-y: 20%;
   position: relative;
   height: clamp(420px, 52vh, 620px) !important;
   overflow: hidden;
   background-color: #0c1418;
-  /* Match source composition: subject on the right, full head in frame. */
-  background-position: 82% 28% !important;
+  /* 默认偏上保头；JS 可按比例/手调写入 --sujing-cover-x/y */
+  background-position: var(--sujing-cover-x) var(--sujing-cover-y) !important;
   background-size: cover !important;
   background-repeat: no-repeat !important;
   isolation: isolate;
@@ -553,7 +555,7 @@ html.sujing-post-atmosphere #web_bg::before {
   z-index: 0;
   pointer-events: none;
   background-image: var(--sujing-post-cover);
-  background-position: 70% 30%;
+  background-position: var(--sujing-cover-x, 50%) var(--sujing-cover-y, 28%);
   background-size: cover;
   opacity: 0.28;
   filter: blur(36px) saturate(1.08);
@@ -5399,7 +5401,8 @@ a.sujing-bento-card:hover::before {
 @media (max-width: 640px) {
   #page-header.post-bg {
     height: clamp(340px, 48vh, 440px) !important;
-    background-position: 88% 26% !important;
+    /* 沿用 --sujing-cover-x/y，勿写死 position，否则 CMS 焦点在窄屏无效 */
+    background-position: var(--sujing-cover-x) var(--sujing-cover-y) !important;
   }
 
   #page-header.not-home-page:not(.post-bg) {

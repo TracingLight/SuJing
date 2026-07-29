@@ -17,7 +17,7 @@ type: sujing-home
   </a>
 
   <section class="sujing-bento-hero" aria-labelledby="sujing-home-title" data-sujing-reveal>
-    <img class="no-lightbox" data-sujing-home-hero src="/img/user/illustrations/moonlit-observatory.webp" alt="黑发世界构筑者在月夜观星台展开星图，远处是云海古城与巨大满月" width="1672" height="941" loading="eager" fetchpriority="high">
+    <img class="no-lightbox" data-sujing-home-hero src="/img/covers/e-c-a-a-3.webp" alt="紫发武者与水龙，花叶飞散" width="1536" height="1024" loading="eager" fetchpriority="high">
     <div class="sujing-bento-hero-shade" aria-hidden="true"></div>
     <div class="sujing-bento-hero-copy">
       <p class="sujing-kicker">首页</p>

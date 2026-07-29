@@ -23,6 +23,7 @@ hexo.extend.generator.register('sujing-site-data', (locals) => {
     path: sitePath(post.path),
     source: post.source,
     cover: post.cover || '',
+    cover_position: post.cover_position || post.coverPosition || '',
     description: cleanText(post.description || post.excerpt).slice(0, 180),
     date: post.date.toISOString(),
     categories: post.categories.toArray().map((item) => item.name),

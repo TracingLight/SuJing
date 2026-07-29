@@ -203,7 +203,7 @@
           <a href="/notes/"><span>短讯</span><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
           <a href="/gallery/"><span>相册</span><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
           <a href="/music/"><span>音乐</span><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
-          <a href="/categories/"><span>主题</span><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+          <a href="/categories/"><span>分类</span><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
           <a href="/about/"><span>关于</span><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
         </nav>
         <div class="sujing-command-taxonomy">
@@ -867,24 +867,138 @@
     input.remove();
   };
 
-  const installPostAtmosphere = () => {
+  const parseCoverPosition = (value) => {
+    const text = String(value || '').trim();
+    if (!text) return null;
+    const parts = text.split(/\s+/).filter(Boolean);
+    if (parts.length < 2) return null;
+    return { x: parts[0], y: parts[1] };
+  };
+
+  const inferCoverFocusFromRatio = (width, height) => {
+    const w = Number(width) || 1;
+    const h = Number(height) || 1;
+    const ratio = w / h;
+    // 竖图/方图：更靠上保头；标准横图略上；超宽接近居中
+    if (ratio <= 0.9) return { x: '50%', y: '14%' };
+    if (ratio <= 1.15) return { x: '50%', y: '18%' };
+    if (ratio <= 1.55) return { x: '50%', y: '22%' };
+    if (ratio <= 1.9) return { x: '50%', y: '28%' };
+    return { x: '50%', y: '40%' };
+  };
+
+  const applyCoverFocus = (header, focus) => {
+    if (!header || !focus) return;
+    header.style.setProperty('--sujing-cover-x', focus.x);
+    header.style.setProperty('--sujing-cover-y', focus.y);
+    document.documentElement.style.setProperty('--sujing-cover-x', focus.x);
+    document.documentElement.style.setProperty('--sujing-cover-y', focus.y);
+
+    // PJAX 不换 head：同步 meta，避免下次软跳转读到上一篇的焦点
+    let meta = document.querySelector('meta[name="sujing-cover-position"]');
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.setAttribute('name', 'sujing-cover-position');
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute('content', `${focus.x} ${focus.y}`);
+
+    let style = document.getElementById('sujing-cover-focus-vars');
+    if (!style) {
+      style = document.createElement('style');
+      style.id = 'sujing-cover-focus-vars';
+      document.head.appendChild(style);
+    }
+    style.textContent = `#page-header.post-bg{--sujing-cover-x:${focus.x};--sujing-cover-y:${focus.y}}`;
+  };
+
+  const clearCoverFocus = () => {
+    const root = document.documentElement;
+    root.style.removeProperty('--sujing-cover-x');
+    root.style.removeProperty('--sujing-cover-y');
+    document.querySelector('meta[name="sujing-cover-position"]')?.remove();
+    document.getElementById('sujing-cover-focus-vars')?.remove();
+  };
+
+  const resolveCoverImageUrl = (header) => {
+    const inline = header.style.backgroundImage || header.getAttribute('style') || '';
+    const matched = inline.match(/url\((['"]?)(.*?)\1\)/i);
+    if (matched?.[2]) return matched[2].replace(/^['"]|['"]$/g, '');
+    const computed = window.getComputedStyle(header).backgroundImage;
+    const computedMatch = computed && computed !== 'none'
+      ? computed.match(/url\((['"]?)(.*?)\1\)/i)
+      : null;
+    return computedMatch?.[2] ? computedMatch[2].replace(/^['"]|['"]$/g, '') : '';
+  };
+
+  const resolvePostCoverFocus = async (header) => {
+    // 1) 顶栏 data / 行内变量（随 PJAX body 替换，优先）
+    const fromData = parseCoverPosition(header?.getAttribute('data-cover-position'));
+    if (fromData) return fromData;
+
+    // 2) 当前路径对应的 site-index（比残留 head meta 更可靠）
+    try {
+      const data = await loadSiteData();
+      const path = window.location.pathname.replace(/index\.html$/, '');
+      const normalized = path.endsWith('/') ? path : `${path}/`;
+      const post = data.posts?.find((item) => {
+        const itemPath = String(item.path || '');
+        return itemPath === path || itemPath === normalized || `${itemPath}/` === normalized;
+      });
+      const fromIndex = parseCoverPosition(post?.cover_position);
+      if (fromIndex) return fromIndex;
+    } catch {
+      // ignore
+    }
+
+    // 3) head meta（整页刷新时有；软跳转可能是上一篇残留）
+    return parseCoverPosition(
+      document.querySelector('meta[name="sujing-cover-position"]')?.getAttribute('content')
+    );
+  };
+
+  const installPostAtmosphere = async () => {
     const root = document.documentElement;
     const header = document.querySelector('#page-header.post-bg');
     document.getElementById('sujing-post-cover-stage')?.remove();
 
     root.classList.remove('sujing-post-atmosphere');
     root.style.removeProperty('--sujing-post-cover');
-    if (!header) return;
+    if (!header) {
+      clearCoverFocus();
+      return;
+    }
 
-    const inline = header.style.backgroundImage || header.getAttribute('style') || '';
-    const matched = inline.match(/url\((['"]?)(.*?)\1\)/i);
-    const image = matched?.[2]
-      ? `url("${matched[2]}")`
-      : window.getComputedStyle(header).backgroundImage;
+    // 行内 / data 焦点立刻生效，不依赖图片 URL 与异步 JSON
+    const eager = parseCoverPosition(header.getAttribute('data-cover-position'));
+    if (eager) applyCoverFocus(header, eager);
 
-    if (!image || image === 'none') return;
-    root.style.setProperty('--sujing-post-cover', image);
-    root.classList.add('sujing-post-atmosphere');
+    const imageUrl = resolveCoverImageUrl(header);
+    if (imageUrl) {
+      root.style.setProperty('--sujing-post-cover', `url("${imageUrl}")`);
+      root.classList.add('sujing-post-atmosphere');
+    }
+
+    const focus = eager || await resolvePostCoverFocus(header);
+    if (focus) {
+      applyCoverFocus(header, focus);
+      return;
+    }
+
+    if (!imageUrl) return;
+
+    await new Promise((resolve) => {
+      const probe = new Image();
+      probe.onload = () => {
+        applyCoverFocus(header, inferCoverFocusFromRatio(probe.naturalWidth, probe.naturalHeight));
+        resolve();
+      };
+      probe.onerror = () => {
+        applyCoverFocus(header, { x: '50%', y: '20%' });
+        resolve();
+      };
+      probe.src = imageUrl;
+    });
   };
 
   const installPostTools = async () => {

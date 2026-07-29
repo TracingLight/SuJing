@@ -10,7 +10,7 @@ menu:
   首页: / || fas fa-compass
   文章: /articles/ || fas fa-book-open
   归档: /archives/ || fas fa-box-archive
-  主题: /categories/ || fas fa-folder-open
+  分类: /categories/ || fas fa-folder-open
   短讯: /notes/ || fas fa-bolt
   相册: /gallery/ || fas fa-images
   音乐: /music/ || fas fa-music
@@ -264,8 +264,10 @@ pjax:
 inject:
   head:
     - <link rel="stylesheet" href="/css/sujing.css">
+    - <link rel="stylesheet" href="/css/sujing-admin.css">
   bottom:
     - <script src="/js/sujing.js" defer></script>
+    - <script src="/js/sujing-admin.js" defer></script>
 
 CDN:
   # Prefer cdnjs over jsDelivr for third-party assets in more network environments.
