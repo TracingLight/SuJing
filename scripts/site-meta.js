@@ -1,5 +1,8 @@
 'use strict';
 
+// Cloudflare / CI 默认 UTC 会把 permalink 日期拧一天；与 _config.yml timezone 对齐
+if (!process.env.TZ) process.env.TZ = 'Asia/Shanghai';
+
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');

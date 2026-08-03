@@ -13,10 +13,10 @@
     "node": ">=22 <25"
   },
   "scripts": {
-    "build": "hexo generate",
-    "check": "hexo clean && hexo generate",
-    "clean": "hexo clean",
-    "deploy": "hexo deploy",
+    "build": "node tools/hexo-tz.js generate",
+    "check": "node tools/hexo-tz.js clean && node tools/hexo-tz.js generate",
+    "clean": "node tools/hexo-tz.js clean",
+    "deploy": "node tools/hexo-tz.js deploy",
     "image:login": "npx wrangler login",
     "image:bucket": "npx wrangler r2 bucket create sujing-images",
     "image:deploy": "npx wrangler deploy --config infra/image-host/wrangler.jsonc",
@@ -25,7 +25,9 @@
     "comments:schema": "npx wrangler d1 execute sujing-comments --remote --file=infra/site-comments/schema.sql",
     "comments:deploy": "npx wrangler deploy --config infra/site-comments/wrangler.jsonc",
     "pages:deploy": "npm run check && wrangler pages deploy public --project-name sujing --branch main --commit-dirty=true",
-    "server": "hexo server"
+    "admin": "node tools/admin/start.js",
+    "admin:api": "node tools/admin/server.js",
+    "server": "node tools/hexo-tz.js server"
   },
   "hexo": {
     "version": "8.1.2"
@@ -48,6 +50,8 @@
     "hexo-wordcount": "^6.0.1"
   },
   "devDependencies": {
+    "busboy": "^1.6.0",
+    "js-yaml": "^4.3.0",
     "wrangler": "^4.112.0"
   }
 }
