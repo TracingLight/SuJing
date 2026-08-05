@@ -4511,6 +4511,13 @@ a.sujing-bento-card:hover::before {
   background-color: var(--sujing-paper) !important;
 }
 
+[data-theme='dark'] #article-container :not(pre) > code {
+  color: #ff8a7c !important;
+  background: rgba(255, 138, 124, 0.12) !important;
+  border: 1px solid rgba(255, 138, 124, 0.16);
+  font-weight: 600;
+}
+
 [data-theme='dark'] #page-header.not-top-img,
 [data-theme='dark'] #page-header.not-top-img #nav,
 [data-theme='dark'] #page-header.nav-fixed #nav {

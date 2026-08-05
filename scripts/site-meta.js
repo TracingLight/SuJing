@@ -94,6 +94,12 @@ hexo.extend.filter.register('after_render:html', (html, locals) => {
       `src="/js/sujing-admin.js?v=${sujingAdminJsVersion}"`
     );
 
+  // Butterfly's empty heading anchors expose their title twice to screen readers.
+  rendered = rendered.replace(
+    /<a href="([^"]+)" class="headerlink" title="[^"]*"><\/a>/g,
+    '<a href="$1" class="headerlink" aria-hidden="true" tabindex="-1"></a>'
+  );
+
   const page = locals?.page || {};
   const focus = parseCoverFocus(page);
   if (focus) {

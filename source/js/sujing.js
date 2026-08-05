@@ -1177,7 +1177,7 @@
     intro.setAttribute('data-sujing-reveal', '');
     intro.innerHTML = `
       <div><p class="sujing-kicker">文章</p><h1>文章库</h1></div>
-      <p>以游戏开发笔记为主，尽量写清方法与验证过程。</p>`;
+      <p>以游戏开发笔记为主，同时补齐计算机基础方面的知识。</p>`;
     recentPosts.prepend(intro);
   };
 
@@ -1287,7 +1287,7 @@
               <i class="fas fa-play" aria-hidden="true"></i>
             </button>`).join('')}
         </div>
-        <audio preload="metadata"></audio>
+        <audio preload="none"></audio>
       </section>`;
     document.body.appendChild(player);
     player.classList.add('list-open');
@@ -1311,6 +1311,7 @@
     const progress = player.querySelector('.sujing-music-progress');
     const progressBar = progress.querySelector('span');
     const trackButtons = [...player.querySelectorAll('.sujing-music-track')];
+    let pendingRestoreTime = 0;
     const persistMusicState = (extra = {}) => {
       writeMusicState({
         trackIndex: state.trackIndex,
@@ -1348,16 +1349,36 @@
     const setTrack = (index, { resetTime = true } = {}) => {
       state.trackIndex = (index + tracks.length) % tracks.length;
       const track = tracks[state.trackIndex];
-      audio.src = track.url;
       player.querySelector('.sujing-music-info strong').textContent = track.title || '未命名曲目';
       player.querySelector('.sujing-music-info span').textContent = track.artist || '未知作者';
       player.querySelector('.sujing-music-cover').src = track.cover || '/img/sujing-mark.svg';
-      if (resetTime) setProgress(0);
+      if (resetTime) {
+        pendingRestoreTime = 0;
+        setProgress(0);
+      }
       syncPlaylistActive();
       persistMusicState({ trackIndex: state.trackIndex });
     };
+    const ensureAudioSource = () => {
+      const track = tracks[state.trackIndex];
+      if (!track?.url) return false;
+      if (audio.dataset.trackIndex === String(state.trackIndex) && audio.getAttribute('src')) return true;
+
+      const restoreTime = pendingRestoreTime;
+      pendingRestoreTime = 0;
+      if (restoreTime > 0) {
+        audio.addEventListener('loadedmetadata', () => {
+          if (!Number.isFinite(audio.duration) || audio.duration <= 0) return;
+          audio.currentTime = Math.min(restoreTime, Math.max(audio.duration - 0.25, 0));
+          setProgress(audio.currentTime / audio.duration);
+        }, { once: true });
+      }
+      audio.dataset.trackIndex = String(state.trackIndex);
+      audio.src = track.url;
+      return true;
+    };
     const safePlay = async () => {
-      if (!audio.src) {
+      if (!ensureAudioSource()) {
         toast('当前曲目缺少音频地址');
         return;
       }
@@ -1391,17 +1412,11 @@
 
     const saved = readMusicState();
     const startIndex = Number.isInteger(saved?.trackIndex) ? saved.trackIndex : 0;
+    pendingRestoreTime = Number.isFinite(saved?.currentTime) && saved.currentTime > 0
+      ? saved.currentTime
+      : 0;
     setTrack(startIndex, { resetTime: false });
     if (saved?.panelOpen) setMusicOpen(true);
-    if (Number.isFinite(saved?.currentTime) && saved.currentTime > 0) {
-      const restoreTime = () => {
-        if (!Number.isFinite(audio.duration) || audio.duration <= 0) return;
-        audio.currentTime = Math.min(saved.currentTime, Math.max(audio.duration - 0.25, 0));
-        setProgress(audio.duration ? audio.currentTime / audio.duration : 0);
-      };
-      if (audio.readyState >= 1) restoreTime();
-      else audio.addEventListener('loadedmetadata', restoreTime, { once: true });
-    }
     if (saved?.playing) {
       window.setTimeout(() => { safePlay(); }, 0);
     }
@@ -1719,18 +1734,25 @@
     });
 
     if (reduced || !('IntersectionObserver' in window)) {
+      document.documentElement.classList.remove('sujing-motion');
       targets.forEach((target) => target.classList.add('is-visible'));
     } else {
-      if (!state.revealObserver) {
-        state.revealObserver = new IntersectionObserver((entries) => {
-          entries.forEach((entry) => {
-            if (!entry.isIntersecting) return;
-            entry.target.classList.add('is-visible');
-            state.revealObserver.unobserve(entry.target);
-          });
-        }, { threshold: 0.12, rootMargin: '0px 0px -36px' });
+      try {
+        if (!state.revealObserver) {
+          state.revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              entry.target.classList.add('is-visible');
+              state.revealObserver.unobserve(entry.target);
+            });
+          }, { threshold: 0.12, rootMargin: '0px 0px -36px' });
+        }
+        document.documentElement.classList.add('sujing-motion');
+        targets.forEach((target) => state.revealObserver.observe(target));
+      } catch {
+        document.documentElement.classList.remove('sujing-motion');
+        targets.forEach((target) => target.classList.add('is-visible'));
       }
-      targets.forEach((target) => state.revealObserver.observe(target));
     }
 
     if (reduced || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
@@ -1955,7 +1977,6 @@
   const installBindings = () => {
     if (document.documentElement.dataset.sujingBindings) return;
     document.documentElement.dataset.sujingBindings = 'true';
-    document.documentElement.classList.add('sujing-motion');
 
     document.addEventListener('pointerdown', createInteractionRipple, { passive: true });
     document.addEventListener('pointerdown', createSealStamp, { passive: true });

@@ -15,7 +15,7 @@ comments: true
       <p class="sujing-kicker">关于</p>
       <h1>溯光如初</h1>
       <p class="sujing-about-role">HELLO, I'M 溯光如初</p>
-      <p>你好，我是溯光如初。专注于 Unity 游戏客户端开发，也持续补齐计算机基础、图形学与跨引擎视野。溯境是我的个人站点：主线写技术实践，同时留下音乐、相册与生活痕迹。</p>
+      <p>你好，我是溯光如初。专注于 Unity 游戏客户端开发，也持续补齐计算机基础、图形学等相关内容。</p>
       <div class="sujing-about-links">
         <a href="https://github.com/TracingLight" target="_blank" rel="noopener noreferrer"><i class="fab fa-github" aria-hidden="true"></i>GitHub</a>
         <a href="mailto:suguangruchu@gmail.com"><i class="fas fa-envelope" aria-hidden="true"></i>Email</a>
