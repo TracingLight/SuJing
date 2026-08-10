@@ -52,6 +52,6 @@
   "devDependencies": {
     "busboy": "^1.6.0",
     "js-yaml": "^4.3.0",
-    "wrangler": "^4.112.0"
+    "wrangler": "^4.119.0"
   }
 }
