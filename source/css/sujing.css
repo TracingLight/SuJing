@@ -128,7 +128,7 @@ input:focus-visible {
   display: block;
   width: 100%;
   height: 100%;
-  opacity: 0.92;
+  opacity: 0.82;
   pointer-events: none;
   /* Light theme: ink dust on paper — multiply keeps teal/gold readable on white. */
   mix-blend-mode: multiply;
@@ -147,7 +147,7 @@ html.sujing-starfield-dragging button {
 }
 
 [data-theme='dark'] #sujing-starfield {
-  opacity: 1;
+  opacity: 0.9;
   mix-blend-mode: screen;
 }
 
@@ -1091,9 +1091,9 @@ a.sujing-button-primary:hover {
 a.sujing-bento-card:hover {
   color: var(--sujing-ink);
   border-color: rgba(26, 122, 130, 0.48);
-  box-shadow: 0 24px 54px rgba(20, 40, 47, 0.14);
+  box-shadow: 0 20px 44px rgba(20, 40, 47, 0.13);
   text-decoration: none !important;
-  transform: translateY(-5px);
+  transform: translateY(-3px);
 }
 
 a.sujing-bento-card:hover::before {
@@ -1162,12 +1162,16 @@ a.sujing-bento-card:hover::before {
 }
 
 .sujing-bento-latest h2 {
+  display: -webkit-box;
   margin: 16px 0 10px;
+  overflow: hidden;
   color: #fff;
-  font-size: 1.82rem;
+  font-size: 1.7rem;
   line-height: 1.28;
   letter-spacing: 0.08em;
   text-shadow: 0 2px 16px rgba(0, 0, 0, 0.28);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .sujing-bento-latest .sujing-bento-card-copy > p {
@@ -1829,8 +1833,8 @@ a.sujing-bento-card:hover::before {
 
 #recent-posts > .recent-post-items > .recent-post-item {
   display: grid;
-  min-height: 178px;
-  grid-template-columns: 260px minmax(0, 1fr);
+  min-height: 158px;
+  grid-template-columns: 238px minmax(0, 1fr);
   margin: 0 !important;
   overflow: hidden;
   border: 1px solid rgba(154, 123, 79, 0.22);
@@ -1847,9 +1851,9 @@ a.sujing-bento-card:hover::before {
 }
 
 #recent-posts .recent-post-item .post_cover {
-  width: 260px;
+  width: 238px;
   height: 100%;
-  min-height: 178px;
+  min-height: 158px;
   order: 0;
 }
 
@@ -1874,10 +1878,10 @@ a.sujing-bento-card:hover::before {
 #recent-posts .recent-post-item .recent-post-info {
   display: flex;
   width: 100%;
-  min-height: 178px;
+  min-height: 158px;
   flex-direction: column;
   justify-content: center;
-  padding: 26px 30px;
+  padding: 22px 26px;
 }
 
 #recent-posts .recent-post-item .article-title {
@@ -2150,10 +2154,13 @@ a.sujing-bento-card:hover::before {
 }
 
 .post-copyright {
+  margin-top: 16px !important;
+  padding: 18px 20px !important;
   border: 1px solid var(--sujing-line) !important;
   border-left: 4px solid var(--sujing-coral) !important;
   border-radius: 6px;
-  background: var(--sujing-paper) !important;
+  background: color-mix(in srgb, var(--sujing-paper) 86%, transparent) !important;
+  box-shadow: none !important;
 }
 
 /* 文末上一篇/下一篇：避免超宽矮条把封面人物头顶裁掉 */
@@ -2318,7 +2325,7 @@ a.sujing-bento-card:hover::before {
 
 .sujing-comments {
   position: relative;
-  margin: 36px 0 8px;
+  margin: 44px 0 8px;
   padding: 28px 26px 24px;
   border: 1px solid var(--sujing-glass-border);
   border-radius: 18px;
@@ -4806,7 +4813,7 @@ a.sujing-bento-card:hover::before {
 .sujing-archive-toolbar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 14px;
+  gap: 12px;
   align-items: center;
 }
 
@@ -4816,7 +4823,7 @@ a.sujing-bento-card:hover::before {
   grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 10px;
   align-items: center;
-  min-height: 52px;
+  min-height: 48px;
   padding: 0 14px 0 16px;
   border: 1px solid var(--sujing-glass-border);
   border-radius: 14px;
@@ -4894,7 +4901,7 @@ a.sujing-bento-card:hover::before {
   justify-content: center;
   gap: 8px;
   margin: 0;
-  padding: 12px 16px;
+  padding: 10px 15px;
   border: 0;
   border-radius: 10px;
   color: var(--sujing-muted);
@@ -4919,8 +4926,8 @@ a.sujing-bento-card:hover::before {
 
 .sujing-archive-filters {
   display: grid;
-  gap: 16px;
-  padding: 20px 22px;
+  gap: 12px;
+  padding: 16px 18px;
   border: 1px solid var(--sujing-glass-border);
   border-radius: 16px;
   background:
@@ -4957,7 +4964,7 @@ a.sujing-bento-card:hover::before {
   align-items: center;
   gap: 7px;
   margin: 0;
-  padding: 7px 12px;
+  padding: 6px 10px;
   border: 1px solid rgba(154, 123, 79, 0.28);
   border-radius: 999px;
   color: var(--sujing-ink-soft);
@@ -5520,6 +5527,16 @@ a.sujing-bento-card:hover::before {
     padding: 21px 20px;
   }
 
+  #recent-posts .recent-post-item .article-title {
+    font-size: 1.12rem;
+  }
+
+  .post #article-container figure.highlight table,
+  .post #article-container figure.highlight pre {
+    font-size: 0.78rem;
+    line-height: 1.65;
+  }
+
   #recent-posts .recent-post-item .article-meta-wrap {
     display: flex;
     flex-wrap: wrap;
@@ -5912,7 +5929,7 @@ a.sujing-bento-card:hover::before {
 
   .sujing-bento-latest h2 {
     margin: 10px 0 8px;
-    font-size: 1.28rem;
+    font-size: 1.2rem;
     letter-spacing: 0.05em;
     text-shadow: none;
   }
