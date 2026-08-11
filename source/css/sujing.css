@@ -969,7 +969,7 @@ a.sujing-button-primary:hover {
   position: relative;
   z-index: 1;
   display: flex;
-  width: min(640px, 74%);
+  width: min(700px, 78%);
   height: 100%;
   flex-direction: column;
   justify-content: center;
@@ -999,7 +999,7 @@ a.sujing-button-primary:hover {
 }
 
 .sujing-bento-hero-copy > p:last-of-type {
-  max-width: 560px;
+  max-width: 600px;
   margin: 0;
   color: rgba(255, 255, 255, 0.88);
   font-size: 0.98rem;
@@ -1327,6 +1327,7 @@ a.sujing-bento-card:hover::before {
 
 .sujing-bento-gallery {
   grid-column: span 8;
+  align-self: start;
   padding: 24px;
 }
 
@@ -1356,7 +1357,7 @@ a.sujing-bento-card:hover::before {
 
 .sujing-bento-gallery-empty {
   display: grid;
-  min-height: 286px;
+  min-height: 180px;
   place-content: center;
   justify-items: center;
   gap: 8px;
@@ -4479,6 +4480,13 @@ a.sujing-bento-card:hover::before {
 
 /* Dark mode */
 
+#article-container :not(pre) > code {
+  border: 1px solid rgba(180, 69, 58, 0.24);
+  color: #a8322a;
+  background: rgba(180, 69, 58, 0.11);
+  font-weight: 650;
+}
+
 [data-theme='dark'] {
   --sujing-paper: #11181c;
   --sujing-surface: #182227;
@@ -5430,12 +5438,15 @@ a.sujing-bento-card:hover::before {
 
   #page-header #site-title,
   #page-header .post-title {
-    font-size: 1.42rem;
+    font-size: 1.52rem;
+    line-height: 1.28;
+    letter-spacing: 0.04em;
   }
 
   #page-header #post-meta {
     margin-top: 8px;
-    font-size: 0.66rem;
+    font-size: 0.7rem;
+    line-height: 1.65;
   }
 
   #page-header.post-bg + #content-inner,
@@ -5935,6 +5946,11 @@ a.sujing-bento-card:hover::before {
 
   .sujing-bento-gallery {
     padding: 22px 20px 20px;
+  }
+
+  .sujing-bento-gallery-empty {
+    min-height: 150px;
+    padding: 22px 18px;
   }
 
   .sujing-bento-gallery > header {

@@ -1745,7 +1745,7 @@
               entry.target.classList.add('is-visible');
               state.revealObserver.unobserve(entry.target);
             });
-          }, { threshold: 0.12, rootMargin: '0px 0px -36px' });
+          }, { threshold: 0.12, rootMargin: '0px 0px 120px' });
         }
         document.documentElement.classList.add('sujing-motion');
         targets.forEach((target) => state.revealObserver.observe(target));
