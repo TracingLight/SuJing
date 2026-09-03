@@ -1,7 +1,7 @@
 ---
 title: new和delete的内部机制
 date: '2026-09-02 19:15:43'
-updated: '2026-09-02 19:32:55'
+updated: '2026-09-03 22:30:39'
 categories:
   - 学习笔记
 tags:
@@ -15,7 +15,7 @@ cover_position: 53.7% 45.7%
 
 ## 分配原始内存【operator new】
 
-核心概念：当编译器遇到 `new Complex(1,2)` 表达式时，并不会直接调用 `malloc`，而是先将其转化为对 <span style="color:#6600ff">operator new</span> 函数的调用。这个函数是 C++ 标准库提供的全局函数，内部本质上就是调用 `malloc` 来申请一块未初始化、未构造的原始内存（raw memory）。
+核心概念：当编译器遇到 `new Complex(1,2)` 表达式时，并不会直接调用 `malloc`，而是先将其转化为对 <span style="color:#177e89">operator new </span>函数的调用。这个函数是 C++ 标准库提供的全局函数，内部本质上就是调用 `malloc` 来申请一块未初始化、未构造的原始内存（raw memory）。
 
 大小参数：`operator new` 接受 `size_t` 参数，编译器根据 `sizeof(类型)` 自动生成，例如 `sizeof(Complex)` 为两个 `double`（通常 16 字节或更大）。
 
@@ -34,7 +34,7 @@ void* p = malloc(sizeof(Complex));        // 只分配原始内存，不调用�
 
 ## 类型转换【static_cast】
 
-核心概念：<span style="color:#6600ff">operator new</span> 返回的是 `void*`（无类型指针），而我们需要的是指向特定类型（如 `Complex*`）的指针，以便后续调用构造函数以及用户使用。第二步是一个纯编译期完成的类型转换，由编译器插入一条 `static_cast` 指令。
+核心概念：<span style="color:#177e89">operator new</span> 返回的是 `void*`（无类型指针），而我们需要的是指向特定类型（如 `Complex*`）的指针，以便后续调用构造函数以及用户使用。第二步是一个纯编译期完成的类型转换，由编译器插入一条 `static_cast` 指令。
 
 ```cpp
 void* temp = operator new(sizeof(Complex));
@@ -58,7 +58,7 @@ pc->Complex::Complex(1,2);                           // 步骤3：调用构造�
 
 ## 析构与释放
 
-对称结构：<span style="color:#6600ff">delete pc;</span> 表达式被编译器分解为两步，顺序与 new 恰好相反：先调用析构函数（清理对象内部动态资源），再释放原始内存（通过 <span style="color:#6600ff">operator delete</span>，内部调用 <span style="color:#6600ff">free</span>）。
+对称结构：<span style="color:#177e89">delete pc;</span> 表达式被编译器分解为两步，顺序与 new 恰好相反：先调用析构函数（清理对象内部动态资源），再释放原始内存（通过 <span style="color:#177e89">operator delete</span>，内部调用<span style="color:#177e89">free</span>）。
 
 ![image](/img/posts/image-mtk02en7.png)
 
