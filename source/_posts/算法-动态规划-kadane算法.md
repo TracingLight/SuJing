@@ -11,7 +11,6 @@ tags:
 description: 本文介绍了LeetCode Hot100中“最大子数组和”问题，并给出了从暴力枚举到动态规划及Kadane算法的多种解法与优化思路。
 cover: /img/covers/e-aa-3-4-a-mtiqcpnn.webp
 copyright: true
-cover_position: 50.9% 28.3%
 ---
 
 ## 题目
