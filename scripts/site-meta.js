@@ -64,17 +64,43 @@ const applyCoverFocusToHeader = (html, focus) => {
   );
 };
 
+// Markdown code spans normally escape HTML. The editor intentionally allows
+// `O(n<sup>2</sup>)` syntax, so restore only bare sup/sub tags outside fenced
+// code blocks; arbitrary tags and attributes remain escaped.
+const restoreInlineSupSub = (html) => html.replace(
+  /<code\b([^>]*)>([\s\S]*?)<\/code>/gi,
+  (full, attrs, body, offset, source) => {
+    const before = source.slice(0, offset);
+    if (/<pre\b[\s\S]*>[^<]*$/i.test(before) && !/<\/pre>\s*$/i.test(before)) return full;
+    const restored = body.replace(
+      /&lt;(sup|sub)&gt;([^<]*?)&lt;\/\1&gt;/gi,
+      (_, tag, inner) => `<${String(tag).toLowerCase()}>${inner}</${String(tag).toLowerCase()}>`
+    );
+    return restored === body ? full : `<code${attrs}>${restored}</code>`;
+  }
+);
+
+// Preserve the convenient Markdown form `O(n<sup>2</sup>)` while preventing
+// marked from treating the tags as literal code text.
+hexo.extend.filter.register('before_post_render', (data) => {
+  if (!data || typeof data.content !== 'string') return data;
+  data.content = data.content.replace(
+    /`([^`\n]*<(sup|sub)>[A-Za-z0-9]+<\/\2>[^`\n]*)`/gi,
+    (full, body) => (/^[A-Za-z0-9\s()[\]+\-*/×.<>/]+$/.test(body) ? `<code>${body}</code>` : full)
+  );
+  return data;
+}, 1000);
+
 hexo.extend.filter.register('after_render:html', (html, locals) => {
   // 每次渲染重算：本地改 CSS/JS 后不必重启 hexo 也能换 ?v=
   const sujingCssVersion = assetVersion('source/css/sujing.css');
   const sujingJsVersion = assetVersion('source/js/sujing.js');
-  const sujingAdminCssVersion = assetVersion('source/css/sujing-admin.css');
-  const sujingAdminJsVersion = assetVersion('source/js/sujing-admin.js');
+  const sujingAdminLoaderVersion = assetVersion('source/js/sujing-admin-loader.js');
 
   let rendered = html
     .replace(
       '<title>溯境 | 溯境</title>',
-      '<title>溯境 - 写游戏，也记日常</title>'
+      '<title>溯境</title>'
     )
     .replace('<script type="application/ld+json"></script>', '')
     .replace(
@@ -82,16 +108,12 @@ hexo.extend.filter.register('after_render:html', (html, locals) => {
       `href="/css/sujing.css?v=${sujingCssVersion}"`
     )
     .replace(
-      'href="/css/sujing-admin.css"',
-      `href="/css/sujing-admin.css?v=${sujingAdminCssVersion}"`
-    )
-    .replace(
       'src="/js/sujing.js"',
       `src="/js/sujing.js?v=${sujingJsVersion}"`
     )
     .replace(
-      'src="/js/sujing-admin.js"',
-      `src="/js/sujing-admin.js?v=${sujingAdminJsVersion}"`
+      'src="/js/sujing-admin-loader.js"',
+      `src="/js/sujing-admin-loader.js?v=${sujingAdminLoaderVersion}"`
     );
 
   // Butterfly's empty heading anchors expose their title twice to screen readers.
@@ -99,6 +121,8 @@ hexo.extend.filter.register('after_render:html', (html, locals) => {
     /<a href="([^"]+)" class="headerlink" title="[^"]*"><\/a>/g,
     '<a href="$1" class="headerlink" aria-hidden="true" tabindex="-1"></a>'
   );
+
+  rendered = restoreInlineSupSub(rendered);
 
   const page = locals?.page || {};
   const focus = parseCoverFocus(page);
@@ -116,4 +140,4 @@ hexo.extend.filter.register('after_render:html', (html, locals) => {
   return rendered
     .replace('<div class="avatar-img text-center"></div>', '')
     .replace(/<div class="site-data text-center">[\s\S]*?(?=<div class="menus_items">)/, '');
-});
+}, 1000);
