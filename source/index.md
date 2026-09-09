@@ -46,10 +46,10 @@ type: sujing-home
     <section class="sujing-bento-card sujing-bento-tracks" aria-labelledby="sujing-tracks-title" data-sujing-reveal>
       <header><p class="sujing-kicker">主题</p><h2 id="sujing-tracks-title">技术入口</h2></header>
       <nav aria-label="技术主题">
-        <a href="/tags/Unity/"><span>01</span><i class="fab fa-unity" aria-hidden="true"></i><strong>Unity 工程实践</strong><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
-        <a href="/articles/"><span>02</span><i class="fas fa-code" aria-hidden="true"></i><strong>编程语言</strong><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
-        <a href="/categories/"><span>03</span><i class="fas fa-microchip" aria-hidden="true"></i><strong>计算机基础</strong><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
-        <a href="/tags/"><span>04</span><i class="fas fa-cube" aria-hidden="true"></i><strong>图形与引擎</strong><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+        <a href="/tags/Unity/" data-home-topic><span>01</span><i class="fab fa-unity" aria-hidden="true"></i><strong>Unity 工程实践</strong><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+        <a href="/articles/" data-home-topic><span>02</span><i class="fas fa-code" aria-hidden="true"></i><strong>编程语言</strong><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+        <a href="/categories/" data-home-topic><span>03</span><i class="fas fa-microchip" aria-hidden="true"></i><strong>计算机基础</strong><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+        <a href="/tags/" data-home-topic><span>04</span><i class="fas fa-cube" aria-hidden="true"></i><strong>图形与引擎</strong><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
       </nav>
     </section>
     <section class="sujing-bento-card sujing-bento-gallery" aria-labelledby="sujing-gallery-title" data-sujing-reveal>
@@ -71,11 +71,7 @@ type: sujing-home
         <p data-sujing-home-note>溯境第一版已上线，后续将陆续补充技术笔记与生活记录。</p>
         <span>查看短讯 <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
       </a>
-      <a class="sujing-bento-card sujing-bento-profile" href="/about/" data-sujing-reveal>
-        <img class="no-lightbox" src="https://img.sujing.dev/avatar/2026/07/site-avatar-1ffd3ccb42df.webp" alt="溯光如初的头像" width="512" height="512" loading="lazy">
-        <div><p class="sujing-kicker">关于</p><h2>溯光如初</h2><span>Unity 游戏客户端开发</span></div>
-        <i class="fas fa-arrow-right" aria-hidden="true"></i>
-      </a>
+      <a class="sujing-bento-card sujing-bento-profile" href="/about/" data-sujing-reveal><img class="no-lightbox" src="https://img.sujing.dev/avatar/2026/07/site-avatar-1ffd3ccb42df.webp" alt="溯光如初的头像" width="512" height="512" loading="lazy"><div><p class="sujing-kicker">关于</p><h2>溯光如初</h2><span>Unity 游戏客户端开发</span></div><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
     </aside>
   </div>
 
