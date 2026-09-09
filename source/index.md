@@ -43,15 +43,6 @@ type: sujing-home
         <span class="sujing-bento-link">继续阅读 <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
       </div>
     </a>
-    <section class="sujing-bento-card sujing-bento-tracks" aria-labelledby="sujing-tracks-title" data-sujing-reveal>
-      <header><p class="sujing-kicker">主题</p><h2 id="sujing-tracks-title">技术入口</h2></header>
-      <nav aria-label="技术主题">
-        <a href="/tags/Unity/" data-home-topic><span>01</span><i class="fab fa-unity" aria-hidden="true"></i><strong>Unity 工程实践</strong><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
-        <a href="/articles/" data-home-topic><span>02</span><i class="fas fa-code" aria-hidden="true"></i><strong>编程语言</strong><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
-        <a href="/categories/" data-home-topic><span>03</span><i class="fas fa-microchip" aria-hidden="true"></i><strong>计算机基础</strong><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
-        <a href="/tags/" data-home-topic><span>04</span><i class="fas fa-cube" aria-hidden="true"></i><strong>图形与引擎</strong><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
-      </nav>
-    </section>
     <section class="sujing-bento-card sujing-bento-gallery" aria-labelledby="sujing-gallery-title" data-sujing-reveal>
       <header>
         <div><p class="sujing-kicker">图录</p><h2 id="sujing-gallery-title">相册预览</h2></div>
