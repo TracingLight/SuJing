@@ -72,7 +72,7 @@ type: sujing-home
         <span>查看短讯 <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
       </a>
       <a class="sujing-bento-card sujing-bento-profile" href="/about/" data-sujing-reveal>
-        <img class="no-lightbox" src="https://img.sujing.dev/avatar/2026/07/site-avatar-1ffd3ccb42df.webp" alt="溯光如初的头像" width="512" height="512" loading="lazy">
+        <img class="no-lightbox" src="https://img.sujing.dev/avatar/2026/09/image-1846f312ad8a.jpg" alt="溯光如初的头像" width="4000" height="4000" loading="lazy">
         <div><p class="sujing-kicker">关于</p><h2>溯光如初</h2><span>Unity 游戏客户端开发</span></div>
         <i class="fas fa-arrow-right" aria-hidden="true"></i>
       </a>
