@@ -9,6 +9,21 @@ comments: true
 ---
 
 <div class="sujing-about" data-sujing-reveal>
+  <header class="sujing-about-profile">
+    <img src="https://img.sujing.dev/avatar/2026/09/image-1846f312ad8a.jpg" alt="溯光如初的头像" width="4000" height="4000">
+    <div>
+      <p class="sujing-kicker">关于</p>
+      <h1>溯光如初</h1>
+      <p class="sujing-about-role">HELLO, I'M 溯光如初</p>
+      <p>你好，我是溯光如初。专注于 Unity 游戏客户端开发，也持续补齐计算机基础、图形学等相关内容。</p>
+      <div class="sujing-about-links">
+        <a href="https://github.com/TracingLight" target="_blank" rel="noopener noreferrer"><i class="fab fa-github" aria-hidden="true"></i>GitHub</a>
+        <a href="mailto:suguangruchu@gmail.com"><i class="fas fa-envelope" aria-hidden="true"></i>Email</a>
+        <a href="/archives/"><i class="fas fa-box-archive" aria-hidden="true"></i>文章卷宗</a>
+      </div>
+    </div>
+  </header>
+
   <section class="sujing-about-section">
     <p class="sujing-kicker">主线</p>
     <h2>游戏开发与学习方向</h2>
