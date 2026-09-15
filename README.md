@@ -1,6 +1,6 @@
 # 溯境
 
-溯光如初的游戏开发技术博客，基于 Hexo 与 Butterfly 构建，部署于 Cloudflare Pages。
+该博客基于 Hexo 与 Butterfly 构建，部署于 Cloudflare Pages。
 
 - Website: <https://sujing.dev>
 - Repository: <https://github.com/TracingLight/SuJing>
