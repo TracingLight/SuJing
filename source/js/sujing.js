@@ -1591,7 +1591,7 @@
       });
       const years = [...groups.keys()].sort((a, b) => b.localeCompare(a));
       return `<div class="sujing-archive-timeline">${years.map((year) => `
-        <section class="sujing-archive-year" data-sujing-reveal>
+        <section class="sujing-archive-year">
           <header class="sujing-archive-year-head">
             <span>${escapeHtml(year)}</span>
             <small>${groups.get(year).length} 篇</small>
