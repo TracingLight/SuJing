@@ -95,25 +95,33 @@ npm run image:upload -- assets/user/screenshots/example.png screenshots
 
 ```bash
 npm run check
+npm run check:performance-build
 ```
 
-该命令会清理旧产物并重新生成站点。输出目录为 `public/`。
+`npm run check` 会清理旧产物并重新生成站点，输出目录为 `public/`。
+
+`npm run check:performance-build` 校验的是真正上线的 HTML：最新文章已预渲染、首屏图 eager、第三方资源已本地化、每个响应式图片候选都存在且小于原图、缓存头生效。
 
 ## Cloudflare Pages
 
 - Project: `sujing`
 - Production branch: `main`
-- Build command: `npm run build`
 - Build output directory: `public`
 - Node.js version: `22`
 
-当前可通过以下命令清理、构建并部署生产版本：
+发布使用本地构建后直接上传，`public/` 就是线上产物：
 
 ```bash
 npm run pages:deploy
 ```
 
-GitHub 仓库已接入 Cloudflare Pages，推送到 `main` 会自动构建并发布。站点主域名：
+该命令依次执行 `npm run check`（构建）、`npm run prune`（把仅本机使用的资源从产物中移除并复查无残留）、`npm run check:performance-build`（产物验收）、`wrangler pages deploy`。
+
+> 本仓库是经过裁剪的公开子集，部分只在本机使用的资源与脚本不在版本控制内。
+> 因此**不要**让 Cloudflare Pages 从 GitHub 仓库自动构建——那样产出的站点会缺少这些本地资源。
+> 请保持 Pages 项目的 Git 集成关闭，只用上面的命令发布。
+
+站点主域名：
 
 <https://sujing.dev>
 
