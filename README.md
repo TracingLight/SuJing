@@ -117,6 +117,15 @@ npm run check:performance-build
 
 两条路径写入同一个生产环境，后执行的一方覆盖前一方。推送前请确认内容已提交，否则 Git 构建会把尚未提交的文章回退掉。
 
+### 下线资源
+
+Cloudflare Pages 在新部署缺少某个文件时，会回落到历史部署里的同名文件：文件已经从 `source/` 删掉、产物里也没有了，线上按老路径请求仍然返回 200，清缓存也不解决。因此下线一个资源必须同时做两件事：
+
+1. 从 `source/` 移除（本地直传时 `npm run prune` 还会把它从产物里摘掉）；
+2. 在 `scripts/site-redirects.js` 的名单里登记该路径，构建时生成的 `_redirects` 会把它固定为 404。
+
+`npm run check:performance-build` 会校验 `_redirects` 存在且规则生效。
+
 站点主域名：
 
 <https://sujing.dev>

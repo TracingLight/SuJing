@@ -86,6 +86,8 @@ assert.ok(variants > 0, '没有生成任何响应式图片派生文件');
 const articles = cheerio.load(fs.readFileSync(path.join(root, 'articles/index.html'), 'utf8'));
 assert.equal(articles('.sujing-list-intro').length, 1);
 assert.match(fs.readFileSync(path.join(root, '_headers'), 'utf8'), /immutable/);
+// 下线的历史资源必须通过 _redirects 显式拦截，否则 Pages 会回落到历史部署里的同名文件
+assert.match(fs.readFileSync(path.join(root, '_redirects'), 'utf8'), /\/404\.html\s+404/);
 
 console.log(
   `Build checks passed: 最新文章预渲染、首屏 eager、依赖本地化、${imagesWithSrcset} 张图共 ${variants} 个响应式引用、列表布局、缓存头。`
