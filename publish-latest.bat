@@ -2,7 +2,7 @@
 setlocal
 cd /d "%~dp0"
 
-echo Publishing the newest blog post to origin/main...
+echo Checking and publishing the site to GitHub (Cloudflare Pages builds automatically)...
 powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\publish-latest.ps1"
 set "EXIT_CODE=%ERRORLEVEL%"
 

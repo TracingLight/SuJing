@@ -20,3 +20,7 @@ source/css/sujing-admin.css
 source/js/sujing-admin.js
 source/js/sujing-admin-loader.js
 scripts/admin-assets.js
+
+# 本地归档与重复原图，不随整站发布提交
+assets/_archive/
+assets/user/duplicates/

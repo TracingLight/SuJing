@@ -16,6 +16,18 @@ npm run server
 
 默认访问地址为 `http://localhost:4000`。
 
+### Windows 快速打开本机控制台
+
+双击项目根目录的 `start-console.bat`，启动管理 API 和博客预览，页面就绪后自动打开浏览器。在博客右下角点击「管」，首次使用时粘贴启动窗口显示的 Token。保留启动窗口，按 `Ctrl+C` 停止服务。服务已运行时，再次启动会直接打开页面。
+
+运行以下命令，可在桌面创建带小猫图标的「溯境控制台」快捷方式；移动项目后重新运行即可更新路径：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\install-console-shortcut.ps1
+```
+
+本机控制台依赖 `tools/admin/`（按现有仓库规则仅保存在本机）。首次使用前先安装项目依赖。
+
 ## 写作
 
 ```bash
@@ -110,12 +122,17 @@ npm run check:performance-build
 - Build output directory: `public`
 - Node.js version: `22`
 
-仓库可以独立构建（`scripts/local-vendor.js` 与 `scripts/responsive-images.js` 已纳入版本控制，第三方资源与响应式图片都在构建期生成），因此下面两条发布路径都可用：
+日常发布使用桌面「溯境控制台」：修改内容 → 写入本地 → 预览 → 在「发布」页点击 **提交并发布（GitHub → Pages）**。
 
-- **本地直传**：`npm run pages:deploy`，依次执行 `npm run check`（构建）、`npm run prune`（把仅本机使用的资源从产物中移除并复查无残留）、`npm run check:performance-build`（产物验收）、`wrangler pages deploy`。工作区里未提交的内容也会一并发布。
-- **Git 构建**：推送到 `main` 后由 Pages 自动构建，只包含仓库里已提交的内容。
+按钮依次执行本地构建、产物裁剪和验收，然后将全部未被 Git 忽略的项目修改（新增、修改、删除）提交到 main 并推送 GitHub，由 Cloudflare Pages 自动构建上线。文章、图片、配置和代码会一起同步；密钥、本机控制台、归档与重复原图按 .gitignore 排除。原本已经被 Git 跟踪的文件仍会提交。发布前请确认本地修改均可公开。
 
-两条路径写入同一个生产环境，后执行的一方覆盖前一方。推送前请确认内容已提交，否则 Git 构建会把尚未提交的文章回退掉。
+命令行入口为 npm run publish:site；旧的 publish-latest.bat 也已接入同一流程，不再只选最新文章。
+
+要求处于 main 分支，且远端没有本机尚未合并的提交。构建或推送失败会停止并记录错误；推送失败时保留本地提交，修复后再次点击即可重试，不执行强制推送或自动合并。没有文件修改时仍会推送此前尚未上传的提交。
+
+**GitHub 同步成功不代表已经上线。** 页面会提示查看 Cloudflare 部署记录；云端构建失败应在修复后重新提交发布。
+
+npm run pages:deploy 保留为需要手动执行的本地直传入口，不会自动提交 Git。日常使用上面的统一发布入口，避免与 Git 自动部署交替覆盖。
 
 ### 下线资源
 
