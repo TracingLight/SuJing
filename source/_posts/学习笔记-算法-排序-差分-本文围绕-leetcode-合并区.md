@@ -11,6 +11,7 @@ tags:
 description: 本文围绕 LeetCode “合并区间” 问题，依次介绍了暴力、排序后合并和基于坐标范围的差分三种解法，并给出了复杂度分析。
 cover: /img/covers/e-aa-3-4-a-mtlmv9ch.webp
 copyright: true
+cover_position: 50.9% 33.9%
 ---
 
 ## 题目

@@ -1,7 +1,7 @@
 ---
 title: LeetCode-Hot1100：矩阵置零
 date: '2026-09-16 23:01:18'
-updated: '2026-09-16 23:01:18'
+updated: '2026-09-18 23:07:43'
 categories:
   - 学习笔记
 tags:
@@ -16,7 +16,7 @@ cover_position: 50.9% 33.9%
 
 ## 题目
 
-![image](/img/posts/image-mu488j69.png)
+![image](/img/posts/image-mu73ejah.png)
 
 ## 暴力
 

@@ -10,6 +10,7 @@ tags:
 description: 介绍LeetCode轮转数组问题的三种解法，包括暴力移位、额外数组以及三次反转的最优实现。
 cover: /img/covers/e-aa-3-4-a-mtn132pa.webp
 copyright: true
+cover_position: 50.9% 33.9%
 ---
 
 ## 题目
