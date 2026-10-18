@@ -106,20 +106,16 @@ npm run check:performance-build
 
 - Project: `sujing`
 - Production branch: `main`
+- Build command: `npm run build`
 - Build output directory: `public`
 - Node.js version: `22`
 
-发布使用本地构建后直接上传，`public/` 就是线上产物：
+仓库可以独立构建（`scripts/local-vendor.js` 与 `scripts/responsive-images.js` 已纳入版本控制，第三方资源与响应式图片都在构建期生成），因此下面两条发布路径都可用：
 
-```bash
-npm run pages:deploy
-```
+- **本地直传**：`npm run pages:deploy`，依次执行 `npm run check`（构建）、`npm run prune`（把仅本机使用的资源从产物中移除并复查无残留）、`npm run check:performance-build`（产物验收）、`wrangler pages deploy`。工作区里未提交的内容也会一并发布。
+- **Git 构建**：推送到 `main` 后由 Pages 自动构建，只包含仓库里已提交的内容。
 
-该命令依次执行 `npm run check`（构建）、`npm run prune`（把仅本机使用的资源从产物中移除并复查无残留）、`npm run check:performance-build`（产物验收）、`wrangler pages deploy`。
-
-> 本仓库是经过裁剪的公开子集，部分只在本机使用的资源与脚本不在版本控制内。
-> 因此**不要**让 Cloudflare Pages 从 GitHub 仓库自动构建——那样产出的站点会缺少这些本地资源。
-> 请保持 Pages 项目的 Git 集成关闭，只用上面的命令发布。
+两条路径写入同一个生产环境，后执行的一方覆盖前一方。推送前请确认内容已提交，否则 Git 构建会把尚未提交的文章回退掉。
 
 站点主域名：
 
