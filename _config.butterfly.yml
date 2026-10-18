@@ -264,10 +264,8 @@ pjax:
 inject:
   head:
     - <link rel="stylesheet" href="/css/sujing.css">
-    - <link rel="stylesheet" href="/css/sujing-admin.css">
   bottom:
     - <script src="/js/sujing.js" defer></script>
-    - <script src="/js/sujing-admin.js" defer></script>
 
 CDN:
   # Prefer cdnjs over jsDelivr for third-party assets in more network environments.

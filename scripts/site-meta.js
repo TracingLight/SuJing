@@ -95,7 +95,6 @@ hexo.extend.filter.register('after_render:html', (html, locals) => {
   // 每次渲染重算：本地改 CSS/JS 后不必重启 hexo 也能换 ?v=
   const sujingCssVersion = assetVersion('source/css/sujing.css');
   const sujingJsVersion = assetVersion('source/js/sujing.js');
-  const sujingAdminLoaderVersion = assetVersion('source/js/sujing-admin-loader.js');
 
   let rendered = html
     .replace(
@@ -110,10 +109,6 @@ hexo.extend.filter.register('after_render:html', (html, locals) => {
     .replace(
       'src="/js/sujing.js"',
       `src="/js/sujing.js?v=${sujingJsVersion}"`
-    )
-    .replace(
-      'src="/js/sujing-admin-loader.js"',
-      `src="/js/sujing-admin-loader.js?v=${sujingAdminLoaderVersion}"`
     );
 
   // Butterfly's empty heading anchors expose their title twice to screen readers.

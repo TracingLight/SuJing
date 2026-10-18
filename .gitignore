@@ -13,3 +13,10 @@ tmp/
 .sujing-admin-token
 .sujing-comments-admin.json
 .sujing-llm.json
+
+# 本机管理控制台：只在本机运行，绝不被 git add -A 顺手带进公开仓库
+tools/admin/
+source/css/sujing-admin.css
+source/js/sujing-admin.js
+source/js/sujing-admin-loader.js
+scripts/admin-assets.js
