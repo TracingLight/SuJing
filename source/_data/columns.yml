@@ -1,0 +1,20 @@
+- name: Unity
+  slug: unity
+  icon: fab fa-unity
+  description: Unity 游戏客户端开发、工具和工程实践
+- name: C#
+  slug: csharp
+  icon: fas fa-code
+  description: C# 语言、运行时和工程应用
+- name: C++
+  slug: cpp
+  icon: fas fa-terminal
+  description: C++ 语言、面向对象和底层实践
+- name: 计算机基础
+  slug: computer-basics
+  icon: fas fa-microchip
+  description: 数据结构、算法、系统与计算机基础知识
+- name: 设计模式
+  slug: design-patterns
+  icon: fas fa-diagram-project
+  description: 面向对象设计与常用设计模式

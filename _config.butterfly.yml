@@ -9,6 +9,12 @@ nav:
 menu:
   首页: / || fas fa-compass
   文章: /articles/ || fas fa-book-open
+  专栏||fas fa-layer-group:
+    Unity: /columns/unity/ || fab fa-unity
+    C#: /columns/csharp/ || fas fa-code
+    C++: /columns/cpp/ || fas fa-terminal
+    计算机基础: /columns/computer-basics/ || fas fa-sitemap
+    设计模式: /columns/design-patterns/ || fas fa-diagram-project
   归档: /archives/ || fas fa-box-archive
   分类: /categories/ || fas fa-folder-open
   短讯: /notes/ || fas fa-bolt

@@ -9,6 +9,8 @@ const cleanText = (value) => String(value || '')
 
 const sitePath = (value) => `/${String(value || '').replace(/^\/+/, '')}`;
 
+const normalizeColumnName = (value) => String(value || '').trim().toLocaleLowerCase('zh-CN');
+
 const countWords = (content) => {
   const text = String(content || '').replace(/<[^>]*>/g, ' ');
   const cn = (text.match(/[\u4E00-\u9FA5]/g) || []).length;
@@ -51,6 +53,23 @@ hexo.extend.generator.register('sujing-site-data', (locals) => {
     .sort((a, b) => b.date.localeCompare(a.date));
   const gallery = locals.data.gallery || { title: '溯境相册', albums: [] };
   const albums = Array.isArray(gallery.albums) ? gallery.albums : [];
+  const configuredColumns = Array.isArray(locals.data.columns) ? locals.data.columns : [];
+  const columns = configuredColumns
+    .map((column) => ({
+      name: String(column.name || '').trim(),
+      slug: String(column.slug || '').trim(),
+      icon: String(column.icon || '').trim(),
+      description: String(column.description || '').trim()
+    }))
+    .filter((column) => column.name && column.slug)
+    .map((column) => ({
+      ...column,
+      path: `/columns/${column.slug}/`,
+      count: posts.filter((post) => {
+        const values = [...post.categories, ...post.tags].map(normalizeColumnName);
+        return values.includes(normalizeColumnName(column.name));
+      }).length
+    }));
   const words = rawPosts.reduce((sum, post) => sum + countWords(post.content), 0);
   const sinceCandidates = [
     SITE_SINCE,
@@ -71,6 +90,6 @@ hexo.extend.generator.register('sujing-site-data', (locals) => {
 
   return {
     path: 'site-index.json',
-    data: JSON.stringify({ posts, categories, tags, music, notes, gallery, stats })
+    data: JSON.stringify({ posts, categories, tags, music, notes, gallery, columns, stats })
   };
 });

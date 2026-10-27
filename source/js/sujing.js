@@ -11,6 +11,7 @@
     scrollFrame: null,
     statsPath: '',
     statsPending: false,
+    navDropdownResizeBound: false,
     starfield: {
       canvas: null,
       context: null,
@@ -91,6 +92,7 @@
             music: { tracks: [] },
             notes: [],
             gallery: { albums: [] },
+            columns: [],
             stats: {
               posts: 0,
               categories: 0,
@@ -120,6 +122,62 @@
     element.classList.add('show');
     clearTimeout(element.hideTimer);
     element.hideTimer = window.setTimeout(() => element.classList.remove('show'), 1800);
+  };
+
+  const closeAnnotations = (except = null) => {
+    document.querySelectorAll('[data-sujing-annotation].is-open').forEach((annotation) => {
+      if (annotation === except) return;
+      annotation.classList.remove('is-open');
+      annotation.setAttribute('aria-expanded', 'false');
+      annotation.querySelector('[role="tooltip"]')?.setAttribute('aria-hidden', 'true');
+    });
+  };
+
+  const toggleAnnotation = (annotation, force) => {
+    if (!annotation) return;
+    const open = force == null ? !annotation.classList.contains('is-open') : Boolean(force);
+    closeAnnotations(open ? annotation : null);
+    annotation.classList.toggle('is-open', open);
+    annotation.setAttribute('aria-expanded', open ? 'true' : 'false');
+    annotation.querySelector('[role="tooltip"]')?.setAttribute('aria-hidden', open ? 'false' : 'true');
+  };
+
+  const installAnnotations = () => {
+    if (document.documentElement.dataset.sujingAnnotations) return;
+    document.documentElement.dataset.sujingAnnotations = 'true';
+
+    document.addEventListener('click', (event) => {
+      const close = event.target.closest?.('[data-sujing-annotation-close]');
+      if (close) {
+        event.preventDefault();
+        event.stopPropagation();
+        toggleAnnotation(close.closest('[data-sujing-annotation]'), false);
+        return;
+      }
+      const annotation = event.target.closest?.('[data-sujing-annotation]');
+      if (annotation) {
+        if (!event.target.closest?.('[role="tooltip"]')) {
+          event.preventDefault();
+          toggleAnnotation(annotation);
+        }
+        return;
+      }
+      closeAnnotations();
+    });
+    document.addEventListener('keydown', (event) => {
+      const annotation = event.target.closest?.('[data-sujing-annotation]');
+      if (event.key === 'Escape') {
+        closeAnnotations();
+        return;
+      }
+      if (!annotation || (event.key !== 'Enter' && event.key !== ' ')) return;
+      event.preventDefault();
+      toggleAnnotation(annotation);
+    });
+    document.addEventListener('focusin', (event) => {
+      const annotation = event.target.closest?.('[data-sujing-annotation]');
+      if (annotation) toggleAnnotation(annotation, true);
+    });
   };
 
   const formatDate = (value) => {
@@ -290,13 +348,46 @@
         ?.querySelector(':scope > .site-page')
         ?.classList.add('is-current');
     });
+    if (current === '/columns' || current.startsWith('/columns/')) {
+      document.querySelector('#nav .menus_item_child a[href^="/columns/"]')
+        ?.closest('.menus_item_child')
+        ?.closest('.menus_item')
+        ?.querySelector(':scope > .site-page')
+        ?.classList.add('is-current');
+    }
   };
 
   const isDesktopNav = () => window.matchMedia('(min-width: 769px)').matches;
 
+  // 下拉以「专栏」为中心展开；窄屏时把展开后的面板整体推回视口内，
+  // 避免胶囊被屏幕左/右边缘裁掉。
+  const placeNavDropdown = (item, submenu) => {
+    submenu.style.removeProperty('--sujing-nav-dropdown-shift');
+    if (!isDesktopNav()) return;
+    const panel = submenu.getBoundingClientRect();
+    if (!panel.width) return;
+    const trigger = item.getBoundingClientRect();
+    const viewport = document.documentElement.clientWidth || window.innerWidth;
+    const margin = 16;
+    const center = trigger.left + trigger.width / 2;
+    let shift = 0;
+    if (center - panel.width / 2 < margin) {
+      shift = margin - (center - panel.width / 2);
+    } else if (center + panel.width / 2 > viewport - margin) {
+      shift = viewport - margin - (center + panel.width / 2);
+    }
+    if (Math.abs(shift) > 0.5) {
+      submenu.style.setProperty('--sujing-nav-dropdown-shift', `${Math.round(shift)}px`);
+    }
+  };
+
   const setNavDropdownOpen = (item, open) => {
     const trigger = item?.querySelector(':scope > .site-page');
     if (!trigger) return;
+    if (open) {
+      const submenu = item.querySelector(':scope > .menus_item_child');
+      if (submenu) placeNavDropdown(item, submenu);
+    }
     item.classList.toggle('is-open', open);
     trigger.setAttribute('aria-expanded', String(open));
   };
@@ -342,8 +433,11 @@
 
       trigger.addEventListener('click', (event) => {
         if (!isDesktopNav()) return;
+        // Desktop navigation is hover-driven: clicking the trigger must not
+        // pin the submenu open after the pointer leaves it. The submenu links
+        // remain ordinary anchors and handle navigation themselves.
         event.preventDefault();
-        toggle();
+        closeNavDropdowns();
       });
       trigger.addEventListener('keydown', (event) => {
         if (!isDesktopNav()) return;
@@ -376,6 +470,15 @@
         }, 0);
       });
     });
+
+    if (!state.navDropdownResizeBound) {
+      state.navDropdownResizeBound = true;
+      window.addEventListener('resize', () => {
+        document.querySelectorAll('#nav .menus_item.is-open > .menus_item_child').forEach((submenu) => {
+          placeNavDropdown(submenu.closest('.menus_item'), submenu);
+        });
+      });
+    }
   };
 
   const starfieldPalette = () => document.documentElement.getAttribute('data-theme') === 'dark'
@@ -1520,6 +1623,58 @@
     });
   };
 
+  const installColumnsPage = async () => {
+    const root = document.querySelector('[data-sujing-columns], [data-sujing-column-page]');
+    if (!root || root.dataset.ready) return;
+    root.dataset.ready = 'true';
+
+    const data = await loadSiteData();
+    const columns = Array.isArray(data.columns) ? data.columns : [];
+    const posts = Array.isArray(data.posts) ? data.posts : [];
+    const normalize = (value) => String(value || '').trim().toLocaleLowerCase('zh-CN');
+    const currentSlug = String(root.dataset.columnSlug || '').trim().toLocaleLowerCase('en-US');
+    const status = root.querySelector('[data-sujing-column-status]');
+    const stage = root.querySelector('[data-sujing-column-stage]');
+
+    const matches = (post, column) => {
+      const values = [...(post.categories || []), ...(post.tags || [])].map(normalize);
+      return values.includes(normalize(column.name));
+    };
+
+    const renderCards = (list) => list.map((post) => `
+      <a class="sujing-column-card" href="${escapeHtml(post.path)}" data-sujing-reveal>
+        <span class="sujing-column-card-media"><img src="${escapeHtml(post.cover || '/img/sujing-mark.svg')}" alt="" loading="lazy" width="480" height="300"></span>
+        <span class="sujing-column-card-body"><time datetime="${escapeHtml(post.date)}">${escapeHtml(formatDate(post.date))}</time><strong>${escapeHtml(post.title || '未命名')}</strong>${post.description ? `<em>${escapeHtml(post.description)}</em>` : ''}</span>
+      </a>`).join('');
+
+    if (!stage || !status) {
+      const hash = window.location.hash.replace(/^#/, '').trim().toLocaleLowerCase('en-US');
+      if (hash && columns.some((column) => column.slug === hash)) {
+        navigateTo(`/columns/${encodeURIComponent(hash)}/`);
+        return;
+      }
+      root.setAttribute('aria-busy', 'false');
+      installMotion();
+      return;
+    }
+
+    const render = () => {
+      const column = columns.find((item) => item.slug === currentSlug);
+      if (!column) {
+        status.textContent = '暂无可用专栏';
+        stage.innerHTML = '<div class="sujing-data-empty"><span class="sujing-empty-seal" aria-hidden="true">空</span><h2>专栏配置为空</h2><p>请在 source/_data/columns.yml 中配置专栏。</p></div>';
+        root.setAttribute('aria-busy', 'false');
+        return;
+      }
+      const list = posts.filter((post) => matches(post, column));
+      status.textContent = `${column.name} · ${list.length} 篇`;
+      stage.innerHTML = `<header class="sujing-column-stage-head"><div><p class="sujing-kicker">${escapeHtml(column.name)}</p><h2>文章索引</h2></div><span>${list.length} 篇</span></header>${list.length ? `<div class="sujing-columns-grid">${renderCards(list)}</div>` : '<div class="sujing-data-empty"><span class="sujing-empty-seal" aria-hidden="true">空</span><h2>这个专栏还没有文章</h2><p>给文章添加对应的分类或标签后，它会自动出现在这里。</p></div>'}`;
+      root.setAttribute('aria-busy', 'false');
+      installMotion();
+    };
+    render();
+  };
+
   const installArchivePage = async () => {
     const root = document.querySelector('[data-sujing-archive]');
     if (!root || root.dataset.ready) return;
@@ -1944,7 +2099,6 @@
     '.sujing-button',
     '.sujing-now-strip',
     'a.sujing-bento-card',
-    '.sujing-bento-tracks nav a',
     '.sujing-bento-gallery a',
     '.sujing-bento-profile[href]',
     '.sujing-bento-destinations > a',
@@ -2603,7 +2757,9 @@
     installNotesPage();
     installGalleryPage();
     installMusicPage();
+    installColumnsPage();
     installArchivePage();
+    installAnnotations();
     ensureMusicPlayer();
     installReadingProgress();
     installMotion();
