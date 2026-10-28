@@ -1936,7 +1936,7 @@ a.sujing-bento-card:hover::before {
 .sujing-bento-colophon {
   position: relative;
   margin-top: 14px;
-  padding-right: 64px;
+  padding-right: 0;
 }
 
 .sujing-bento-destinations {

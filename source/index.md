@@ -97,6 +97,5 @@ type: sujing-home
       <a href="/music/" data-sujing-reveal data-sujing-tilt><span>03</span><div><strong>音乐</strong><small>歌单与听录</small></div><i class="fas fa-music" aria-hidden="true"></i></a>
       <a href="/about/" data-sujing-reveal data-sujing-tilt><span>04</span><div><strong>关于</strong><small>作者介绍</small></div><i class="fas fa-user" aria-hidden="true"></i></a>
     </nav>
-    <span class="sujing-home-seal" aria-hidden="true">溯</span>
   </div>
 </div>
