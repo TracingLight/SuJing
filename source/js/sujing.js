@@ -2806,41 +2806,63 @@ void main() {
       }
 
       void main() {
+        float t = uTime;
         vec2 center = vec2(0.5, 0.47);
-        vec2 zoom = (vUv - 0.5) * (1.0 + 0.006 * sin(uTime * 0.18)) + 0.5;
+        vec2 zoom = (vUv - 0.5) * (1.0 + 0.01 * sin(t * 0.16)) + 0.5;
         vec2 delta = zoom - center;
         float distanceToCenter = length(delta);
+        // 中心人物保持稳定，水流主要集中在四周
+        float flowStrength = mix(0.22, 1.0, smoothstep(0.18, 0.55, distanceToCenter));
 
-        // 中心水纹：轻微折射，不抢画面
-        float ripple = sin(distanceToCenter * 42.0 - uTime * 1.05)
-          * smoothstep(0.52, 0.0, distanceToCenter) * 0.0018;
+        // 大尺度水面起伏：整体缓慢推流
+        vec2 bigWave = vec2(
+          sin(zoom.x * 8.0 + zoom.y * 3.0 + t * 0.9),
+          sin(zoom.y * 10.0 - zoom.x * 4.0 - t * 0.7)
+        ) * 0.0028;
+
+        // 中心水纹：一圈圈扩散的折射
+        float ripple = sin(distanceToCenter * 34.0 - t * 1.5)
+          * smoothstep(0.58, 0.02, distanceToCenter) * 0.0016;
         vec2 rippleOffset = normalize(delta + vec2(0.0001)) * ripple;
 
-        vec2 base = coverUv(zoom + uMouse * 0.008 + rippleOffset);
+        vec2 warped = zoom + uMouse * 0.01 + (bigWave + rippleOffset) * flowStrength;
+        vec2 base = coverUv(warped);
 
-        // 沿用墙纸的 waterflow 思路：flow map 的 RG 作为方向，phase 控制波形
+        // 沿用墙纸的 waterflow 思路，并明显加强流速与位移
         vec2 flow = texture2D(uFlow, base).rg;
         vec2 direction = (flow - 0.5) * 2.0;
-        float phase = texture2D(uPhase, base * 2.1 + vec2(uTime * 0.006, 0.0)).r;
-        float wave = sin(uTime * 0.55 + phase * 6.2831853);
-        vec2 offsetA = direction * (0.0044 + 0.0032 * wave);
-        vec2 offsetB = direction * (0.0024 + 0.0018 * sin(uTime * 0.82 + phase * 6.2831853 + 1.7));
+        float phase = texture2D(uPhase, base * 2.4 + vec2(t * 0.01, t * 0.004)).r;
+        float flowWave = sin(t * 0.9 + phase * 6.2831853);
+        float flowWave2 = sin(t * 1.25 + phase * 6.2831853 + 1.7);
+        vec2 offsetA = direction * (0.0055 + 0.0035 * flowWave) * flowStrength;
+        vec2 offsetB = direction * (0.003 + 0.002 * flowWave2) * flowStrength;
 
         vec3 colorA = texture2D(uImage, clamp(base + offsetA, 0.001, 0.999)).rgb;
         vec3 colorB = texture2D(uImage, clamp(base + offsetB, 0.001, 0.999)).rgb;
-        vec3 color = mix(colorA, colorB, 0.35);
+        vec3 color = mix(colorA, colorB, 0.4);
+
+        float glow = smoothstep(0.56, 0.015, distanceToCenter);
+
+        // 水下焦散：两道交叉波前的亮线
+        float causticA = sin((zoom.x * 46.0 + sin(zoom.y * 27.0 + t * 0.8) * 2.2) + t * 1.1);
+        float causticB = sin((zoom.y * 41.0 - sin(zoom.x * 23.0 - t * 0.6) * 2.6) - t * 0.9);
+        float caustic = pow(max(0.0, causticA * causticB), 5.0);
+        color += vec3(0.1, 0.5, 0.75) * caustic * (0.08 + 0.05 * glow);
+
+        // 细碎高光，像水面反光
+        float sparkle = pow(max(0.0, sin((zoom.x + zoom.y) * 60.0 + t * 1.6 + phase * 6.0)), 18.0);
+        color += vec3(0.4, 0.76, 1.0) * sparkle * 0.05;
 
         // 中心呼吸光
-        float glow = smoothstep(0.56, 0.015, distanceToCenter);
-        color += vec3(0.08, 0.5, 0.78) * glow * (0.045 + 0.025 * sin(uTime * 0.7));
+        color += vec3(0.08, 0.5, 0.78) * glow * (0.05 + 0.03 * sin(t * 0.7));
 
-        // 极缓慢的侧向光带，让静止截图也有呼吸感
-        float sweep = smoothstep(0.26, 0.0, abs(zoom.x - (0.5 + 0.32 * sin(uTime * 0.13))));
-        color += vec3(0.28, 0.62, 0.9) * sweep * (0.008 + 0.012 * glow);
+        // 侧向光带
+        float sweep = smoothstep(0.26, 0.0, abs(zoom.x - (0.5 + 0.32 * sin(t * 0.13))));
+        color += vec3(0.28, 0.62, 0.9) * sweep * (0.006 + 0.008 * glow);
 
         // 边缘压暗，文字更稳
         float vignette = smoothstep(1.02, 0.28, distance(vUv, vec2(0.5)));
-        color *= mix(0.8, 1.0, vignette);
+        color *= mix(0.78, 1.0, vignette);
 
         gl_FragColor = vec4(color, 1.0);
       }

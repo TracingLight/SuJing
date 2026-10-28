@@ -7415,3 +7415,9 @@ body {
     display: none !important;
   }
 }
+
+/* 去掉首屏四周的装饰线 */
+.sujing-bento-hero::before {
+  display: none !important;
+  content: none !important;
+}
