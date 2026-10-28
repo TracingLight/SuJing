@@ -1894,6 +1894,107 @@ void main() {
     ledger.classList.add('is-ready');
   };
 
+  let homeIntroPlayed = false;
+  let homeIntroTypingTimer = 0;
+
+  const resetHomeSubtitle = (subtitle) => {
+    const target = subtitle?.querySelector('[data-sujing-typewriter-text]');
+    if (!target) return;
+    target.textContent = '';
+    subtitle.classList.remove('is-complete');
+    subtitle.classList.add('is-typing');
+  };
+
+  const typeHomeSubtitle = (subtitle, instant = false) => {
+    const target = subtitle?.querySelector('[data-sujing-typewriter-text]');
+    if (!target) return;
+    const full = subtitle.dataset.text || target.textContent || '';
+    window.clearTimeout(homeIntroTypingTimer);
+    if (instant || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      target.textContent = full;
+      subtitle.classList.remove('is-typing');
+      subtitle.classList.add('is-complete');
+      return;
+    }
+    target.textContent = '';
+    subtitle.classList.remove('is-complete');
+    subtitle.classList.add('is-typing');
+    let index = 0;
+    const step = () => {
+      index += 1;
+      target.textContent = full.slice(0, index);
+      if (index < full.length) {
+        homeIntroTypingTimer = window.setTimeout(step, index < 6 ? 90 : 52);
+      } else {
+        subtitle.classList.remove('is-typing');
+        subtitle.classList.add('is-complete');
+      }
+    };
+    homeIntroTypingTimer = window.setTimeout(step, 420);
+  };
+
+  const installHomeIntro = () => {
+    const overlay = document.querySelector('[data-sujing-intro]');
+    if (!overlay) return;
+    const subtitle = document.querySelector('[data-sujing-typewriter]');
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (homeIntroPlayed || reduce) {
+      overlay.remove();
+      document.body.classList.remove('sujing-intro-lock');
+      typeHomeSubtitle(subtitle, true);
+      return;
+    }
+
+    homeIntroPlayed = true;
+    document.body.appendChild(overlay);
+    document.body.classList.add('sujing-intro-lock');
+    resetHomeSubtitle(subtitle);
+
+    const skip = overlay.querySelector('[data-sujing-intro-skip]');
+    let opened = false;
+    let doneTimer = 0;
+    let fallbackTimer = 0;
+    let cleanupTimer = 0;
+
+    const onKey = (event) => {
+      if (event.key === 'Escape') open();
+    };
+
+    const cleanup = () => {
+      window.clearTimeout(doneTimer);
+      window.clearTimeout(fallbackTimer);
+      window.clearTimeout(cleanupTimer);
+      document.removeEventListener('keydown', onKey, true);
+      document.removeEventListener('pjax:send', onPjaxSend);
+      overlay.remove();
+      document.body.classList.remove('sujing-intro-lock');
+    };
+
+    const onPjaxSend = () => {
+      window.clearTimeout(homeIntroTypingTimer);
+      cleanup();
+    };
+
+    const open = () => {
+      if (opened) return;
+      opened = true;
+      window.clearTimeout(fallbackTimer);
+      overlay.classList.add('is-opening');
+      document.body.classList.remove('sujing-intro-lock');
+      typeHomeSubtitle(subtitle, false);
+      doneTimer = window.setTimeout(() => {
+        overlay.classList.add('is-done');
+        cleanupTimer = window.setTimeout(cleanup, 460);
+      }, 1150);
+    };
+
+    skip?.addEventListener('click', open);
+    document.addEventListener('keydown', onKey, true);
+    document.addEventListener('pjax:send', onPjaxSend);
+    fallbackTimer = window.setTimeout(open, 1500);
+  };
+
   const installHomeContent = async () => {
     const home = document.querySelector('[data-sujing-home]');
     if (!home) return;
@@ -3454,6 +3555,7 @@ void main() {
     installCurrentNavigation();
     installNavDropdowns();
     installStarfield();
+    installHomeIntro();
     installHomeContent();
     installArticlesIntro();
     installPostAtmosphere();

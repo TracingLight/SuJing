@@ -8,28 +8,50 @@ comments: false
 type: sujing-home
 ---
 
+<noscript><style>.sujing-intro{display:none!important}</style></noscript>
+
 <div class="sujing-home sujing-bento-home" data-sujing-home>
+  <div class="sujing-intro" data-sujing-intro>
+    <div class="sujing-intro-panel sujing-intro-panel-left" aria-hidden="true"></div>
+    <div class="sujing-intro-panel sujing-intro-panel-right" aria-hidden="true"></div>
+    <div class="sujing-intro-core">
+      <span class="sujing-intro-mark"><img src="/img/sujing-icon-full-192.png" alt="" width="192" height="192" loading="eager"></span>
+      <p class="sujing-intro-kicker">SUJING</p>
+      <p class="sujing-intro-name">溯境</p>
+      <span class="sujing-intro-progress" aria-hidden="true"><i></i></span>
+      <p class="sujing-intro-hint" role="status">正在展开卷宗…</p>
+    </div>
+    <button type="button" class="sujing-intro-skip" data-sujing-intro-skip aria-label="跳过开场">跳过</button>
+  </div>
+
+  <section class="sujing-bento-hero" aria-labelledby="sujing-home-title">
+    <img class="no-lightbox" data-sujing-home-hero
+      src="/img/sujing-opening.webp"
+      srcset="/img/sujing-opening-900.webp 900w, /img/sujing-opening.webp 1800w"
+      sizes="(max-width: 768px) 100vw, 1180px"
+      alt="蓝光与白蝶中的少女插画" width="1800" height="1800" loading="eager" fetchpriority="high" decoding="async">
+    <div class="sujing-bento-hero-shade" aria-hidden="true"></div>
+    <div class="sujing-bento-hero-copy">
+      <div class="sujing-hero-center">
+        <h1 id="sujing-home-title">欢迎来到溯境！</h1>
+        <p class="sujing-hero-subtitle" data-sujing-typewriter data-text="世界上只有一种真正的英雄主义，那就是认清生活的真相后依然热爱生活。——罗曼·罗兰">
+          <span class="sujing-hero-subtitle-text" data-sujing-typewriter-text aria-hidden="true">世界上只有一种真正的英雄主义，那就是认清生活的真相后依然热爱生活。——罗曼·罗兰</span><span class="sujing-hero-subtitle-cursor" aria-hidden="true"></span>
+          <span class="sujing-sr-only">世界上只有一种真正的英雄主义，那就是认清生活的真相后依然热爱生活。——罗曼·罗兰</span>
+        </p>
+        <div class="sujing-home-actions">
+          <a class="sujing-button sujing-button-primary" href="/archives/"><span>浏览卷宗</span><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+          <a class="sujing-button sujing-button-quiet" href="/articles/"><i class="fas fa-book-open" aria-hidden="true"></i><span>文章库</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <a class="sujing-now-strip" href="/notes/" data-sujing-reveal>
     <span><i class="fas fa-feather" aria-hidden="true"></i> 短讯</span>
     <strong data-sujing-home-note>溯境第一版已上线，后续将陆续补充技术笔记与生活记录。</strong>
     <time data-sujing-home-note-time datetime="2026-07-21">2026.07.21</time>
     <i class="fas fa-arrow-right" aria-hidden="true"></i>
   </a>
-
-  <section class="sujing-bento-hero" aria-labelledby="sujing-home-title" data-sujing-reveal>
-    <img class="no-lightbox" data-sujing-home-hero src="/img/covers/e-c-a-a-3.webp" alt="紫发武者与水龙，花叶飞散" width="1536" height="1024" loading="eager" fetchpriority="high">
-    <div class="sujing-bento-hero-shade" aria-hidden="true"></div>
-    <div class="sujing-bento-hero-copy">
-      <p class="sujing-kicker">首页</p>
-      <h1 id="sujing-home-title">溯境</h1>
-      <p>以 Unity 游戏客户端开发为主，记录技术实践，也留下生活与兴趣方面的笔记。</p>
-      <div class="sujing-home-actions">
-        <a class="sujing-button sujing-button-primary" href="/archives/"><span>浏览卷宗</span><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
-        <a class="sujing-button sujing-button-quiet" href="/articles/"><i class="fas fa-book-open" aria-hidden="true"></i><span>文章库</span></a>
-      </div>
-    </div>
-    <div class="sujing-bento-hero-meta" aria-hidden="true"><span>游艺</span><span>绘事</span><span>日课</span></div>
-  </section>
 
   <div class="sujing-bento-grid">
     <a class="sujing-bento-card sujing-bento-latest" href="/2026/07/25/开发随笔-c-面向对象-初步了解c-面向对象的知识/" data-sujing-latest-card data-sujing-reveal data-sujing-tilt>
