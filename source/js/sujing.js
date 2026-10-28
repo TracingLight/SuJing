@@ -1930,7 +1930,7 @@ void main() {
         subtitle.classList.add('is-complete');
       }
     };
-    homeIntroTypingTimer = window.setTimeout(step, 420);
+    homeIntroTypingTimer = window.setTimeout(step, 180);
   };
 
   const installHomeIntro = () => {
@@ -1990,14 +1990,14 @@ void main() {
       typeHomeSubtitle(subtitle, false);
       doneTimer = window.setTimeout(() => {
         overlay.classList.add('is-done');
-        cleanupTimer = window.setTimeout(cleanup, 460);
-      }, 1150);
+        cleanupTimer = window.setTimeout(cleanup, 60);
+      }, 450);
     };
 
     skip?.addEventListener('click', open);
     document.addEventListener('keydown', onKey, true);
     document.addEventListener('pjax:send', onPjaxSend);
-    fallbackTimer = window.setTimeout(open, 1500);
+    fallbackTimer = window.setTimeout(open, 60);
   };
 
   const installHomeContent = async () => {

@@ -11,22 +11,15 @@ type: sujing-home
 <noscript><style>.sujing-intro{display:none!important}</style></noscript>
 
 <div class="sujing-home sujing-bento-home" data-sujing-home>
-  <div class="sujing-intro" data-sujing-intro>
-    <div class="sujing-intro-backdrop" aria-hidden="true"></div>
-    <div class="sujing-intro-panel sujing-intro-panel-left" aria-hidden="true"></div>
-    <div class="sujing-intro-panel sujing-intro-panel-right" aria-hidden="true"></div>
-    <span class="sujing-intro-corner sujing-intro-corner-tl" aria-hidden="true">SUJING · 溯境</span>
-    <span class="sujing-intro-corner sujing-intro-corner-tr" aria-hidden="true">EST. 2026</span>
-    <span class="sujing-intro-corner sujing-intro-corner-bl" aria-hidden="true">以游戏为舟 · 记沿途之光</span>
-    <div class="sujing-intro-core">
-      <span class="sujing-intro-halo" aria-hidden="true"></span>
-      <span class="sujing-intro-mark"><img src="/img/sujing-icon-full-192.png" alt="" width="192" height="192" loading="eager"></span>
-      <p class="sujing-intro-kicker">SUJING</p>
+  <div class="sujing-intro" data-sujing-intro aria-hidden="true">
+    <span class="sujing-intro-seal" aria-hidden="true">溯</span>
+    <div class="sujing-intro-word">
+      <p class="sujing-intro-kicker">SUJING · 2026</p>
       <p class="sujing-intro-name">溯境</p>
-      <span class="sujing-intro-progress" aria-hidden="true"><i></i></span>
-      <p class="sujing-intro-hint" role="status">正在展开卷宗…</p>
+      <span class="sujing-intro-rule" aria-hidden="true"></span>
+      <p class="sujing-intro-sub">以游戏为舟 · 记沿途之光</p>
     </div>
-    <button type="button" class="sujing-intro-skip" data-sujing-intro-skip aria-label="跳过开场">跳过</button>
+    <span class="sujing-intro-index" aria-hidden="true">序 / PROLOGUE</span>
   </div>
 
   <section class="sujing-bento-hero" aria-labelledby="sujing-home-title">
