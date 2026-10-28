@@ -1,7 +1,7 @@
 ---
 title: 继承
 date: '2026-09-16 21:58:00'
-updated: '2026-10-28 13:37:03'
+updated: '2026-10-28 15:21:35'
 categories:
   - 学习笔记
 tags:
@@ -26,7 +26,7 @@ class Student : public Person { ... };
 注意：只有 public 继承才表达“is-a”关系。private 和 protected 继承通常表达“根据某物实现出”，是组合的一种变体，而非真正的逻辑继承。
 
 常见误解：继承只是为了复用代码，子类能调用父类函数即可。
-正确认知：看到 class A : public B，必须能逻辑上断言“A是一种B”（如 Student 是一种 Person）。若逻辑不成立（如 Pencil : public Eraser），{% annotation "啊对对对" %}即使编译通过，设计也是错误的{% endannotation %}。继承首先是设计语言，其次才是复用工具。
+正确认知：看到 class A : public B，必须能逻辑上断言“A是一种B”（如 Student 是一种 Person）。若逻辑不成立（如 Pencil : public Eraser），即使编译通过，设计也是错误的。继承首先是设计语言，其次才是复用工具。
 
 ## 子类对象的内存结构
 
