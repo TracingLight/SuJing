@@ -32,7 +32,7 @@ hexo.extend.tag.register('annotation', (args, content) => {
     `<span class="sujing-annotation-tooltip" id="${id}" role="tooltip" aria-hidden="true">`,
     '<span class="sujing-annotation-card">',
     '<span class="sujing-annotation-head">',
-    '<span class="sujing-annotation-eyebrow">词条批注</span>',
+    '<span class="sujing-annotation-eyebrow">批注</span>',
     '</span>',
     '<span class="sujing-annotation-term" data-sujing-annotation-term></span>',
     `<span class="sujing-annotation-note">${escapeHtml(note)}</span>`,
