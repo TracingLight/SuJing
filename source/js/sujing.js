@@ -2740,6 +2740,282 @@ void main() {
     });
   };
 
+  let heroCanvasCleanup = null;
+
+  const installHeroCanvas = () => {
+    if (heroCanvasCleanup) {
+      heroCanvasCleanup();
+      heroCanvasCleanup = null;
+    }
+    const hero = document.querySelector('.sujing-bento-hero');
+    const canvas = hero?.querySelector('[data-sujing-hero-canvas]');
+    if (!hero || !canvas) return;
+    if (canvas.dataset.sujingCanvasReady === 'true') return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (window.matchMedia('(max-width: 768px), (hover: none)').matches) return;
+
+    const gl = canvas.getContext('webgl', {
+      alpha: true,
+      antialias: false,
+      premultipliedAlpha: false,
+      powerPreference: 'high-performance'
+    });
+    if (!gl) return;
+
+    const imageSrc = canvas.dataset.image || '/img/sujing-hero-dynamic.webp';
+    const flowSrc = canvas.dataset.flow || '/img/sujing-hero-flow.png';
+    const phaseSrc = canvas.dataset.phase || '/img/sujing-hero-phase.png';
+
+    const loadImage = (src) => new Promise((resolve, reject) => {
+      const img = new Image();
+      img.decoding = 'async';
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error(`无法加载 ${src}`));
+      img.src = src;
+    });
+
+    const vertexSource = `
+      attribute vec2 aPosition;
+      varying vec2 vUv;
+      void main() {
+        vUv = aPosition * 0.5 + 0.5;
+        gl_Position = vec4(aPosition, 0.0, 1.0);
+      }
+    `;
+
+    const fragmentSource = `
+      precision highp float;
+
+      varying vec2 vUv;
+
+      uniform sampler2D uImage;
+      uniform sampler2D uFlow;
+      uniform sampler2D uPhase;
+      uniform vec2 uResolution;
+      uniform vec2 uImageSize;
+      uniform vec2 uMouse;
+      uniform float uTime;
+
+      vec2 coverUv(vec2 uv) {
+        float imageAspect = uImageSize.x / max(uImageSize.y, 1.0);
+        float viewAspect = uResolution.x / max(uResolution.y, 1.0);
+        vec2 scale = imageAspect > viewAspect
+          ? vec2(viewAspect / imageAspect, 1.0)
+          : vec2(1.0, imageAspect / viewAspect);
+        return (uv - 0.5) * scale + 0.5;
+      }
+
+      void main() {
+        vec2 center = vec2(0.5, 0.47);
+        vec2 zoom = (vUv - 0.5) * (1.0 + 0.006 * sin(uTime * 0.18)) + 0.5;
+        vec2 delta = zoom - center;
+        float distanceToCenter = length(delta);
+
+        // 中心水纹：轻微折射，不抢画面
+        float ripple = sin(distanceToCenter * 42.0 - uTime * 1.05)
+          * smoothstep(0.52, 0.0, distanceToCenter) * 0.0018;
+        vec2 rippleOffset = normalize(delta + vec2(0.0001)) * ripple;
+
+        vec2 base = coverUv(zoom + uMouse * 0.008 + rippleOffset);
+
+        // 沿用墙纸的 waterflow 思路：flow map 的 RG 作为方向，phase 控制波形
+        vec2 flow = texture2D(uFlow, base).rg;
+        vec2 direction = (flow - 0.5) * 2.0;
+        float phase = texture2D(uPhase, base * 2.1 + vec2(uTime * 0.006, 0.0)).r;
+        float wave = sin(uTime * 0.55 + phase * 6.2831853);
+        vec2 offsetA = direction * (0.0044 + 0.0032 * wave);
+        vec2 offsetB = direction * (0.0024 + 0.0018 * sin(uTime * 0.82 + phase * 6.2831853 + 1.7));
+
+        vec3 colorA = texture2D(uImage, clamp(base + offsetA, 0.001, 0.999)).rgb;
+        vec3 colorB = texture2D(uImage, clamp(base + offsetB, 0.001, 0.999)).rgb;
+        vec3 color = mix(colorA, colorB, 0.35);
+
+        // 中心呼吸光
+        float glow = smoothstep(0.56, 0.015, distanceToCenter);
+        color += vec3(0.08, 0.5, 0.78) * glow * (0.045 + 0.025 * sin(uTime * 0.7));
+
+        // 极缓慢的侧向光带，让静止截图也有呼吸感
+        float sweep = smoothstep(0.26, 0.0, abs(zoom.x - (0.5 + 0.32 * sin(uTime * 0.13))));
+        color += vec3(0.28, 0.62, 0.9) * sweep * (0.008 + 0.012 * glow);
+
+        // 边缘压暗，文字更稳
+        float vignette = smoothstep(1.02, 0.28, distance(vUv, vec2(0.5)));
+        color *= mix(0.8, 1.0, vignette);
+
+        gl_FragColor = vec4(color, 1.0);
+      }
+    `;
+
+    const compile = (type, source) => {
+      const shader = gl.createShader(type);
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        const message = gl.getShaderInfoLog(shader);
+        gl.deleteShader(shader);
+        throw new Error(message || 'shader compile failed');
+      }
+      return shader;
+    };
+
+    let disposed = false;
+    let raf = 0;
+    let visible = true;
+    let observer = null;
+    let program = null;
+    let buffer = null;
+    const textures = [];
+    const mouse = { x: 0, y: 0 };
+    const target = { x: 0, y: 0 };
+
+    const cleanup = () => {
+      if (disposed) return;
+      disposed = true;
+      if (raf) cancelAnimationFrame(raf);
+      observer?.disconnect();
+      window.removeEventListener('resize', resize);
+      hero.removeEventListener('pointermove', onPointerMove);
+      hero.removeEventListener('pointerleave', onPointerLeave);
+      document.removeEventListener('visibilitychange', onVisibility);
+      document.removeEventListener('pjax:send', cleanup);
+      canvas.classList.remove('is-ready');
+      canvas.dataset.sujingCanvasReady = '';
+      if (program) gl.deleteProgram(program);
+      if (buffer) gl.deleteBuffer(buffer);
+      for (const texture of textures) gl.deleteTexture(texture);
+      const lose = gl.getExtension('WEBGL_lose_context');
+      if (lose) lose.loseContext();
+    };
+
+    const start = () => {
+      if (disposed || raf || !visible || document.hidden) return;
+      raf = requestAnimationFrame(frame);
+    };
+
+    const frame = (now) => {
+      raf = 0;
+      if (disposed || !canvas.isConnected || document.hidden || !visible) return;
+      const time = (now - 0) / 1000;
+      mouse.x += (target.x - mouse.x) * 0.055;
+      mouse.y += (target.y - mouse.y) * 0.055;
+      gl.uniform1f(program.uniforms.uTime, time);
+      gl.uniform2f(program.uniforms.uMouse, mouse.x, mouse.y);
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+      if (!canvas.classList.contains('is-ready')) canvas.classList.add('is-ready');
+      raf = requestAnimationFrame(frame);
+    };
+
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5, 2600 / Math.max(hero.clientWidth, 1));
+      const width = Math.max(1, Math.round(hero.clientWidth * dpr));
+      const height = Math.max(1, Math.round(hero.clientHeight * dpr));
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
+      gl.viewport(0, 0, width, height);
+      if (program) gl.uniform2f(program.uniforms.uResolution, width, height);
+    }
+
+    const onPointerMove = (event) => {
+      if (event.pointerType && event.pointerType !== 'mouse') return;
+      const rect = hero.getBoundingClientRect();
+      target.x = ((event.clientX - rect.left) / Math.max(rect.width, 1)) * 2 - 1;
+      target.y = -(((event.clientY - rect.top) / Math.max(rect.height, 1)) * 2 - 1);
+    };
+
+    const onPointerLeave = () => {
+      target.x = 0;
+      target.y = 0;
+    };
+
+    const onVisibility = () => {
+      if (!document.hidden) start();
+    };
+
+    Promise.all([
+      loadImage(imageSrc),
+      loadImage(flowSrc),
+      loadImage(phaseSrc)
+    ]).then(([imageTexture, flowTexture, phaseTexture]) => {
+      if (disposed) return;
+      const vertexShader = compile(gl.VERTEX_SHADER, vertexSource);
+      const fragmentShader = compile(gl.FRAGMENT_SHADER, fragmentSource);
+      program = gl.createProgram();
+      gl.attachShader(program, vertexShader);
+      gl.attachShader(program, fragmentShader);
+      gl.linkProgram(program);
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        throw new Error(gl.getProgramInfoLog(program) || 'program link failed');
+      }
+      gl.useProgram(program);
+      program.uniforms = {
+        uImage: gl.getUniformLocation(program, 'uImage'),
+        uFlow: gl.getUniformLocation(program, 'uFlow'),
+        uPhase: gl.getUniformLocation(program, 'uPhase'),
+        uResolution: gl.getUniformLocation(program, 'uResolution'),
+        uImageSize: gl.getUniformLocation(program, 'uImageSize'),
+        uMouse: gl.getUniformLocation(program, 'uMouse'),
+        uTime: gl.getUniformLocation(program, 'uTime')
+      };
+
+      buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+        -1, -1, 1, -1, -1, 1,
+        -1, 1, 1, -1, 1, 1
+      ]), gl.STATIC_DRAW);
+      const position = gl.getAttribLocation(program, 'aPosition');
+      gl.enableVertexAttribArray(position);
+      gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+
+      const makeTexture = (source, unit) => {
+        const texture = gl.createTexture();
+        textures.push(texture);
+        gl.activeTexture(gl.TEXTURE0 + unit);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+        return texture;
+      };
+
+      makeTexture(imageTexture, 0);
+      makeTexture(flowTexture, 1);
+      makeTexture(phaseTexture, 2);
+      gl.uniform1i(program.uniforms.uImage, 0);
+      gl.uniform1i(program.uniforms.uFlow, 1);
+      gl.uniform1i(program.uniforms.uPhase, 2);
+      gl.uniform2f(program.uniforms.uImageSize, imageTexture.naturalWidth || 2400, imageTexture.naturalHeight || 1005);
+
+      resize();
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      canvas.dataset.sujingCanvasReady = 'true';
+      heroCanvasCleanup = cleanup;
+
+      observer = ('IntersectionObserver' in window)
+        ? new IntersectionObserver((entries) => {
+          visible = Boolean(entries[0]?.isIntersecting);
+          if (visible) start();
+        }, { threshold: 0.01 })
+        : null;
+      observer?.observe(hero);
+
+      window.addEventListener('resize', resize, { passive: true });
+      hero.addEventListener('pointermove', onPointerMove, { passive: true });
+      hero.addEventListener('pointerleave', onPointerLeave, { passive: true });
+      document.addEventListener('visibilitychange', onVisibility);
+      document.addEventListener('pjax:send', cleanup);
+      start();
+    }).catch(() => {
+      cleanup();
+    });
+  };
+
   const installHeroParallax = () => {
     const hero = document.querySelector('.sujing-bento-hero');
     const image = hero?.querySelector('img');
@@ -3575,6 +3851,7 @@ void main() {
     installReadingProgress();
     installMotion();
     installHeroParallax();
+    installHeroCanvas();
     installMagneticButtons();
     installAmbientInk();
     installScrollAtmosphere();

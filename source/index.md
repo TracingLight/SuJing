@@ -24,10 +24,11 @@ type: sujing-home
 
   <section class="sujing-bento-hero" aria-labelledby="sujing-home-title">
     <img class="no-lightbox" data-sujing-home-hero
-      src="/img/sujing-opening.webp"
-      srcset="/img/sujing-opening-900.webp 900w, /img/sujing-opening.webp 1800w"
-      sizes="(max-width: 768px) 100vw, 1180px"
-      alt="蓝光与白蝶中的少女插画" width="1800" height="1800" loading="eager" fetchpriority="high" decoding="async">
+      src="/img/sujing-hero-dynamic.webp"
+      srcset="/img/sujing-hero-dynamic-1600.webp 1600w, /img/sujing-hero-dynamic.webp 2400w"
+      sizes="(max-width: 768px) 100vw, 1680px"
+      alt="蓝光水镜中的少女与白蝶" width="2400" height="1005" loading="eager" fetchpriority="high" decoding="async">
+    <canvas class="sujing-hero-canvas" data-sujing-hero-canvas data-image="/img/sujing-hero-dynamic.webp" data-flow="/img/sujing-hero-flow.png" data-phase="/img/sujing-hero-phase.png" aria-hidden="true"></canvas>
     <div class="sujing-bento-hero-shade" aria-hidden="true"></div>
     <div class="sujing-bento-hero-copy">
       <div class="sujing-hero-center">
