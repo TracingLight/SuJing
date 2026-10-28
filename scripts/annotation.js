@@ -33,7 +33,6 @@ hexo.extend.tag.register('annotation', (args, content) => {
     '<span class="sujing-annotation-card">',
     '<span class="sujing-annotation-head">',
     '<span class="sujing-annotation-eyebrow">词条批注</span>',
-    '<button type="button" class="sujing-annotation-close" data-sujing-annotation-close aria-label="关闭批注">&times;</button>',
     '</span>',
     '<span class="sujing-annotation-term" data-sujing-annotation-term></span>',
     `<span class="sujing-annotation-note">${escapeHtml(note)}</span>`,

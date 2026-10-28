@@ -813,15 +813,6 @@ void main() {
     });
 
     document.addEventListener('click', (event) => {
-      const close = event.target.closest?.('[data-sujing-annotation-close]');
-      if (close) {
-        event.preventDefault();
-        event.stopPropagation();
-        const owner = annotationOwnerOf(close.closest('.sujing-annotation-tooltip'));
-        closeAnnotation(owner);
-        owner?.focus({ preventScroll: true });
-        return;
-      }
       if (event.target.closest?.('.sujing-annotation-tooltip')) return;
       const annotation = event.target.closest?.('[data-sujing-annotation]');
       if (annotation) {
@@ -846,12 +837,7 @@ void main() {
       const annotation = event.target.closest?.('[data-sujing-annotation]');
       if (!annotation || (event.key !== 'Enter' && event.key !== ' ')) return;
       event.preventDefault();
-      const willOpen = !annotation.classList.contains('is-open');
       toggleAnnotation(annotation);
-      if (willOpen) {
-        const tooltip = annotationTooltipOf(annotation);
-        window.requestAnimationFrame(() => tooltip?.querySelector('[data-sujing-annotation-close]')?.focus({ preventScroll: true }));
-      }
     });
 
     document.addEventListener('focusin', (event) => {
