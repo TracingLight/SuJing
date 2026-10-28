@@ -12,9 +12,14 @@ type: sujing-home
 
 <div class="sujing-home sujing-bento-home" data-sujing-home>
   <div class="sujing-intro" data-sujing-intro>
+    <div class="sujing-intro-backdrop" aria-hidden="true"></div>
     <div class="sujing-intro-panel sujing-intro-panel-left" aria-hidden="true"></div>
     <div class="sujing-intro-panel sujing-intro-panel-right" aria-hidden="true"></div>
+    <span class="sujing-intro-corner sujing-intro-corner-tl" aria-hidden="true">SUJING · 溯境</span>
+    <span class="sujing-intro-corner sujing-intro-corner-tr" aria-hidden="true">EST. 2026</span>
+    <span class="sujing-intro-corner sujing-intro-corner-bl" aria-hidden="true">以游戏为舟 · 记沿途之光</span>
     <div class="sujing-intro-core">
+      <span class="sujing-intro-halo" aria-hidden="true"></span>
       <span class="sujing-intro-mark"><img src="/img/sujing-icon-full-192.png" alt="" width="192" height="192" loading="eager"></span>
       <p class="sujing-intro-kicker">SUJING</p>
       <p class="sujing-intro-name">溯境</p>
@@ -44,9 +49,16 @@ type: sujing-home
         </div>
       </div>
     </div>
+    <div class="sujing-hero-meta" aria-hidden="true">
+      <span>GAME DEV · NOTES</span>
+      <span>SUJING · 2026</span>
+    </div>
+    <a class="sujing-hero-scroll" href="#sujing-home-content" aria-label="向下浏览首页">
+      <span>向下</span><i aria-hidden="true"></i>
+    </a>
   </section>
 
-  <a class="sujing-now-strip" href="/notes/" data-sujing-reveal>
+  <a class="sujing-now-strip" id="sujing-home-content" href="/notes/" data-sujing-reveal>
     <span><i class="fas fa-feather" aria-hidden="true"></i> 短讯</span>
     <strong data-sujing-home-note>溯境第一版已上线，后续将陆续补充技术笔记与生活记录。</strong>
     <time data-sujing-home-note-time datetime="2026-07-21">2026.07.21</time>

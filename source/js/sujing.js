@@ -1942,6 +1942,7 @@ void main() {
     if (homeIntroPlayed || reduce) {
       overlay.remove();
       document.body.classList.remove('sujing-intro-lock');
+      document.documentElement.classList.remove('sujing-intro-active', 'sujing-intro-revealed');
       typeHomeSubtitle(subtitle, true);
       return;
     }
@@ -1949,6 +1950,7 @@ void main() {
     homeIntroPlayed = true;
     document.body.appendChild(overlay);
     document.body.classList.add('sujing-intro-lock');
+    document.documentElement.classList.add('sujing-intro-active');
     resetHomeSubtitle(subtitle);
 
     const skip = overlay.querySelector('[data-sujing-intro-skip]');
@@ -1969,6 +1971,7 @@ void main() {
       document.removeEventListener('pjax:send', onPjaxSend);
       overlay.remove();
       document.body.classList.remove('sujing-intro-lock');
+      document.documentElement.classList.remove('sujing-intro-active', 'sujing-intro-revealed');
     };
 
     const onPjaxSend = () => {
@@ -1982,6 +1985,8 @@ void main() {
       window.clearTimeout(fallbackTimer);
       overlay.classList.add('is-opening');
       document.body.classList.remove('sujing-intro-lock');
+      document.documentElement.classList.remove('sujing-intro-active');
+      document.documentElement.classList.add('sujing-intro-revealed');
       typeHomeSubtitle(subtitle, false);
       doneTimer = window.setTimeout(() => {
         overlay.classList.add('is-done');
