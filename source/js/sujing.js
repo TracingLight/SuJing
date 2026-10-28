@@ -12,6 +12,15 @@
     statsPath: '',
     statsPending: false,
     navDropdownResizeBound: false,
+    annotation: {
+      active: null,
+      closeTimer: 0,
+      frame: 0,
+      pointerDown: null,
+      pointerTimer: 0,
+      hoverQuery: null,
+      bound: false
+    },
     starfield: {
       canvas: null,
       context: null,
@@ -124,60 +133,768 @@
     element.hideTimer = window.setTimeout(() => element.classList.remove('show'), 1800);
   };
 
+  /* ---------------------------------------------------------------------------
+   * Inline annotations
+   * 一条词条 = 渐变下划 + 菱形粒子标记 + hover/click 词条卡
+   * 视觉层：全屏 Canvas（WebGL 着色器光晕 + GPU 点精灵粒子；降级 2D Canvas）
+   * ------------------------------------------------------------------------- */
+
+  const annotationTooltipOf = (annotation) => {
+    const id = annotation?.getAttribute?.('aria-describedby');
+    return id ? document.getElementById(id) : null;
+  };
+
+  const annotationOwnerOf = (tooltip) => {
+    if (!tooltip?.id) return null;
+    return document.querySelector(`[data-sujing-annotation][aria-describedby="${tooltip.id}"]`);
+  };
+
+  const annotationHoverEnabled = () => {
+    state.annotation.hoverQuery ||= window.matchMedia('(hover: hover) and (pointer: fine)');
+    return state.annotation.hoverQuery.matches;
+  };
+
+  const annotationMotionReduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const annotationFx = {
+    canvas: null,
+    gl: null,
+    ctx: null,
+    mode: '',
+    failed: false,
+    width: 0,
+    height: 0,
+    dpr: 1,
+    rect: null,
+    open: 0,
+    target: 0,
+    time: 0,
+    age: 0,
+    last: 0,
+    raf: 0,
+    emit: 0,
+    particles: [],
+    haloProgram: null,
+    pointProgram: null,
+    quad: null,
+    pointBuffer: null,
+    haloUniform: {},
+    pointUniform: {},
+    haloAttr: 0,
+    pointAttr: {},
+
+    shaders: {
+      haloVs: `
+attribute vec2 aPos;
+varying vec2 vUv;
+void main() {
+  vUv = aPos * 0.5 + 0.5;
+  gl_Position = vec4(aPos, 0.0, 1.0);
+}`,
+      haloFs: `
+precision highp float;
+varying vec2 vUv;
+uniform vec2 uRes;
+uniform vec2 uCenter;
+uniform vec2 uSize;
+uniform float uTime;
+uniform float uOpen;
+uniform float uAge;
+uniform vec3 uA;
+uniform vec3 uB;
+
+float hash21(vec2 p) {
+  p = fract(p * vec2(123.34, 456.21));
+  p += dot(p, p + 45.32);
+  return fract(p.x * p.y);
+}
+
+float noise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  float a = hash21(i);
+  float b = hash21(i + vec2(1.0, 0.0));
+  float c = hash21(i + vec2(0.0, 1.0));
+  float d = hash21(i + vec2(1.0, 1.0));
+  return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
+
+float fbm(vec2 p) {
+  float v = 0.0;
+  float amp = 0.5;
+  for (int i = 0; i < 4; i++) {
+    v += amp * noise(p);
+    p = p * 2.03 + 17.1;
+    amp *= 0.5;
+  }
+  return v;
+}
+
+float sdRoundBox(vec2 p, vec2 b, float r) {
+  vec2 q = abs(p) - b + r;
+  return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;
+}
+
+void main() {
+  vec2 p = vUv * uRes - uCenter;
+  vec2 halfSize = max(uSize * 0.5, vec2(8.0));
+  float d = sdRoundBox(p, halfSize + vec2(3.0), 10.0);
+  float t = uTime;
+  float n = fbm(p * 0.12 + vec2(t * 0.2, -t * 0.15));
+  float n2 = noise(p * 0.18 - vec2(t * 0.16, t * 0.22));
+  float ringWidth = 3.0 + n * 1.2;
+  float ring = exp(-pow(abs(d) / ringWidth, 2.0));
+  float glow = 1.0 - smoothstep(0.0, 38.0, max(abs(d), 0.0));
+  float ang = atan(p.y, p.x);
+  float sweep = pow(max(0.0, cos(ang - t * 1.5 + n * 2.5)), 14.0);
+  float insideFade = smoothstep(-6.0, 0.0, d);
+  float age = clamp(uAge / 0.9, 0.0, 1.0);
+  float wave = exp(-pow((abs(d) - age * 56.0) / 3.2, 2.0)) * (1.0 - age);
+  float alpha = (ring * (0.42 + 0.2 * n2) + glow * 0.1 + ring * sweep * 0.65 + wave * 0.55) * insideFade;
+  alpha *= uOpen;
+  alpha = min(alpha, 0.9);
+  vec3 col = mix(uA, uB, clamp(0.2 + sweep * 0.8 + n2 * 0.1, 0.0, 1.0));
+  col += vec3(0.18) * sweep;
+  gl_FragColor = vec4(col, clamp(alpha, 0.0, 0.85));
+}`,
+      pointVs: `
+attribute vec2 aPos;
+attribute float aSize;
+attribute float aAlpha;
+attribute float aHue;
+uniform vec2 uRes;
+uniform float uDpr;
+varying float vAlpha;
+varying float vHue;
+void main() {
+  vec2 clip = (aPos / uRes) * 2.0 - 1.0;
+  gl_Position = vec4(clip.x, -clip.y, 0.0, 1.0);
+  gl_PointSize = aSize * uDpr;
+  vAlpha = aAlpha;
+  vHue = aHue;
+}`,
+      pointFs: `
+precision mediump float;
+varying float vAlpha;
+varying float vHue;
+uniform vec3 uA;
+uniform vec3 uB;
+void main() {
+  vec2 c = gl_PointCoord - 0.5;
+  float d = length(c);
+  float core = pow(max(0.0, 1.0 - d * 2.0), 3.0);
+  float halo = 1.0 - smoothstep(0.0, 0.5, d);
+  float a = core + halo * 0.22;
+  vec3 col = mix(uA, uB, vHue);
+  gl_FragColor = vec4(col, a * vAlpha);
+}`
+    },
+
+    compile(gl, type, source) {
+      const shader = gl.createShader(type);
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        gl.deleteShader(shader);
+        return null;
+      }
+      return shader;
+    },
+
+    program(gl, vsSource, fsSource) {
+      const vs = this.compile(gl, gl.VERTEX_SHADER, vsSource);
+      const fs = this.compile(gl, gl.FRAGMENT_SHADER, fsSource);
+      if (!vs || !fs) return null;
+      const program = gl.createProgram();
+      gl.attachShader(program, vs);
+      gl.attachShader(program, fs);
+      gl.linkProgram(program);
+      gl.deleteShader(vs);
+      gl.deleteShader(fs);
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        gl.deleteProgram(program);
+        return null;
+      }
+      return program;
+    },
+
+    mount() {
+      const canvas = document.createElement('canvas');
+      canvas.id = 'sujing-annotation-fx';
+      canvas.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(canvas);
+      this.canvas = canvas;
+      return canvas;
+    },
+
+    init() {
+      if (this.canvas) return this.mode !== 'none';
+      if (this.failed || annotationMotionReduced()) return false;
+      if (window.matchMedia('(max-width: 640px)').matches) {
+        this.mode = 'none';
+        this.failed = true;
+        return false;
+      }
+
+      let canvas = this.mount();
+      const gl = canvas.getContext('webgl', {
+        alpha: true,
+        antialias: false,
+        premultipliedAlpha: false,
+        powerPreference: 'low-power'
+      });
+      if (gl) {
+        const halo = this.program(gl, this.shaders.haloVs, this.shaders.haloFs);
+        const points = this.program(gl, this.shaders.pointVs, this.shaders.pointFs);
+        if (halo && points) {
+          this.gl = gl;
+          this.haloProgram = halo;
+          this.pointProgram = points;
+          this.mode = 'webgl';
+          this.quad = gl.createBuffer();
+          gl.bindBuffer(gl.ARRAY_BUFFER, this.quad);
+          gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+            -1, -1, 1, -1, -1, 1,
+            -1, 1, 1, -1, 1, 1
+          ]), gl.STATIC_DRAW);
+          this.pointBuffer = gl.createBuffer();
+          this.haloAttr = gl.getAttribLocation(halo, 'aPos');
+          this.haloUniform = {
+            res: gl.getUniformLocation(halo, 'uRes'),
+            center: gl.getUniformLocation(halo, 'uCenter'),
+            size: gl.getUniformLocation(halo, 'uSize'),
+            time: gl.getUniformLocation(halo, 'uTime'),
+            open: gl.getUniformLocation(halo, 'uOpen'),
+            age: gl.getUniformLocation(halo, 'uAge'),
+            a: gl.getUniformLocation(halo, 'uA'),
+            b: gl.getUniformLocation(halo, 'uB')
+          };
+          this.pointAttr = {
+            pos: gl.getAttribLocation(points, 'aPos'),
+            size: gl.getAttribLocation(points, 'aSize'),
+            alpha: gl.getAttribLocation(points, 'aAlpha'),
+            hue: gl.getAttribLocation(points, 'aHue')
+          };
+          this.pointUniform = {
+            res: gl.getUniformLocation(points, 'uRes'),
+            dpr: gl.getUniformLocation(points, 'uDpr'),
+            a: gl.getUniformLocation(points, 'uA'),
+            b: gl.getUniformLocation(points, 'uB')
+          };
+          this.resize();
+          return true;
+        }
+        canvas.remove();
+        canvas = this.mount();
+      }
+
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        this.ctx = ctx;
+        this.mode = '2d';
+        this.resize();
+        return true;
+      }
+      canvas.remove();
+      this.canvas = null;
+      this.mode = 'none';
+      this.failed = true;
+      return false;
+    },
+
+    resize() {
+      if (!this.canvas) return;
+      const dpr = Math.min(1.5, window.devicePixelRatio || 1);
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      this.width = width;
+      this.height = height;
+      this.dpr = dpr;
+      this.canvas.width = Math.max(1, Math.round(width * dpr));
+      this.canvas.height = Math.max(1, Math.round(height * dpr));
+      this.canvas.style.width = `${width}px`;
+      this.canvas.style.height = `${height}px`;
+      if (this.gl) this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+      if (this.ctx) this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    },
+
+    setRect(rect) {
+      this.rect = rect;
+    },
+
+    openAt(rect) {
+      if (!rect || !this.init()) return;
+      this.rect = rect;
+      const reopening = this.target > 0.5;
+      this.target = 1;
+      this.age = 0;
+      if (!reopening) {
+        this.open = Math.max(this.open, 0.01);
+        this.particles.length = 0;
+        this.spawn(40, true);
+        this.last = 0;
+      } else {
+        this.spawn(8);
+      }
+      this.start();
+    },
+
+    close() {
+      this.target = 0;
+      this.start();
+    },
+
+    start() {
+      if (this.raf || !this.canvas) return;
+      this.raf = window.requestAnimationFrame((time) => this.frame(time));
+    },
+
+    spawn(count, burst = false) {
+      const rect = this.rect;
+      if (!rect) return;
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      for (let i = 0; i < count; i += 1) {
+        const angle = burst
+          ? (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.35
+          : Math.random() * Math.PI * 2;
+        const life = (burst ? 700 : 1000) + Math.random() * (burst ? 800 : 1000);
+        this.particles.push({
+          angle,
+          radiusX: rect.width / 2 + 8 + Math.random() * (burst ? 20 : 38),
+          radiusY: rect.height / 2 + 7 + Math.random() * (burst ? 16 : 26),
+          spin: (Math.random() < 0.5 ? -1 : 1) * (0.0006 + Math.random() * 0.0012),
+          seed: Math.random() * Math.PI * 2,
+          x: cx,
+          y: cy,
+          life,
+          maxLife: life,
+          size: 2.2 + Math.random() * (burst ? 3 : 2.4),
+          hue: Math.random() < 0.55 ? 0 : 1,
+          alpha: 0.65 + Math.random() * 0.35
+        });
+      }
+      if (this.particles.length > 110) this.particles.splice(0, this.particles.length - 110);
+    },
+
+    update(dt) {
+      const rect = this.rect;
+      const cx = rect ? rect.left + rect.width / 2 : 0;
+      const cy = rect ? rect.top + rect.height / 2 : 0;
+      const particles = this.particles;
+      for (let i = particles.length - 1; i >= 0; i -= 1) {
+        const p = particles[i];
+        p.life -= dt;
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
+        p.angle += p.spin * dt;
+        const age = p.maxLife - p.life;
+        const breathe = 1 + 0.05 * Math.sin(p.seed + age * 0.004);
+        p.x = cx + Math.cos(p.angle) * p.radiusX * breathe;
+        p.y = cy + Math.sin(p.angle) * p.radiusY * breathe;
+      }
+    },
+
+    frame(now) {
+      this.raf = 0;
+      if (!this.canvas || !this.rect) {
+        this.clear();
+        return;
+      }
+      if (!this.last) this.last = now;
+      const dt = Math.min(48, Math.max(8, now - this.last));
+      this.last = now;
+      this.time += dt / 1000;
+      this.age += dt / 1000;
+      const ease = 1 - Math.pow(1 - (this.target ? 0.17 : 0.12), dt / 16.67);
+      this.open += (this.target - this.open) * ease;
+      if (!this.target && this.open < 0.012 && !this.particles.length) {
+        this.open = 0;
+        this.clear();
+        this.last = 0;
+        return;
+      }
+      if (this.target && this.open > 0.04) {
+        this.emit += dt;
+        if (this.emit > 70) {
+          this.emit = 0;
+          this.spawn(1);
+        }
+      }
+      this.update(dt);
+      this.draw();
+      this.raf = window.requestAnimationFrame((time) => this.frame(time));
+    },
+
+    clear() {
+      if (this.gl) {
+        this.gl.clearColor(0, 0, 0, 0);
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+      } else if (this.ctx) {
+        this.ctx.clearRect(0, 0, this.width, this.height);
+      }
+    },
+
+    draw() {
+      const rect = this.rect;
+      if (!rect || !this.mode) return;
+      const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const teal = dark ? [0.3, 0.82, 0.78] : [0.1, 0.48, 0.5];
+      const gold = dark ? [0.95, 0.76, 0.42] : [0.72, 0.56, 0.32];
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      if (this.mode === 'webgl') {
+        const gl = this.gl;
+        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.disable(gl.DEPTH_TEST);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.useProgram(this.haloProgram);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.quad);
+        gl.enableVertexAttribArray(this.haloAttr);
+        gl.vertexAttribPointer(this.haloAttr, 2, gl.FLOAT, false, 0, 0);
+        gl.uniform2f(this.haloUniform.res, this.width, this.height);
+        gl.uniform2f(this.haloUniform.center, cx, this.height - cy);
+        gl.uniform2f(this.haloUniform.size, rect.width, rect.height);
+        gl.uniform1f(this.haloUniform.time, this.time);
+        gl.uniform1f(this.haloUniform.open, this.open);
+        gl.uniform1f(this.haloUniform.age, this.age);
+        gl.uniform3f(this.haloUniform.a, teal[0], teal[1], teal[2]);
+        gl.uniform3f(this.haloUniform.b, gold[0], gold[1], gold[2]);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+        if (this.particles.length) {
+          const data = new Float32Array(this.particles.length * 5);
+          for (let i = 0; i < this.particles.length; i += 1) {
+            const p = this.particles[i];
+            const progress = 1 - p.life / p.maxLife;
+            const twinkle = 0.7 + 0.3 * Math.sin(p.seed + this.time * 5);
+            const alpha = Math.sin(Math.PI * progress) * p.alpha * this.open * twinkle;
+            const offset = i * 5;
+            data[offset] = p.x;
+            data[offset + 1] = p.y;
+            data[offset + 2] = p.size;
+            data[offset + 3] = alpha;
+            data[offset + 4] = p.hue;
+          }
+          gl.useProgram(this.pointProgram);
+          gl.bindBuffer(gl.ARRAY_BUFFER, this.pointBuffer);
+          gl.bufferData(gl.ARRAY_BUFFER, data, gl.DYNAMIC_DRAW);
+          const stride = 5 * 4;
+          gl.enableVertexAttribArray(this.pointAttr.pos);
+          gl.vertexAttribPointer(this.pointAttr.pos, 2, gl.FLOAT, false, stride, 0);
+          gl.enableVertexAttribArray(this.pointAttr.size);
+          gl.vertexAttribPointer(this.pointAttr.size, 1, gl.FLOAT, false, stride, 8);
+          gl.enableVertexAttribArray(this.pointAttr.alpha);
+          gl.vertexAttribPointer(this.pointAttr.alpha, 1, gl.FLOAT, false, stride, 12);
+          gl.enableVertexAttribArray(this.pointAttr.hue);
+          gl.vertexAttribPointer(this.pointAttr.hue, 1, gl.FLOAT, false, stride, 16);
+          gl.uniform2f(this.pointUniform.res, this.width, this.height);
+          gl.uniform1f(this.pointUniform.dpr, this.dpr);
+          gl.uniform3f(this.pointUniform.a, teal[0], teal[1], teal[2]);
+          gl.uniform3f(this.pointUniform.b, gold[0], gold[1], gold[2]);
+          gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+          gl.drawArrays(gl.POINTS, 0, this.particles.length);
+        }
+      } else if (this.mode === '2d') {
+        this.draw2d(cx, cy, teal, gold, dark);
+      }
+    },
+
+    draw2d(cx, cy, teal, gold, dark) {
+      const ctx = this.ctx;
+      if (!ctx) return;
+      ctx.clearRect(0, 0, this.width, this.height);
+      const rect = this.rect;
+      if (!rect) return;
+      const x = rect.left - 3;
+      const y = rect.top - 3;
+      const w = rect.width + 6;
+      const h = rect.height + 6;
+      const gradient = ctx.createLinearGradient(x, y, x + w, y + h);
+      gradient.addColorStop(0, `rgba(${teal.map((v) => Math.round(v * 255)).join(',')},1)`);
+      gradient.addColorStop(1, `rgba(${gold.map((v) => Math.round(v * 255)).join(',')},1)`);
+      ctx.save();
+      ctx.globalAlpha = this.open * (dark ? 0.55 : 0.4);
+      ctx.strokeStyle = gradient;
+      ctx.lineWidth = 1 + 0.7 * (0.5 + 0.5 * Math.sin(this.time * 2.2));
+      ctx.shadowColor = dark ? 'rgba(80, 220, 210, 0.7)' : 'rgba(26, 122, 130, 0.45)';
+      ctx.shadowBlur = 24;
+      ctx.beginPath();
+      if (typeof ctx.roundRect === 'function') ctx.roundRect(x, y, w, h, 12);
+      else ctx.rect(x, y, w, h);
+      ctx.stroke();
+      ctx.restore();
+      for (const p of this.particles) {
+        const progress = 1 - p.life / p.maxLife;
+        const twinkle = 0.7 + 0.3 * Math.sin(p.seed + this.time * 5);
+        const alpha = Math.sin(Math.PI * progress) * p.alpha * this.open * twinkle;
+        if (alpha <= 0.01) continue;
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = p.hue
+          ? `rgb(${gold.map((v) => Math.round(v * 255)).join(',')})`
+          : `rgb(${teal.map((v) => Math.round(v * 255)).join(',')})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+  };
+
+  const clearAnnotationClose = () => {
+    if (!state.annotation.closeTimer) return;
+    window.clearTimeout(state.annotation.closeTimer);
+    state.annotation.closeTimer = 0;
+  };
+
+  const scheduleAnnotationClose = (delay = 280) => {
+    clearAnnotationClose();
+    state.annotation.closeTimer = window.setTimeout(() => {
+      state.annotation.closeTimer = 0;
+      closeAnnotations();
+    }, delay);
+  };
+
+  const positionAnnotationCard = (annotation, tooltip) => {
+    if (!annotation || !tooltip || !tooltip.isConnected) return;
+    const term = annotation.getBoundingClientRect();
+    const vw = document.documentElement.clientWidth || window.innerWidth;
+    const vh = window.innerHeight || document.documentElement.clientHeight;
+    const margin = 12;
+    const gap = 18;
+    const width = tooltip.offsetWidth;
+    const height = tooltip.offsetHeight;
+    if (!width || !height) return;
+    let left = term.left + term.width / 2 - width / 2;
+    left = Math.max(margin, Math.min(vw - margin - width, left));
+    const below = vh - term.bottom;
+    const above = term.top;
+    let top;
+    let placement;
+    if (below >= height + gap + margin || below >= above) {
+      top = term.bottom + gap;
+      placement = 'below';
+    } else {
+      top = term.top - gap - height;
+      placement = 'above';
+    }
+    top = Math.max(margin, Math.min(vh - margin - height, top));
+    tooltip.style.left = `${Math.round(left)}px`;
+    tooltip.style.top = `${Math.round(top)}px`;
+    tooltip.dataset.placement = placement;
+    const arrowX = Math.max(18, Math.min(width - 18, term.left + term.width / 2 - left));
+    tooltip.style.setProperty('--arrow-x', `${Math.round(arrowX)}px`);
+  };
+
+  const layoutActiveAnnotation = () => {
+    const annotation = state.annotation.active;
+    if (!annotation) return;
+    const tooltip = annotationTooltipOf(annotation);
+    if (!tooltip) return;
+    positionAnnotationCard(annotation, tooltip);
+    annotationFx.setRect(annotation.getBoundingClientRect());
+  };
+
+  const openAnnotation = (annotation) => {
+    if (!annotation) return;
+    const tooltip = annotationTooltipOf(annotation);
+    if (!tooltip) return;
+    if (state.annotation.active === annotation) {
+      clearAnnotationClose();
+      layoutActiveAnnotation();
+      return;
+    }
+    closeAnnotations();
+    state.annotation.active = annotation;
+    annotation.classList.add('is-open');
+    annotation.setAttribute('aria-expanded', 'true');
+    tooltip.setAttribute('aria-hidden', 'false');
+    tooltip.classList.remove('is-open');
+    const term = tooltip.querySelector('[data-sujing-annotation-term]');
+    if (term) term.textContent = annotation.querySelector('.sujing-annotation-text')?.textContent?.trim() || '';
+    positionAnnotationCard(annotation, tooltip);
+    window.requestAnimationFrame(() => {
+      if (state.annotation.active !== annotation) return;
+      positionAnnotationCard(annotation, tooltip);
+      tooltip.classList.add('is-open');
+      annotationFx.openAt(annotation.getBoundingClientRect());
+    });
+  };
+
+  const closeAnnotation = (annotation) => {
+    if (!annotation) return;
+    const tooltip = annotationTooltipOf(annotation);
+    annotation.classList.remove('is-open');
+    annotation.setAttribute('aria-expanded', 'false');
+    if (tooltip) {
+      tooltip.classList.remove('is-open');
+      tooltip.setAttribute('aria-hidden', 'true');
+    }
+    if (state.annotation.active === annotation) {
+      state.annotation.active = null;
+      annotationFx.close();
+    }
+  };
+
   const closeAnnotations = (except = null) => {
     document.querySelectorAll('[data-sujing-annotation].is-open').forEach((annotation) => {
       if (annotation === except) return;
-      annotation.classList.remove('is-open');
-      annotation.setAttribute('aria-expanded', 'false');
-      annotation.querySelector('[role="tooltip"]')?.setAttribute('aria-hidden', 'true');
+      closeAnnotation(annotation);
     });
+    if (!except) clearAnnotationClose();
   };
 
   const toggleAnnotation = (annotation, force) => {
     if (!annotation) return;
     const open = force == null ? !annotation.classList.contains('is-open') : Boolean(force);
-    closeAnnotations(open ? annotation : null);
-    annotation.classList.toggle('is-open', open);
-    annotation.setAttribute('aria-expanded', open ? 'true' : 'false');
-    annotation.querySelector('[role="tooltip"]')?.setAttribute('aria-hidden', open ? 'false' : 'true');
+    if (open) openAnnotation(annotation);
+    else closeAnnotation(annotation);
+  };
+
+  const collectAnnotationCards = () => {
+    document.querySelectorAll('body > .sujing-annotation-tooltip').forEach((tooltip) => {
+      if (!annotationOwnerOf(tooltip)) tooltip.remove();
+    });
+    document.querySelectorAll('[data-sujing-annotation]').forEach((annotation) => {
+      const tooltip = annotationTooltipOf(annotation);
+      if (!tooltip) return;
+      if (tooltip.parentElement !== document.body) document.body.appendChild(tooltip);
+      const term = tooltip.querySelector('[data-sujing-annotation-term]');
+      if (term) term.textContent = annotation.querySelector('.sujing-annotation-text')?.textContent?.trim() || '';
+      tooltip.setAttribute('aria-hidden', annotation.classList.contains('is-open') ? 'false' : 'true');
+    });
+    if (state.annotation.active && !state.annotation.active.isConnected) {
+      state.annotation.active = null;
+      annotationFx.close();
+    }
   };
 
   const installAnnotations = () => {
-    if (document.documentElement.dataset.sujingAnnotations) return;
-    document.documentElement.dataset.sujingAnnotations = 'true';
+    collectAnnotationCards();
+    if (state.annotation.bound) return;
+    state.annotation.bound = true;
+
+    document.addEventListener('pointerdown', (event) => {
+      const annotation = event.target.closest?.('[data-sujing-annotation]');
+      if (!annotation) return;
+      state.annotation.pointerDown = annotation;
+      if (state.annotation.pointerTimer) window.clearTimeout(state.annotation.pointerTimer);
+      state.annotation.pointerTimer = window.setTimeout(() => {
+        state.annotation.pointerDown = null;
+        state.annotation.pointerTimer = 0;
+      }, 600);
+    }, true);
+
+    document.addEventListener('pointerover', (event) => {
+      if (event.pointerType && event.pointerType !== 'mouse') return;
+      if (!annotationHoverEnabled()) return;
+      const annotation = event.target.closest?.('[data-sujing-annotation]');
+      const tooltip = event.target.closest?.('.sujing-annotation-tooltip');
+      const owner = annotation || annotationOwnerOf(tooltip);
+      if (!owner) return;
+      clearAnnotationClose();
+      if (state.annotation.active !== owner) openAnnotation(owner);
+    });
+
+    document.addEventListener('pointerout', (event) => {
+      if (event.pointerType && event.pointerType !== 'mouse') return;
+      if (!annotationHoverEnabled()) return;
+      const from = event.target.closest?.('[data-sujing-annotation], .sujing-annotation-tooltip');
+      if (!from) return;
+      const to = event.relatedTarget;
+      if (to && to.closest?.('[data-sujing-annotation], .sujing-annotation-tooltip')) return;
+      scheduleAnnotationClose();
+    });
 
     document.addEventListener('click', (event) => {
       const close = event.target.closest?.('[data-sujing-annotation-close]');
       if (close) {
         event.preventDefault();
         event.stopPropagation();
-        toggleAnnotation(close.closest('[data-sujing-annotation]'), false);
+        const owner = annotationOwnerOf(close.closest('.sujing-annotation-tooltip'));
+        closeAnnotation(owner);
+        owner?.focus({ preventScroll: true });
         return;
       }
+      if (event.target.closest?.('.sujing-annotation-tooltip')) return;
       const annotation = event.target.closest?.('[data-sujing-annotation]');
       if (annotation) {
-        if (!event.target.closest?.('[role="tooltip"]')) {
-          event.preventDefault();
-          toggleAnnotation(annotation);
-        }
+        event.preventDefault();
+        toggleAnnotation(annotation);
         return;
       }
       closeAnnotations();
     });
+
     document.addEventListener('keydown', (event) => {
-      const annotation = event.target.closest?.('[data-sujing-annotation]');
       if (event.key === 'Escape') {
+        const active = state.annotation.active;
+        if (!active) return;
+        const tooltip = annotationTooltipOf(active);
+        const focusInside = active.contains(document.activeElement) || tooltip?.contains(document.activeElement);
         closeAnnotations();
+        if (focusInside) active.focus({ preventScroll: true });
+        event.preventDefault();
         return;
       }
+      const annotation = event.target.closest?.('[data-sujing-annotation]');
       if (!annotation || (event.key !== 'Enter' && event.key !== ' ')) return;
       event.preventDefault();
+      const willOpen = !annotation.classList.contains('is-open');
       toggleAnnotation(annotation);
+      if (willOpen) {
+        const tooltip = annotationTooltipOf(annotation);
+        window.requestAnimationFrame(() => tooltip?.querySelector('[data-sujing-annotation-close]')?.focus({ preventScroll: true }));
+      }
     });
+
     document.addEventListener('focusin', (event) => {
+      if (state.annotation.pointerDown) return;
       const annotation = event.target.closest?.('[data-sujing-annotation]');
-      if (annotation) toggleAnnotation(annotation, true);
+      const tooltip = event.target.closest?.('.sujing-annotation-tooltip');
+      const owner = annotation || annotationOwnerOf(tooltip);
+      if (!owner) return;
+      clearAnnotationClose();
+      openAnnotation(owner);
     });
+
+    document.addEventListener('focusout', (event) => {
+      const from = event.target.closest?.('[data-sujing-annotation], .sujing-annotation-tooltip');
+      if (!from) return;
+      window.setTimeout(() => {
+        const active = state.annotation.active;
+        if (!active) return;
+        const tooltip = annotationTooltipOf(active);
+        if (active.contains(document.activeElement) || tooltip?.contains(document.activeElement)) return;
+        scheduleAnnotationClose(160);
+      }, 0);
+    });
+
+    const onLayout = () => {
+      if (state.annotation.frame) return;
+      state.annotation.frame = window.requestAnimationFrame(() => {
+        state.annotation.frame = 0;
+        const annotation = state.annotation.active;
+        if (!annotation) return;
+        const rect = annotation.getBoundingClientRect();
+        if (rect.bottom < -40 || rect.top > window.innerHeight + 40) {
+          closeAnnotation(annotation);
+          return;
+        }
+        layoutActiveAnnotation();
+      });
+    };
+    window.addEventListener('scroll', onLayout, { passive: true });
+    window.addEventListener('resize', () => {
+      annotationFx.resize();
+      onLayout();
+    }, { passive: true });
   };
 
   const formatDate = (value) => {
@@ -2064,6 +2781,7 @@
 
     document.addEventListener('pjax:send', () => {
       document.body.classList.add('sujing-leaving');
+      closeAnnotations();
     });
     document.addEventListener('pjax:complete', () => {
       document.body.classList.remove('sujing-leaving');

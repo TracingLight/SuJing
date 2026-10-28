@@ -30,8 +30,14 @@ hexo.extend.tag.register('annotation', (args, content) => {
     `<span class="sujing-annotation" data-sujing-annotation tabindex="0" role="button" aria-label="查看批注" aria-expanded="false" aria-describedby="${id}">`,
     `<span class="sujing-annotation-text">${body}</span>`,
     `<span class="sujing-annotation-tooltip" id="${id}" role="tooltip" aria-hidden="true">`,
-    `<span class="sujing-annotation-note">${escapeHtml(note)}</span>`,
+    '<span class="sujing-annotation-card">',
+    '<span class="sujing-annotation-head">',
+    '<span class="sujing-annotation-eyebrow">词条批注</span>',
     '<button type="button" class="sujing-annotation-close" data-sujing-annotation-close aria-label="关闭批注">&times;</button>',
+    '</span>',
+    '<span class="sujing-annotation-term" data-sujing-annotation-term></span>',
+    `<span class="sujing-annotation-note">${escapeHtml(note)}</span>`,
+    '</span>',
     '</span>',
     '</span>'
   ].join('');
