@@ -2072,7 +2072,7 @@ void main() {
             <em>歌单 · ${tracks.length}</em>
           </button>
         </div>
-        <img class="sujing-music-cover" alt="" src="${escapeHtml(tracks[0].cover || '/img/sujing-mark.svg')}">
+        <img class="sujing-music-cover" alt="" src="${escapeHtml(tracks[0].cover || '/img/sujing-icon-512.png')}">
         <div class="sujing-music-info"><strong></strong><span></span></div>
         <div class="sujing-music-controls">
           <button type="button" data-music="prev" title="上一首" aria-label="上一首"><i class="fas fa-backward-step" aria-hidden="true"></i></button>
@@ -2157,7 +2157,7 @@ void main() {
       const track = tracks[state.trackIndex];
       player.querySelector('.sujing-music-info strong').textContent = track.title || '未命名曲目';
       player.querySelector('.sujing-music-info span').textContent = track.artist || '未知作者';
-      player.querySelector('.sujing-music-cover').src = track.cover || '/img/sujing-mark.svg';
+      player.querySelector('.sujing-music-cover').src = track.cover || '/img/sujing-icon-512.png';
       if (resetTime) {
         pendingRestoreTime = 0;
         setProgress(0);
@@ -2314,7 +2314,7 @@ void main() {
     }
     container.innerHTML = `<div class="sujing-track-list">${tracks.map((track, index) => `
       <button type="button" data-track-index="${index}">
-        <img src="${escapeHtml(track.cover || '/img/sujing-mark.svg')}" alt="" loading="lazy">
+        <img src="${escapeHtml(track.cover || '/img/sujing-icon-512.png')}" alt="" loading="lazy">
         <span><strong>${escapeHtml(track.title || '未命名曲目')}</strong><small>${escapeHtml(track.artist || '未知作者')}</small></span>
         <i class="fas fa-play" aria-hidden="true"></i>
       </button>`).join('')}</div>`;
@@ -2346,7 +2346,7 @@ void main() {
 
     const renderCards = (list) => list.map((post) => `
       <a class="sujing-column-card" href="${escapeHtml(post.path)}" data-sujing-reveal>
-        <span class="sujing-column-card-media"><img src="${escapeHtml(post.cover || '/img/sujing-mark.svg')}" alt="" loading="lazy" width="480" height="300"></span>
+        <span class="sujing-column-card-media"><img src="${escapeHtml(post.cover || '/img/sujing-icon-512.png')}" alt="" loading="lazy" width="480" height="300"></span>
         <span class="sujing-column-card-body"><time datetime="${escapeHtml(post.date)}">${escapeHtml(formatDate(post.date))}</time><strong>${escapeHtml(post.title || '未命名')}</strong>${post.description ? `<em>${escapeHtml(post.description)}</em>` : ''}</span>
       </a>`).join('');
 
@@ -2438,7 +2438,7 @@ void main() {
       return [cats, tagsLine].filter(Boolean).join('  ·  ');
     };
 
-    const coverOf = (post) => escapeHtml(post.cover || '/img/sujing-mark.svg');
+    const coverOf = (post) => escapeHtml(post.cover || '/img/sujing-icon-512.png');
 
     const renderTimeline = (list) => {
       const groups = new Map();

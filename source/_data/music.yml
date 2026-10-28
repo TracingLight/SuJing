@@ -3,12 +3,12 @@ tracks:
   - title: 南山雪
     artist: 叶里
     url: /media/music/nanshanxue.mp3
-    cover: /img/sujing-mark.svg
+    cover: /img/sujing-icon-512.png
   - title: 难渡半生
     artist: 残雪
     url: /media/music/nandubansheng.mp3
-    cover: /img/sujing-mark.svg
+    cover: /img/sujing-icon-512.png
   - title: 错位时空
     artist: 艾辰
     url: /media/music/e-3-4e-3-4-e-a-1-2-c-o-2.mp3
-    cover: /img/sujing-mark.svg
+    cover: /img/sujing-icon-512.png

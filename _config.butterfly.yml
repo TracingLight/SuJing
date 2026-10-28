@@ -27,7 +27,7 @@ social:
   fas fa-envelope: mailto:suguangruchu@gmail.com || Email || '#b44b4b'
 
 # Visual identity
-favicon: /img/sujing-mark.svg
+favicon: /img/sujing-icon-32.png
 avatar:
   img: https://img.sujing.dev/avatar/2026/09/image-1846f312ad8a.jpg
   effect: false
@@ -270,6 +270,9 @@ pjax:
 inject:
   head:
     - <link rel="stylesheet" href="/css/sujing.css">
+    - <link rel="icon" type="image/png" sizes="192x192" href="/img/sujing-icon-192.png">
+    - <link rel="apple-touch-icon" sizes="180x180" href="/img/apple-touch-icon.png">
+    - <link rel="manifest" href="/site.webmanifest">
   bottom:
     - <script src="/js/sujing.js" defer></script>
 
