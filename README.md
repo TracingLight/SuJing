@@ -14,19 +14,7 @@ npm install
 npm run server
 ```
 
-直接运行 `npm run server` 时默认访问地址为 `http://localhost:4000`。如果端口被占用，Hexo 会按自身提示处理；使用下方的 `npm run admin` 时，启动器会自动选择可用端口并在终端打印实际地址。
-
-### Windows 快速打开本机控制台
-
-双击项目根目录的 `start-console.bat`，启动管理 API 和博客预览，页面就绪后自动打开浏览器。在博客右下角点击「管」，首次使用时粘贴启动窗口显示的 Token。保留启动窗口，按 `Ctrl+C` 停止服务。服务已运行时，再次启动会直接打开页面。
-
-运行以下命令，可在桌面创建带小猫图标的「溯境控制台」快捷方式；移动项目后重新运行即可更新路径：
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\install-console-shortcut.ps1
-```
-
-本机控制台依赖 `tools/admin/`（按现有仓库规则仅保存在本机）。首次使用前先安装项目依赖。`npm run admin` 会先启动可用的 Hexo 预览，再启动 API；`4000` 被其它服务占用时会顺延到下一个端口，API 健康检查和管理台会跟随实际博客地址。
+直接运行 `npm run server` 时默认访问地址为 `http://localhost:4000`。如果端口被占用，Hexo 会按自身提示处理。
 
 ## 写作
 
@@ -38,7 +26,7 @@ npx hexo new post "文章标题"
 
 本站 Markdown / Butterfly 标签说明见：[docs/写博客-Markdown语法.md](docs/写博客-Markdown语法.md)（含与常见 Markdown 的差异，以及预览与线上渲染不一致处）。
 
-文章批注使用 `{% annotation "说明" %}词语{% endannotation %}`，专栏入口会悬浮显示 Unity、C#、C++、计算机基础和设计模式标签，点击后进入对应独立页面；文章按分类或标签自动归类，管理台正文工具栏可以直接插入批注。
+文章批注使用 `{% annotation "说明" %}词语{% endannotation %}`，专栏入口会悬浮显示 Unity、C#、C++、计算机基础和设计模式标签，点击后进入对应独立页面；文章按分类或标签自动归类。
 
 工程结构、数据流、Worker 边界、发布流程和变更规则见：[docs/项目工程指南.md](docs/项目工程指南.md)。日常新建文章、发布、故障排查和资源下线见：[docs/维护与发布说明.md](docs/维护与发布说明.md)。
 
@@ -126,17 +114,13 @@ npm run check:performance-build
 - Build output directory: `public`
 - Node.js version: `22`
 
-日常发布使用桌面「溯境控制台」：修改内容 → 写入本地 → 预览 → 在「发布」页点击 **确认部署**（GitHub → Pages）。
+日常发布使用 `npm run publish:site`：命令会依次执行本地构建、产物裁剪和验收，然后把全部未被 Git 忽略的项目修改（新增、修改、删除）提交到 `main` 并推送 GitHub，由 Cloudflare Pages 自动构建上线。文章、图片、配置和代码会一起同步；密钥、归档与重复原图按 `.gitignore` 排除。原本已经被 Git 跟踪的文件仍会提交。发布前请确认本地修改均可公开。
 
-按钮依次执行本地构建、产物裁剪和验收，然后将全部未被 Git 忽略的项目修改（新增、修改、删除）提交到 main 并推送 GitHub，由 Cloudflare Pages 自动构建上线。文章、图片、配置和代码会一起同步；密钥、本机控制台、归档与重复原图按 .gitignore 排除。原本已经被 Git 跟踪的文件仍会提交。发布前请确认本地修改均可公开。
+要求处于 `main` 分支，且远端没有本机尚未合并的提交。构建或推送失败会停止并记录错误；推送失败时保留本地提交，修复后再次运行即可重试，不执行强制推送或自动合并。没有文件修改时仍会推送此前尚未上传的提交。
 
-命令行入口为 npm run publish:site；旧的 publish-latest.bat 也已接入同一流程，不再只选最新文章。
+**GitHub 同步成功不代表已经上线。** 请查看 Cloudflare Pages 的部署记录；云端构建失败应在修复后重新发布。
 
-要求处于 main 分支，且远端没有本机尚未合并的提交。构建或推送失败会停止并记录错误；推送失败时保留本地提交，修复后再次点击即可重试，不执行强制推送或自动合并。没有文件修改时仍会推送此前尚未上传的提交。
-
-**GitHub 同步成功不代表已经上线。** 页面会提示查看 Cloudflare 部署记录；云端构建失败应在修复后重新提交发布。
-
-npm run pages:deploy 保留为需要手动执行的本地直传入口，不会自动提交 Git。日常使用上面的统一发布入口，避免与 Git 自动部署交替覆盖。
+`npm run pages:deploy` 保留为需要手动执行的本地直传入口，不会自动提交 Git。日常使用上面的统一发布入口，避免与 Git 自动部署交替覆盖。
 
 ### 下线资源
 
