@@ -32,6 +32,13 @@ const columnPage = (column) => {
     <div class="sujing-column-hero-mark" aria-hidden="true">辑</div>
   </header>
   <p class="sujing-columns-status" data-sujing-column-status role="status">正在整理专栏…</p>
+  <section class="sujing-column-toolbar" data-sujing-reveal aria-label="专栏检索">
+    <label class="sujing-archive-search">
+      <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+      <input type="search" name="q" data-sujing-column-q placeholder="检索本专栏的标题、摘要、分类或标签" autocomplete="off" spellcheck="false">
+      <button type="button" data-sujing-column-clear hidden aria-label="清除检索">清除</button>
+    </label>
+  </section>
   <section class="sujing-column-stage" data-sujing-column-stage aria-live="polite"></section>
 </div>`
     }

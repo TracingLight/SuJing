@@ -7422,3 +7422,27 @@ body {
   display: none !important;
   content: none !important;
 }
+
+/* 专栏页：复用归档检索框 */
+.sujing-column-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sujing-column-toolbar .sujing-archive-search {
+  flex: 1;
+  max-width: 640px;
+}
+
+@media (max-width: 640px) {
+  .sujing-column-toolbar .sujing-archive-search {
+    max-width: none;
+  }
+}
+
+.sujing-column-toolbar .sujing-archive-search input[type="search"]::-webkit-search-cancel-button,
+.sujing-column-toolbar .sujing-archive-search input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+  display: none;
+}

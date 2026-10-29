@@ -2450,10 +2450,53 @@ void main() {
     const currentSlug = String(root.dataset.columnSlug || '').trim().toLocaleLowerCase('en-US');
     const status = root.querySelector('[data-sujing-column-status]');
     const stage = root.querySelector('[data-sujing-column-stage]');
+    let qInput = root.querySelector('[data-sujing-column-q]');
+    let clearBtn = root.querySelector('[data-sujing-column-clear]');
+
+    // 兼容已经生成好的旧页面：没有检索框就补一个，不必重新生成整站
+    if (!qInput && stage) {
+      const toolbar = document.createElement('section');
+      toolbar.className = 'sujing-column-toolbar';
+      toolbar.setAttribute('data-sujing-reveal', '');
+      toolbar.setAttribute('aria-label', '专栏检索');
+      toolbar.innerHTML = `<label class="sujing-archive-search">
+        <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+        <input type="search" name="q" data-sujing-column-q placeholder="检索本专栏的标题、摘要、分类或标签" autocomplete="off" spellcheck="false">
+        <button type="button" data-sujing-column-clear hidden aria-label="清除检索">清除</button>
+      </label>`;
+      stage.parentNode.insertBefore(toolbar, stage);
+      qInput = toolbar.querySelector('[data-sujing-column-q]');
+      clearBtn = toolbar.querySelector('[data-sujing-column-clear]');
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    let query = params.get('q') || '';
+    if (qInput) qInput.value = query;
 
     const matches = (post, column) => {
       const values = [...(post.categories || []), ...(post.tags || [])].map(normalize);
       return values.includes(normalize(column.name));
+    };
+    const matchesQuery = (post) => {
+      const q = normalize(query);
+      if (!q) return true;
+      const haystack = normalize([
+        post.title,
+        post.description,
+        ...(post.categories || []),
+        ...(post.tags || []),
+        post.date
+      ].join(' '));
+      return q.split(/\s+/).filter(Boolean).every((token) => haystack.includes(token));
+    };
+
+    const syncUrl = () => {
+      const next = new URLSearchParams(window.location.search);
+      const trimmed = query.trim();
+      if (trimmed) next.set('q', trimmed);
+      else next.delete('q');
+      const qs = next.toString();
+      window.history.replaceState(null, '', `${window.location.pathname}${qs ? `?${qs}` : ''}`);
     };
 
     const renderCards = (list) => list.map((post) => `
@@ -2481,12 +2524,48 @@ void main() {
         root.setAttribute('aria-busy', 'false');
         return;
       }
-      const list = posts.filter((post) => matches(post, column));
-      status.textContent = `${column.name} · ${list.length} 篇`;
-      stage.innerHTML = `<header class="sujing-column-stage-head"><div><p class="sujing-kicker">${escapeHtml(column.name)}</p><h2>文章索引</h2></div><span>${list.length} 篇</span></header>${list.length ? `<div class="sujing-columns-grid">${renderCards(list)}</div>` : '<div class="sujing-data-empty"><span class="sujing-empty-seal" aria-hidden="true">空</span><h2>这个专栏还没有文章</h2><p>给文章添加对应的分类或标签后，它会自动出现在这里。</p></div>'}`;
+      const baseList = posts.filter((post) => matches(post, column));
+      const list = baseList.filter(matchesQuery);
+      const trimmed = query.trim();
+      status.textContent = trimmed
+        ? `${column.name} · 检索 ${list.length} / ${baseList.length} 篇`
+        : `${column.name} · ${list.length} 篇`;
+      if (qInput) qInput.value = query;
+      if (clearBtn) clearBtn.hidden = !trimmed;
+      const empty = trimmed
+        ? '<div class="sujing-data-empty"><span class="sujing-empty-seal" aria-hidden="true">寻</span><h2>没有匹配的文章</h2><p>换个关键词，或清空检索查看这个专栏的全部文章。</p></div>'
+        : '<div class="sujing-data-empty"><span class="sujing-empty-seal" aria-hidden="true">空</span><h2>这个专栏还没有文章</h2><p>给文章添加对应的分类或标签后，它会自动出现在这里。</p></div>';
+      stage.innerHTML = `<header class="sujing-column-stage-head"><div><p class="sujing-kicker">${escapeHtml(column.name)}</p><h2>文章索引</h2></div><span>${list.length} 篇</span></header>${list.length ? `<div class="sujing-columns-grid">${renderCards(list)}</div>` : empty}`;
       root.setAttribute('aria-busy', 'false');
       installMotion();
     };
+
+    let searchTimer = 0;
+    qInput?.addEventListener('input', () => {
+      window.clearTimeout(searchTimer);
+      searchTimer = window.setTimeout(() => {
+        query = qInput.value;
+        syncUrl();
+        render();
+      }, 120);
+    });
+    qInput?.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      query = '';
+      qInput.value = '';
+      syncUrl();
+      render();
+    });
+    clearBtn?.addEventListener('click', () => {
+      query = '';
+      if (qInput) {
+        qInput.value = '';
+        qInput.focus();
+      }
+      syncUrl();
+      render();
+    });
+
     render();
   };
 
