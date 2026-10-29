@@ -60,7 +60,12 @@ hexo.extend.filter.register('after_render:html', (html, locals) => {
     card.find('h2').text(latest.title);
     card.find('time').attr('datetime', latest.date.toISOString()).text(latest.date.format('YYYY.MM.DD'));
     card.find('.sujing-bento-card-copy > p').text(String(latest.description || '').replace(/<[^>]*>/g, '').trim());
-    if (latest.cover) card.find('img').attr('src', latest.cover).removeAttr('data-lazy-src').attr('alt', `${latest.title}封面`);
+    if (latest.cover) {
+      const coverImg = card.find('img');
+      coverImg.attr('src', latest.cover).removeAttr('data-lazy-src').attr('alt', `${latest.title}封面`);
+      const coverPosition = String(latest.cover_position || '').trim();
+      if (coverPosition) coverImg.css('object-position', coverPosition);
+    }
   }
   $('img').each((_, node) => {
     const img = $(node);

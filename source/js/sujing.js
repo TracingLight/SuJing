@@ -2027,6 +2027,12 @@ void main() {
         cover.removeAttribute('data-original');
         cover.loading = 'eager';
         cover.src = latest.cover;
+        const coverPosition = String(latest.cover_position || '').trim();
+        if (coverPosition) {
+          cover.style.objectPosition = coverPosition;
+        } else {
+          cover.style.removeProperty('object-position');
+        }
         cover.alt = `${latest.title || '最新文章'}封面`;
       }
     }
