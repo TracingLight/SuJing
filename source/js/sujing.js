@@ -2420,7 +2420,7 @@ void main() {
     const tracks = data.music?.tracks || [];
     container.setAttribute('aria-busy', 'false');
     if (!tracks.length) {
-      container.innerHTML = '<div class="sujing-data-empty" data-sujing-reveal><span class="sujing-empty-seal" aria-hidden="true">音</span><h2>歌单整理中</h2><p>将曲目放入 <code>source/media/music/</code>，并写入 <code>music.yml</code> 后即可播放。</p></div>';
+      container.innerHTML = '<div class="sujing-data-empty" data-sujing-reveal><span class="sujing-empty-seal" aria-hidden="true">音</span><h2>歌单整理中</h2><p>在 <code>source/_data/music.yml</code> 中填入 R2 音频地址后即可播放。</p></div>';
       installMotion();
       return;
     }

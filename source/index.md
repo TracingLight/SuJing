@@ -29,7 +29,7 @@ type: sujing-home
       sizes="(max-width: 768px) 100vw, 1680px"
       alt="蓝光水镜中的少女与白蝶" width="2400" height="1350" loading="eager" fetchpriority="high" decoding="async">
     <video class="sujing-hero-video" data-sujing-hero-video muted loop playsinline preload="none" poster="/img/sujing-hero-dynamic-clean.webp" disablepictureinpicture aria-hidden="true" tabindex="-1">
-      <source src="/media/sujing-hero-loop.mp4" type="video/mp4">
+      <source src="https://img.sujing.dev/media/2026/10/sujing-hero-loop-d41616168bb3.mp4" type="video/mp4">
     </video>
     <div class="sujing-bento-hero-shade" aria-hidden="true"></div>
     <div class="sujing-bento-hero-copy">

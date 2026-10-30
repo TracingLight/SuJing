@@ -23,6 +23,7 @@
     "image:bucket": "npx wrangler r2 bucket create sujing-images",
     "image:deploy": "npx wrangler deploy --config infra/image-host/wrangler.jsonc",
     "image:upload": "node tools/upload-image.js",
+    "media:upload": "node tools/upload-image.js",
     "stats:deploy": "npx wrangler deploy --config infra/site-stats/wrangler.jsonc",
     "comments:schema": "npx wrangler d1 execute sujing-comments --remote --file=infra/site-comments/schema.sql",
     "comments:deploy": "npx wrangler deploy --config infra/site-comments/wrangler.jsonc",

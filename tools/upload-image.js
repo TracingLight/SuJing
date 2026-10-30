@@ -14,7 +14,13 @@ const mimeTypes = {
   '.jpg': 'image/jpeg',
   '.png': 'image/png',
   '.svg': 'image/svg+xml',
-  '.webp': 'image/webp'
+  '.webp': 'image/webp',
+  '.mp4': 'video/mp4',
+  '.webm': 'video/webm',
+  '.mp3': 'audio/mpeg',
+  '.m4a': 'audio/mp4',
+  '.ogg': 'audio/ogg',
+  '.wav': 'audio/wav'
 };
 
 const fail = (message) => {
@@ -58,8 +64,10 @@ const folder = (positional[1] || config.defaultFolder || 'blog')
   .replace(/\.\./g, '') || 'blog';
 const key = `${folder}/${year}/${month}/${slug}-${hash}${extension}`;
 
-if (bytes.length > 2 * 1024 * 1024) {
-  console.warn(`[image:upload] Warning: ${(bytes.length / 1024 / 1024).toFixed(2)} MB. Compress large images before publishing.`);
+const isImage = contentType.startsWith('image/');
+const sizeLimit = isImage ? 2 * 1024 * 1024 : 25 * 1024 * 1024;
+if (bytes.length > sizeLimit) {
+  console.warn(`[image:upload] Warning: ${(bytes.length / 1024 / 1024).toFixed(2)} MB. Consider compressing this ${isImage ? 'image' : 'media'} before publishing.`);
 }
 
 if (!printOnly) {
@@ -91,11 +99,12 @@ const markdown = `![${alt}](${url})`;
 
 console.log(`\nR2 key: ${key}`);
 console.log(`URL: ${url}`);
-console.log(`Markdown: ${markdown}`);
+if (isImage) console.log(`Markdown: ${markdown}`);
+console.log(`Content-Type: ${contentType}`);
 
 if (!printOnly && !noCopy && !placeholder && process.platform === 'win32') {
-  const copied = spawnSync('clip.exe', [], { input: markdown, encoding: 'utf8' });
-  if (copied.status === 0) console.log('Markdown copied to clipboard.');
+  const copied = spawnSync('clip.exe', [], { input: isImage ? markdown : url, encoding: 'utf8' });
+  if (copied.status === 0) console.log(isImage ? 'Markdown copied to clipboard.' : 'URL copied to clipboard.');
 }
 
 if (placeholder) {
