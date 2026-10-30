@@ -140,7 +140,8 @@ const visitorCookie = (id) => (
 const collectStats = async (env, path) => ({
   siteUv: await readCount(env, 'site:uv'),
   sitePv: await readCount(env, 'site:pv'),
-  pagePv: await readCount(env, `page:pv:${path}`)
+  pagePv: await readCount(env, `page:pv:${path}`),
+  pageUv: await readCount(env, `page:uv:${path}`)
 });
 
 const handleHit = async (request, env, origin) => {
@@ -181,6 +182,12 @@ const handleHit = async (request, env, origin) => {
 
   const sitePv = await bumpCount(env, 'site:pv');
   const pagePv = await bumpCount(env, `page:pv:${path}`);
+  let pageUv = await readCount(env, `page:uv:${path}`);
+  const pageSeenKey = `page:seen:${visitorId}:${path}`;
+  if (!(await env.STATS.get(pageSeenKey))) {
+    pageUv = await bumpCount(env, `page:uv:${path}`);
+    await env.STATS.put(pageSeenKey, '1', { expirationTtl: COOKIE_MAX_AGE });
+  }
   let siteUv = await readCount(env, 'site:uv');
 
   if (isNewVisitor) {
@@ -188,7 +195,7 @@ const handleHit = async (request, env, origin) => {
     await env.STATS.put(`visitor:${visitorId}`, '1', { expirationTtl: COOKIE_MAX_AGE });
   }
 
-  return jsonResponse({ siteUv, sitePv, pagePv, path }, 200, origin, extraHeaders);
+  return jsonResponse({ siteUv, sitePv, pagePv, pageUv, path }, 200, origin, extraHeaders);
 };
 
 export default {

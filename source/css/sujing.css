@@ -7446,3 +7446,30 @@ body {
   -webkit-appearance: none;
   display: none;
 }
+
+/* 文章阅读：次数 + 人数 */
+.sujing-post-stats .sujing-stat-unit {
+  margin-left: -3px;
+  color: rgba(196, 165, 116, 0.78);
+  font-family: var(--sujing-display);
+  font-size: 0.58rem;
+  letter-spacing: 0.04em;
+}
+
+.sujing-post-stats .sujing-stat-divider {
+  margin: 0 1px;
+  color: rgba(196, 165, 116, 0.48);
+  font-size: 0.66rem;
+}
+
+.sujing-post-stats [data-sujing-stat="pageUv"] {
+  color: rgba(242, 248, 247, 0.88);
+}
+
+[data-theme='light'] .sujing-post-stats .sujing-stat-unit {
+  color: rgba(111, 91, 62, 0.72);
+}
+
+[data-theme='light'] .sujing-post-stats [data-sujing-stat="pageUv"] {
+  color: var(--sujing-ink);
+}
