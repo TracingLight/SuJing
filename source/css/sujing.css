@@ -7473,3 +7473,13 @@ body {
 [data-theme='light'] .sujing-post-stats [data-sujing-stat="pageUv"] {
   color: var(--sujing-ink);
 }
+
+.sujing-post-stats .sujing-stat-uv {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.sujing-post-stats .sujing-stat-uv[hidden] {
+  display: none !important;
+}

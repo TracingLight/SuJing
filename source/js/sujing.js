@@ -3157,6 +3157,8 @@ void main() {
   };
 
   const STATS_ENDPOINT = 'https://stats.sujing.dev/v1/hit';
+  // 阅读人数先累计，达到阈值后再显示，避免新统计刚上线时出现“43 次 · 1 人”的误导
+  const PAGE_UV_DISPLAY_MIN = 10;
 
   const formatStatNumber = (value) => {
     const number = Number(value);
@@ -3196,8 +3198,8 @@ void main() {
     mount = document.createElement('span');
     mount.className = 'sujing-post-stats';
     mount.dataset.sujingPostStats = 'true';
-    mount.setAttribute('aria-label', '本文阅读次数与阅读人数');
-    mount.innerHTML = '<i class="sujing-stat-mark" aria-hidden="true"></i><em>阅读</em><strong data-sujing-stat="pagePv">—</strong><span class="sujing-stat-unit">次</span><span class="sujing-stat-divider" aria-hidden="true">·</span><strong data-sujing-stat="pageUv">—</strong><span class="sujing-stat-unit">人</span>';
+    mount.setAttribute('aria-label', '本文阅读次数');
+    mount.innerHTML = '<i class="sujing-stat-mark" aria-hidden="true"></i><em>阅读</em><strong data-sujing-stat="pagePv">—</strong><span class="sujing-stat-unit">次</span><span class="sujing-stat-uv" data-sujing-stat-uv hidden><span class="sujing-stat-divider" aria-hidden="true">·</span><strong data-sujing-stat="pageUv">—</strong><span class="sujing-stat-unit">人</span></span>';
     if (host.classList?.contains('meta-secondline') && host.childNodes.length) {
       const sep = document.createElement('span');
       sep.className = 'post-meta-separator';
@@ -3220,6 +3222,10 @@ void main() {
     });
     document.querySelectorAll('[data-sujing-stat="pageUv"]').forEach((node) => {
       node.textContent = formatStatNumber(data.pageUv);
+    });
+    const pageUv = Number(data.pageUv);
+    document.querySelectorAll('[data-sujing-stat-uv]').forEach((node) => {
+      node.hidden = !Number.isFinite(pageUv) || pageUv < PAGE_UV_DISPLAY_MIN;
     });
     document.querySelectorAll('[data-sujing-site-stats], [data-sujing-post-stats]').forEach((node) => {
       node.classList.add('is-ready');
