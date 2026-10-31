@@ -54,7 +54,7 @@
     "hexo-wordcount": "^6.0.1"
   },
   "devDependencies": {
-    "@fancyapps/ui": "^6.1.14",
+    "@fancyapps/ui": "^6.1.15",
     "@fortawesome/fontawesome-free": "^7.2.0",
     "busboy": "^1.6.0",
     "cheerio": "^1.2.0",
