@@ -129,7 +129,7 @@ const readCount = async (env, key) => {
 
 const bumpCount = async (env, key) => {
   const next = (await readCount(env, key)) + 1;
-  await env.STATS.put(key, String(next));
+  await env.STATS.put(key, String(next), { metadata: { count: next } });
   return next;
 };
 
@@ -143,6 +143,59 @@ const collectStats = async (env, path) => ({
   pagePv: await readCount(env, `page:pv:${path}`),
   pageUv: await readCount(env, `page:uv:${path}`)
 });
+
+const requireStatsAdmin = (request, env) => {
+  const token = env.STATS_ADMIN_TOKEN;
+  if (!token) return { ok: false, status: 503, error: 'admin_not_configured' };
+  const header = request.headers.get('Authorization') || '';
+  const match = header.match(/^Bearer\s+(.+)$/i);
+  if (!match || match[1] !== token) return { ok: false, status: 401, error: 'unauthorized' };
+  return { ok: true };
+};
+
+const listPageStats = async (env) => {
+  const pages = new Map();
+  const addPrefix = async (prefix, field) => {
+    let cursor;
+    do {
+      const listed = await env.STATS.list({ prefix, cursor });
+      for (const key of listed.keys || []) {
+        const path = key.name.slice(prefix.length);
+        if (!path || !path.startsWith('/')) continue;
+        const row = pages.get(path) || { path, pagePv: 0, pageUv: 0 };
+        const metadataCount = Number(key.metadata?.count);
+        row[field] = Number.isFinite(metadataCount) && metadataCount >= 0
+          ? metadataCount
+          : await readCount(env, key.name);
+        pages.set(path, row);
+      }
+      cursor = listed.list_complete ? null : listed.cursor;
+    } while (cursor);
+  };
+  await addPrefix('page:pv:', 'pagePv');
+  await addPrefix('page:uv:', 'pageUv');
+  return [...pages.values()]
+    .filter((row) => row.pagePv > 0 || row.pageUv > 0)
+    .sort((a, b) => b.pagePv - a.pagePv || b.pageUv - a.pageUv || a.path.localeCompare(b.path));
+};
+
+const backfillStatsMetadata = async (env) => {
+  let updated = 0;
+  for (const prefix of ['page:pv:', 'page:uv:']) {
+    let cursor;
+    do {
+      const listed = await env.STATS.list({ prefix, cursor });
+      for (const key of listed.keys || []) {
+        const count = await readCount(env, key.name);
+        if (Number(key.metadata?.count) === count) continue;
+        await env.STATS.put(key.name, String(count), { metadata: { count } });
+        updated += 1;
+      }
+      cursor = listed.list_complete ? null : listed.cursor;
+    } while (cursor);
+  }
+  return { updated };
+};
 
 const handleHit = async (request, env, origin) => {
   // 无 Origin / 非白名单：拒绝写入，避免 curl 刷量；本机预览也不计入线上
@@ -217,6 +270,25 @@ export default {
       return jsonResponse(await collectStats(env, path), 200, origin);
     }
 
+    if (url.pathname === '/v1/admin/backfill' && request.method === 'POST') {
+      const auth = requireStatsAdmin(request, env);
+      if (!auth.ok) return jsonResponse({ error: auth.error }, auth.status, origin);
+      const result = await backfillStatsMetadata(env);
+      return jsonResponse({ ok: true, ...result }, 200, origin);
+    }
+
+    if (url.pathname === '/v1/admin/stats' && request.method === 'GET') {
+      const auth = requireStatsAdmin(request, env);
+      if (!auth.ok) return jsonResponse({ error: auth.error }, auth.status, origin);
+      const pages = await listPageStats(env);
+      return jsonResponse({
+        generatedAt: new Date().toISOString(),
+        sitePv: await readCount(env, 'site:pv'),
+        siteUv: await readCount(env, 'site:uv'),
+        pages
+      }, 200, origin);
+    }
+
     if (url.pathname === '/v1/hit' && request.method === 'POST') {
       return handleHit(request, env, origin);
     }
@@ -224,7 +296,7 @@ export default {
     if (url.pathname === '/' && request.method === 'GET') {
       return jsonResponse({
         service: 'sujing-site-stats',
-        endpoints: ['/v1/hit', '/v1/stats', '/__health']
+        endpoints: ['/v1/hit', '/v1/stats', '/v1/admin/stats', '/v1/admin/backfill', '/__health']
       }, 200, origin);
     }
 
