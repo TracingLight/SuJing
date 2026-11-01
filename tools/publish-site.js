@@ -9,6 +9,7 @@ const stripAnsi = (value) => String(value).replace(new RegExp(`${ANSI_ESCAPE}\\[
 
 const runCommand = (command, args, { cwd, log }) => new Promise((resolve, reject) => {
   let output = '';
+  let stdoutBuffer = '';
   let hiddenGenerated = 0;
   const child = spawn(command, args, {
     cwd,
@@ -16,20 +17,31 @@ const runCommand = (command, args, { cwd, log }) => new Promise((resolve, reject
     shell: process.platform === 'win32' && command === 'npm.cmd',
     windowsHide: true
   });
+  const flushLines = (final = false) => {
+    const lines = stdoutBuffer.split(/\r?\n/);
+    stdoutBuffer = final ? '' : (lines.pop() || '');
+    const visible = [];
+    for (const line of lines) {
+      if (/^\s*INFO\s+Generated:/.test(line)) {
+        hiddenGenerated += 1;
+        continue;
+      }
+      visible.push(line);
+    }
+    if (visible.length) log(`${visible.join(NL)}${NL}`);
+  };
   child.stdout.on('data', (chunk) => {
     output += chunk;
-    // Hexo prints one "INFO Generated: ..." line per output file. Keep the
-    // useful build summary, but do not flood the admin publish log with
-    // hundreds of individual paths.
-    const visible = stripAnsi(String(chunk)).replace(/^\s*INFO\s+Generated:.*(?:\r?\n|$)/gm, () => {
-      hiddenGenerated += 1;
-      return '';
-    });
-    if (visible) log(visible);
+    // Hexo prints one "INFO Generated: ..." line per output file. Buffer
+    // complete lines so paths split across chunks are still filtered, while
+    // keeping the useful build summary.
+    stdoutBuffer += stripAnsi(String(chunk));
+    flushLines(false);
   });
   child.stderr.on('data', (chunk) => log(String(chunk)));
   child.on('error', reject);
   child.on('close', (code) => {
+    flushLines(true);
     if (hiddenGenerated) log(`[publish] 已省略 ${hiddenGenerated} 行生成文件日志${NL}`);
     if (code === 0) resolve(output.trim());
     else reject(new Error(`${command} ${args.join(' ')} 失败（exit ${code}），请查看日志`));
