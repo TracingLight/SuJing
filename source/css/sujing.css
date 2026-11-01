@@ -2299,12 +2299,88 @@ a.sujing-bento-card:hover::before {
 }
 
 .post #article-container blockquote {
-  margin: 1.8em 0;
-  padding: 18px 22px;
-  border-left: 4px solid var(--sujing-teal);
-  border-radius: 0 6px 6px 0;
+  position: relative;
+  margin: 2.1em 0;
+  padding: 24px 32px 24px 64px;
+  overflow: hidden;
+  border: 1px solid rgba(26, 122, 130, 0.16);
+  border-radius: 14px;
   color: var(--sujing-ink-soft);
-  background: rgba(23, 126, 137, 0.07);
+  background:
+    linear-gradient(135deg, rgba(26, 122, 130, 0.075), rgba(154, 123, 79, 0.028) 68%, transparent),
+    var(--sujing-surface);
+  box-shadow:
+    0 10px 28px rgba(20, 40, 47, 0.045),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.post #article-container blockquote::before {
+  position: absolute;
+  top: 10px;
+  left: 16px;
+  color: rgba(26, 122, 130, 0.26);
+  font-family: Georgia, "Times New Roman", var(--sujing-display);
+  font-size: 3.4rem;
+  line-height: 1;
+  content: "“";
+  pointer-events: none;
+  user-select: none;
+}
+
+.post #article-container blockquote p {
+  margin: 0;
+}
+
+.post #article-container blockquote p + p {
+  margin-top: 0.75em;
+}
+
+.post #article-container blockquote ul,
+.post #article-container blockquote ol {
+  margin: 0.7em 0;
+  padding-left: 1.25em;
+}
+
+.post #article-container blockquote cite,
+.post #article-container blockquote footer {
+  display: block;
+  margin-top: 0.9em;
+  color: var(--sujing-muted);
+  font-size: 0.82em;
+  font-style: normal;
+  text-align: right;
+}
+
+[data-theme="dark"] .post #article-container blockquote {
+  border-color: rgba(127, 214, 208, 0.2);
+  color: rgba(232, 242, 240, 0.9);
+  background:
+    linear-gradient(135deg, rgba(79, 176, 173, 0.12), rgba(154, 123, 79, 0.035) 68%, transparent),
+    rgba(17, 27, 31, 0.82);
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+[data-theme="dark"] .post #article-container blockquote::before {
+  color: rgba(79, 176, 173, 0.3);
+}
+
+[data-theme="dark"] .post #article-container blockquote cite,
+[data-theme="dark"] .post #article-container blockquote footer {
+  color: rgba(198, 216, 213, 0.62);
+}
+
+@media (max-width: 768px) {
+  .post #article-container blockquote {
+    padding: 20px 20px 20px 54px;
+    border-radius: 12px;
+  }
+
+  .post #article-container blockquote::before {
+    left: 12px;
+    font-size: 3rem;
+  }
 }
 
 .post #article-container img {
