@@ -3,18 +3,34 @@
 const path = require('node:path');
 const { spawn } = require('node:child_process');
 
+const ANSI_ESCAPE = String.fromCharCode(27);
+const NL = String.fromCharCode(10);
+const stripAnsi = (value) => String(value).replace(new RegExp(`${ANSI_ESCAPE}\\[[0-9;]*m`, 'g'), '');
+
 const runCommand = (command, args, { cwd, log }) => new Promise((resolve, reject) => {
   let output = '';
+  let hiddenGenerated = 0;
   const child = spawn(command, args, {
     cwd,
     env: { ...process.env, FORCE_COLOR: '0', GIT_TERMINAL_PROMPT: '0' },
     shell: process.platform === 'win32' && command === 'npm.cmd',
     windowsHide: true
   });
-  child.stdout.on('data', (chunk) => { output += chunk; log(String(chunk)); });
+  child.stdout.on('data', (chunk) => {
+    output += chunk;
+    // Hexo prints one "INFO Generated: ..." line per output file. Keep the
+    // useful build summary, but do not flood the admin publish log with
+    // hundreds of individual paths.
+    const visible = stripAnsi(String(chunk)).replace(/^\s*INFO\s+Generated:.*(?:\r?\n|$)/gm, () => {
+      hiddenGenerated += 1;
+      return '';
+    });
+    if (visible) log(visible);
+  });
   child.stderr.on('data', (chunk) => log(String(chunk)));
   child.on('error', reject);
   child.on('close', (code) => {
+    if (hiddenGenerated) log(`[publish] 已省略 ${hiddenGenerated} 行生成文件日志${NL}`);
     if (code === 0) resolve(output.trim());
     else reject(new Error(`${command} ${args.join(' ')} 失败（exit ${code}），请查看日志`));
   });
@@ -22,7 +38,7 @@ const runCommand = (command, args, { cwd, log }) => new Promise((resolve, reject
 
 async function publishSite({ cwd = path.join(__dirname, '..'), log = console.log, run = runCommand } = {}) {
   const command = async (program, args) => {
-    log(`[publish] ${program} ${args.join(' ')}\n`);
+    log(`[publish] ${program} ${args.join(' ')}${NL}`);
     return run(program, args, { cwd, log });
   };
   const git = (...args) => command('git', args);
@@ -47,11 +63,11 @@ async function publishSite({ cwd = path.join(__dirname, '..'), log = console.log
     const date = new Date().toISOString();
     await git('commit', '-m', `chore: publish site ${date}`);
   } else {
-    log('[publish] 没有新的文件修改；仍会推送已有的本地提交。\n');
+    log(`[publish] 没有新的文件修改；仍会推送已有的本地提交。${NL}`);
   }
   await git('push', 'origin', 'HEAD:refs/heads/main');
   const commit = await git('rev-parse', 'HEAD');
-  log(`[publish] GitHub 已同步：${commit}。有新提交时 Cloudflare Pages 会自动构建；请在部署记录确认上线结果。\n`);
+  log(`[publish] GitHub 已同步：${commit}。有新提交时 Cloudflare Pages 会自动构建；请在部署记录确认上线结果。${NL}`);
   return { commit, pushed: true };
 }
 
