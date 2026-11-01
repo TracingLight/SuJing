@@ -224,16 +224,54 @@ const requireAdmin = (request, env) => {
   return { ok: true };
 };
 
-const listAdminComments = async (env, url) => {
-  const limit = Math.min(100, Math.max(1, Number(url.searchParams.get('limit')) || 50));
-  const cursor = Number(url.searchParams.get('cursor')) || 0;
+const backupComments = async (env) => {
+  if (!env.BACKUPS) throw new Error('backup_bucket_not_configured');
+  const exportedAt = new Date().toISOString();
+  const day = exportedAt.slice(0, 10);
   const result = await env.DB.prepare(`
     SELECT id, path, parent_id, nickname, email_hash, email, website, content, created_at, status
     FROM comments
-    WHERE (? = 0 OR created_at < ?)
-    ORDER BY created_at DESC
-    LIMIT ?
-  `).bind(cursor, cursor, limit).all();
+    ORDER BY created_at ASC
+  `).all();
+  const comments = result.results || [];
+  const payload = {
+    version: 1,
+    service: 'sujing-site-comments',
+    exportedAt,
+    count: comments.length,
+    comments
+  };
+  const body = JSON.stringify(payload);
+  const dailyKey = `comments/daily/${day}.json`;
+  const latestKey = 'comments/latest.json';
+  await env.BACKUPS.put(dailyKey, body, {
+    httpMetadata: { contentType: 'application/json; charset=utf-8' },
+    customMetadata: { count: String(comments.length), exportedAt }
+  });
+  await env.BACKUPS.put(latestKey, body, {
+    httpMetadata: { contentType: 'application/json; charset=utf-8' },
+    customMetadata: { count: String(comments.length), exportedAt }
+  });
+  return { dailyKey, latestKey, count: comments.length, exportedAt };
+};
+
+const listAdminComments = async (env, url) => {
+  const limit = Math.min(100, Math.max(1, Number(url.searchParams.get('limit')) || 50));
+  const cursor = Number(url.searchParams.get('cursor')) || 0;
+  const result = cursor
+    ? await env.DB.prepare(`
+        SELECT id, path, parent_id, nickname, email_hash, email, website, content, created_at, status
+        FROM comments
+        WHERE created_at < ?
+        ORDER BY created_at DESC
+        LIMIT ?
+      `).bind(cursor, limit).all()
+    : await env.DB.prepare(`
+        SELECT id, path, parent_id, nickname, email_hash, email, website, content, created_at, status
+        FROM comments
+        ORDER BY created_at DESC
+        LIMIT ?
+      `).bind(limit).all();
   const comments = (result.results || []).map(mapAdminComment);
   const nextCursor = comments.length ? comments[comments.length - 1].createdAt : null;
   return { comments, nextCursor, total: comments.length };
@@ -349,6 +387,13 @@ export default {
       return createComment(request, env, origin);
     }
 
+    if (url.pathname === '/v1/admin/backup' && request.method === 'POST') {
+      const auth = requireAdmin(request, env);
+      if (!auth.ok) return jsonResponse({ error: auth.error }, auth.status, origin);
+      const result = await backupComments(env);
+      return jsonResponse({ ok: true, ...result }, 200, origin);
+    }
+
     if (url.pathname === '/v1/admin/comments' && request.method === 'GET') {
       const auth = requireAdmin(request, env);
       if (!auth.ok) return jsonResponse({ error: auth.error }, auth.status, origin);
@@ -374,5 +419,9 @@ export default {
     }
 
     return textResponse('Not Found', 404, origin);
+  },
+
+  async scheduled(controller, env, ctx) {
+    ctx.waitUntil(backupComments(env));
   }
 };

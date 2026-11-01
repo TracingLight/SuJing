@@ -17,6 +17,9 @@ CREATE INDEX IF NOT EXISTS idx_comments_path_created
 CREATE INDEX IF NOT EXISTS idx_comments_parent
   ON comments(parent_id);
 
+CREATE INDEX IF NOT EXISTS idx_comments_created
+  ON comments(created_at DESC);
+
 CREATE TABLE IF NOT EXISTS rate_limits (
   key TEXT PRIMARY KEY,
   count INTEGER NOT NULL DEFAULT 0,

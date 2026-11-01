@@ -9,6 +9,17 @@
       "custom_domain": true
     }
   ],
+  "triggers": {
+    "crons": [
+      "17 3 * * *"
+    ]
+  },
+  "r2_buckets": [
+    {
+      "binding": "BACKUPS",
+      "bucket_name": "sujing-comments-backups"
+    }
+  ],
   "d1_databases": [
     {
       "binding": "DB",
