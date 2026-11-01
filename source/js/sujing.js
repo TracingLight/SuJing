@@ -47,6 +47,27 @@
   };
 
   const MUSIC_STATE_KEY = 'sujing-music-state';
+  const MUSIC_VOLUME_KEY = 'sujing-music-volume';
+  const MUSIC_LAST_VOLUME_KEY = 'sujing-music-last-volume';
+
+  const readStoredVolume = (key, fallback) => {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw === null || raw === '') return fallback;
+      const value = Number(raw);
+      return Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : fallback;
+    } catch {
+      return fallback;
+    }
+  };
+
+  const writeStoredVolume = (key, value) => {
+    try {
+      localStorage.setItem(key, String(Math.min(1, Math.max(0, value))));
+    } catch {
+      /* ignore private mode/quota */
+    }
+  };
 
   const readMusicState = () => {
     try {
@@ -2194,6 +2215,13 @@ void main() {
         <div class="sujing-music-progress" role="slider" aria-label="播放进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
           <span></span>
         </div>
+        <div class="sujing-music-volume">
+          <button type="button" data-music="mute" aria-label="静音" aria-pressed="false" title="静音">
+            <i class="fas fa-volume-high" aria-hidden="true"></i>
+          </button>
+          <input type="range" data-music="volume" min="0" max="100" step="1" value="72" aria-label="音量">
+          <output data-music="volume-value" aria-hidden="true">72</output>
+        </div>
         <div class="sujing-music-playlist" role="listbox" aria-label="歌单">
           ${tracks.map((track, index) => `
             <button type="button" class="sujing-music-track" role="option" data-track-index="${index}" aria-selected="false">
@@ -2226,10 +2254,57 @@ void main() {
     const audio = player.querySelector('audio');
     const playButton = player.querySelector('[data-music="play"]');
     const listButton = player.querySelector('[data-music="list"]');
+    const muteButton = player.querySelector('[data-music="mute"]');
+    const volumeRange = player.querySelector('[data-music="volume"]');
+    const volumeValue = player.querySelector('[data-music="volume-value"]');
     const progress = player.querySelector('.sujing-music-progress');
     const progressBar = progress.querySelector('span');
     const trackButtons = [...player.querySelectorAll('.sujing-music-track')];
     let pendingRestoreTime = 0;
+    let lastVolume = readStoredVolume(MUSIC_LAST_VOLUME_KEY, 0.72);
+
+    const syncVolumeUI = (value, persist = true) => {
+      const volume = Math.min(1, Math.max(0, Number(value) || 0));
+      audio.volume = volume;
+      if (volumeRange) {
+        volumeRange.value = String(Math.round(volume * 100));
+        volumeRange.style.setProperty('--volume', `${volume * 100}%`);
+        volumeRange.setAttribute('aria-valuetext', `${Math.round(volume * 100)}%`);
+      }
+      if (volumeValue) volumeValue.textContent = String(Math.round(volume * 100));
+      if (muteButton) {
+        const icon = muteButton.querySelector('i');
+        if (icon) {
+          icon.className = volume === 0
+            ? 'fas fa-volume-xmark'
+            : volume < 0.45
+              ? 'fas fa-volume-low'
+              : 'fas fa-volume-high';
+        }
+        muteButton.classList.toggle('is-muted', volume === 0);
+        muteButton.setAttribute('aria-label', volume === 0 ? '恢复音量' : '静音');
+        muteButton.setAttribute('title', volume === 0 ? '恢复音量' : '静音');
+        muteButton.setAttribute('aria-pressed', volume === 0 ? 'true' : 'false');
+      }
+      if (volume > 0) {
+        lastVolume = volume;
+        if (persist) writeStoredVolume(MUSIC_LAST_VOLUME_KEY, volume);
+      }
+      if (persist) writeStoredVolume(MUSIC_VOLUME_KEY, volume);
+    };
+
+    const savedVolume = readStoredVolume(MUSIC_VOLUME_KEY, lastVolume);
+    lastVolume = readStoredVolume(MUSIC_LAST_VOLUME_KEY, savedVolume || 0.72);
+    syncVolumeUI(savedVolume, false);
+    volumeRange?.addEventListener('input', () => syncVolumeUI(Number(volumeRange.value) / 100));
+    muteButton?.addEventListener('click', () => {
+      if (audio.volume > 0) {
+        lastVolume = audio.volume;
+        syncVolumeUI(0);
+      } else {
+        syncVolumeUI(lastVolume || 0.72);
+      }
+    });
     const persistMusicState = (extra = {}) => {
       writeMusicState({
         trackIndex: state.trackIndex,

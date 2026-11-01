@@ -7559,3 +7559,121 @@ body {
 .sujing-post-stats .sujing-stat-uv[hidden] {
   display: none !important;
 }
+
+/* 音乐播放器：音量 */
+.sujing-music-volume {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 22px;
+  margin-top: -1px;
+}
+
+.sujing-music-volume > button {
+  display: inline-grid;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  color: var(--sujing-gold);
+  background: transparent;
+  cursor: pointer;
+  transition: color 0.18s ease, background-color 0.18s ease;
+}
+
+.sujing-music-volume > button:hover,
+.sujing-music-volume > button:focus-visible {
+  color: var(--sujing-seal);
+  background: rgba(180, 69, 58, 0.08);
+  outline: none;
+}
+
+.sujing-music-volume > button.is-muted {
+  color: var(--sujing-seal);
+}
+
+.sujing-music-volume input[type='range'] {
+  --volume: 72%;
+  width: auto;
+  height: 18px;
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.sujing-music-volume input[type='range']::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--sujing-teal) 0%,
+    var(--sujing-gold) var(--volume),
+    rgba(154, 123, 79, 0.18) var(--volume),
+    rgba(154, 123, 79, 0.18) 100%
+  );
+}
+
+.sujing-music-volume input[type='range']::-webkit-slider-thumb {
+  width: 10px;
+  height: 10px;
+  margin-top: -3.5px;
+  border: 1px solid rgba(154, 123, 79, 0.9);
+  border-radius: 50%;
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--sujing-surface);
+  box-shadow: 0 0 0 3px rgba(154, 123, 79, 0.1);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sujing-music-volume input[type='range']:hover::-webkit-slider-thumb,
+.sujing-music-volume input[type='range']:focus-visible::-webkit-slider-thumb {
+  transform: scale(1.18);
+  box-shadow: 0 0 0 4px rgba(154, 123, 79, 0.16);
+}
+
+.sujing-music-volume input[type='range']::-moz-range-track {
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(154, 123, 79, 0.18);
+}
+
+.sujing-music-volume input[type='range']::-moz-range-progress {
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--sujing-teal), var(--sujing-gold));
+}
+
+.sujing-music-volume input[type='range']::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border: 1px solid rgba(154, 123, 79, 0.9);
+  border-radius: 50%;
+  background: var(--sujing-surface);
+  box-shadow: 0 0 0 3px rgba(154, 123, 79, 0.1);
+}
+
+.sujing-music-volume output {
+  min-width: 2.2ch;
+  color: var(--sujing-muted);
+  font-family: var(--sujing-display);
+  font-size: 0.58rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+[data-theme='dark'] .sujing-music-volume input[type='range']::-webkit-slider-thumb {
+  background: var(--sujing-night-surface);
+}
+
+[data-theme='dark'] .sujing-music-volume input[type='range']::-moz-range-thumb {
+  background: var(--sujing-night-surface);
+}
