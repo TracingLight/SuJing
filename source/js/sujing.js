@@ -49,6 +49,7 @@
   const MUSIC_STATE_KEY = 'sujing-music-state';
   const MUSIC_VOLUME_KEY = 'sujing-music-volume';
   const MUSIC_LAST_VOLUME_KEY = 'sujing-music-last-volume';
+  const MUSIC_LOOP_KEY = 'sujing-music-loop';
 
   const readStoredVolume = (key, fallback) => {
     try {
@@ -64,6 +65,23 @@
   const writeStoredVolume = (key, value) => {
     try {
       localStorage.setItem(key, String(Math.min(1, Math.max(0, value))));
+    } catch {
+      /* ignore private mode/quota */
+    }
+  };
+
+  const readStoredFlag = (key, fallback = false) => {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw === null ? fallback : raw === '1';
+    } catch {
+      return fallback;
+    }
+  };
+
+  const writeStoredFlag = (key, value) => {
+    try {
+      localStorage.setItem(key, value ? '1' : '0');
     } catch {
       /* ignore private mode/quota */
     }
@@ -2211,6 +2229,7 @@ void main() {
           <button type="button" data-music="prev" title="上一首" aria-label="上一首"><i class="fas fa-backward-step" aria-hidden="true"></i></button>
           <button type="button" data-music="play" title="播放" aria-label="播放"><i class="fas fa-play" aria-hidden="true"></i></button>
           <button type="button" data-music="next" title="下一首" aria-label="下一首"><i class="fas fa-forward-step" aria-hidden="true"></i></button>
+          <button type="button" data-music="loop" title="单曲循环" aria-label="单曲循环" aria-pressed="false"><i class="fas fa-repeat" aria-hidden="true"></i><span class="sujing-music-loop-one" aria-hidden="true">1</span></button>
         </div>
         <div class="sujing-music-progress" role="slider" aria-label="播放进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
           <span></span>
@@ -2257,6 +2276,8 @@ void main() {
     const muteButton = player.querySelector('[data-music="mute"]');
     const volumeRange = player.querySelector('[data-music="volume"]');
     const volumeValue = player.querySelector('[data-music="volume-value"]');
+    const loopButton = player.querySelector('[data-music="loop"]');
+    let loopOne = readStoredFlag(MUSIC_LOOP_KEY, false);
     const progress = player.querySelector('.sujing-music-progress');
     const progressBar = progress.querySelector('span');
     const trackButtons = [...player.querySelectorAll('.sujing-music-track')];
@@ -2292,6 +2313,21 @@ void main() {
       }
       if (persist) writeStoredVolume(MUSIC_VOLUME_KEY, volume);
     };
+
+    const syncLoopUI = () => {
+      if (!loopButton) return;
+      loopButton.classList.toggle('is-active', loopOne);
+      loopButton.setAttribute('aria-pressed', loopOne ? 'true' : 'false');
+      loopButton.title = loopOne ? '单曲循环：开' : '单曲循环';
+      loopButton.setAttribute('aria-label', loopOne ? '关闭单曲循环' : '开启单曲循环');
+    };
+    syncLoopUI();
+    loopButton?.addEventListener('click', () => {
+      loopOne = !loopOne;
+      writeStoredFlag(MUSIC_LOOP_KEY, loopOne);
+      syncLoopUI();
+      toast(loopOne ? '单曲循环已开启' : '单曲循环已关闭');
+    });
 
     const savedVolume = readStoredVolume(MUSIC_VOLUME_KEY, lastVolume);
     lastVolume = readStoredVolume(MUSIC_LAST_VOLUME_KEY, savedVolume || 0.72);
@@ -2454,7 +2490,14 @@ void main() {
       persistMusicState({ playing: false });
     });
     audio.addEventListener('ended', () => {
-      setTrack(state.trackIndex + 1);
+      if (loopOne) {
+        audio.currentTime = 0;
+        setProgress(0);
+        persistMusicState({ playing: true });
+        safePlay();
+        return;
+      }
+      setTrack((state.trackIndex + 1) % tracks.length);
       safePlay();
     });
     audio.addEventListener('timeupdate', () => {

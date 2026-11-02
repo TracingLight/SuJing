@@ -7677,3 +7677,31 @@ body {
 [data-theme='dark'] .sujing-music-volume input[type='range']::-moz-range-thumb {
   background: var(--sujing-night-surface);
 }
+
+/* 音乐单曲循环 */
+.sujing-music-controls [data-music='loop'] {
+  position: relative;
+}
+
+.sujing-music-loop-one {
+  position: absolute;
+  right: 3px;
+  bottom: 2px;
+  color: currentColor;
+  font-family: var(--sujing-display);
+  font-size: 0.48rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.06em;
+  opacity: 0.72;
+}
+
+.sujing-music-controls [data-music='loop'].is-active {
+  color: var(--sujing-seal);
+  border-color: rgba(180, 69, 58, 0.3);
+  background: rgba(180, 69, 58, 0.09);
+}
+
+.sujing-music-controls [data-music='loop'].is-active .sujing-music-loop-one {
+  opacity: 1;
+}
