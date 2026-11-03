@@ -9,6 +9,11 @@
       "custom_domain": true
     }
   ],
+  "triggers": {
+    "crons": [
+      "55 15 * * *"
+    ]
+  },
   "kv_namespaces": [
     {
       "binding": "STATS",

@@ -260,6 +260,63 @@ const handleHit = async (request, env, origin) => {
   return jsonResponse({ siteUv, sitePv, pagePv, pageUv, path }, 200, origin, extraHeaders);
 };
 
+const SHANGHAI_OFFSET_MS = 8 * 60 * 60 * 1000;
+
+const shanghaiDate = (epoch = Date.now()) => (
+  new Date(epoch + SHANGHAI_OFFSET_MS).toISOString().slice(0, 10)
+);
+
+const createSnapshot = async (env, date = shanghaiDate()) => {
+  const pages = await listPageStats(env);
+  const payload = {
+    version: 1,
+    date,
+    generatedAt: new Date().toISOString(),
+    timezone: 'Asia/Shanghai',
+    sitePv: await readCount(env, 'site:pv'),
+    siteUv: await readCount(env, 'site:uv'),
+    pages
+  };
+  const key = `snapshot:${date}`;
+  const body = JSON.stringify(payload);
+  await env.STATS.put(key, body, {
+    metadata: {
+      date,
+      sitePv: payload.sitePv,
+      siteUv: payload.siteUv,
+      pages: pages.length
+    }
+  });
+  return { key, date, sitePv: payload.sitePv, siteUv: payload.siteUv, pages: pages.length, bytes: body.length };
+};
+
+const listSnapshots = async (env, days = 30) => {
+  const limit = Math.min(180, Math.max(1, Number(days) || 30));
+  const keys = [];
+  let cursor;
+  do {
+    const listed = await env.STATS.list({ prefix: 'snapshot:', cursor });
+    keys.push(...(listed.keys || []));
+    cursor = listed.list_complete ? null : listed.cursor;
+  } while (cursor);
+  const selected = keys
+    .filter((key) => /^snapshot:\d{4}-\d{2}-\d{2}$/.test(key.name))
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .slice(-limit);
+  const snapshots = [];
+  for (const key of selected) {
+    const value = await env.STATS.get(key.name);
+    if (!value) continue;
+    try {
+      const parsed = JSON.parse(value);
+      snapshots.push(parsed);
+    } catch {
+      /* skip malformed snapshot */
+    }
+  }
+  return snapshots;
+};
+
 const handleRead = async (request, env, origin) => {
   if (!isAllowedOrigin(origin)) {
     return jsonResponse({ error: 'origin_not_allowed' }, 403, origin);
@@ -318,6 +375,20 @@ export default {
       return jsonResponse({ ok: true, ...result }, 200, origin);
     }
 
+    if (url.pathname === '/v1/admin/snapshot' && request.method === 'POST') {
+      const auth = requireStatsAdmin(request, env);
+      if (!auth.ok) return jsonResponse({ error: auth.error }, auth.status, origin);
+      const result = await createSnapshot(env);
+      return jsonResponse({ ok: true, ...result }, 200, origin);
+    }
+
+    if (url.pathname === '/v1/admin/snapshots' && request.method === 'GET') {
+      const auth = requireStatsAdmin(request, env);
+      if (!auth.ok) return jsonResponse({ error: auth.error }, auth.status, origin);
+      const snapshots = await listSnapshots(env, url.searchParams.get('days'));
+      return jsonResponse({ snapshots }, 200, origin);
+    }
+
     if (url.pathname === '/v1/admin/stats' && request.method === 'GET') {
       const auth = requireStatsAdmin(request, env);
       if (!auth.ok) return jsonResponse({ error: auth.error }, auth.status, origin);
@@ -341,10 +412,15 @@ export default {
     if (url.pathname === '/' && request.method === 'GET') {
       return jsonResponse({
         service: 'sujing-site-stats',
-        endpoints: ['/v1/hit', '/v1/read', '/v1/stats', '/v1/admin/stats', '/v1/admin/backfill', '/__health']
+        endpoints: ['/v1/hit', '/v1/read', '/v1/stats', '/v1/admin/stats', '/v1/admin/snapshot', '/v1/admin/snapshots', '/v1/admin/backfill', '/__health']
       }, 200, origin);
     }
 
     return textResponse('Not Found', 404, origin);
+  },
+
+  async scheduled(controller, env, ctx) {
+    const date = shanghaiDate(controller.scheduledTime || Date.now());
+    ctx.waitUntil(createSnapshot(env, date));
   }
 };
