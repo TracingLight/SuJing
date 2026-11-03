@@ -3275,6 +3275,7 @@ void main() {
   };
 
   const STATS_ENDPOINT = 'https://stats.sujing.dev/v1/hit';
+  const READ_ENDPOINT = 'https://stats.sujing.dev/v1/read';
   // 阅读人数先累计，达到阈值后再显示，避免新统计刚上线时出现“43 次 · 1 人”的误导
   const PAGE_UV_DISPLAY_MIN = 10;
 
@@ -3385,6 +3386,110 @@ void main() {
     } finally {
       state.statsPending = false;
     }
+  };
+
+  let readingSession = null;
+
+  const installReadingTime = () => {
+    readingSession?.dispose?.();
+    readingSession = null;
+    if (isLocalPreviewHost()) return;
+    const article = document.querySelector('.post #article-container');
+    if (!article || !document.querySelector('.post')) return;
+
+    const path = normalizeStatsPath();
+    let activeSince = document.visibilityState === 'visible' ? performance.now() : 0;
+    let seconds = 0;
+    let maxDepth = 0;
+    let disposed = false;
+    let scrollFrame = 0;
+
+    const accrue = () => {
+      if (!activeSince) return;
+      seconds += Math.max(0, (performance.now() - activeSince) / 1000);
+      activeSince = performance.now();
+    };
+
+    const updateDepth = () => {
+      const height = article.offsetHeight;
+      if (!height) return;
+      const rect = article.getBoundingClientRect();
+      const viewed = Math.min(height, Math.max(0, window.innerHeight - rect.top));
+      maxDepth = Math.max(maxDepth, Math.round((viewed / height) * 100));
+    };
+
+    const send = (payload) => {
+      const body = JSON.stringify(payload);
+      try {
+        if (navigator.sendBeacon) {
+          const blob = new Blob([body], { type: 'application/json' });
+          if (navigator.sendBeacon(READ_ENDPOINT, blob)) return;
+        }
+      } catch {
+        /* fall through */
+      }
+      fetch(READ_ENDPOINT, {
+        method: 'POST',
+        keepalive: true,
+        headers: { 'Content-Type': 'application/json' },
+        body
+      }).catch(() => {});
+    };
+
+    const flush = () => {
+      if (disposed) return;
+      accrue();
+      updateDepth();
+      const measured = Math.round(seconds);
+      if (measured < 3 && maxDepth <= 0) return;
+      send({ path, seconds: Math.min(3600, measured), depth: maxDepth });
+      seconds = 0;
+      maxDepth = 0;
+      activeSince = document.visibilityState === 'visible' ? performance.now() : 0;
+    };
+
+    const onScroll = () => {
+      if (scrollFrame) return;
+      scrollFrame = window.requestAnimationFrame(() => {
+        updateDepth();
+        scrollFrame = 0;
+      });
+    };
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        accrue();
+        flush();
+        activeSince = 0;
+      } else if (!activeSince) {
+        activeSince = performance.now();
+      }
+    };
+
+    const onPageHide = () => {
+      accrue();
+      flush();
+    };
+
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('pagehide', onPageHide, { once: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
+    updateDepth();
+
+    readingSession = {
+      flush,
+      dispose: () => {
+        if (disposed) return;
+        accrue();
+        updateDepth();
+        flush();
+        disposed = true;
+        document.removeEventListener('visibilitychange', onVisibility);
+        window.removeEventListener('pagehide', onPageHide);
+        window.removeEventListener('scroll', onScroll);
+        if (scrollFrame) window.cancelAnimationFrame(scrollFrame);
+      }
+    };
   };
 
   const COMMENTS_ENDPOINT = 'https://comments.sujing.dev/v1/comments';
@@ -3847,6 +3952,7 @@ void main() {
     installGalleryParallax();
     installPageLeaveInk();
     installSiteStats();
+    installReadingTime();
     installComments();
     updateReadingProgress();
   };

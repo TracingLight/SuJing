@@ -133,6 +133,12 @@ const bumpCount = async (env, key) => {
   return next;
 };
 
+const addAmount = async (env, key, amount) => {
+  const next = (await readCount(env, key)) + amount;
+  await env.STATS.put(key, String(next), { metadata: { count: next } });
+  return next;
+};
+
 const visitorCookie = (id) => (
   `${VISITOR_COOKIE}=${encodeURIComponent(id)}; Path=/; Max-Age=${COOKIE_MAX_AGE}; SameSite=None; Secure; HttpOnly`
 );
@@ -162,7 +168,7 @@ const listPageStats = async (env) => {
       for (const key of listed.keys || []) {
         const path = key.name.slice(prefix.length);
         if (!path || !path.startsWith('/')) continue;
-        const row = pages.get(path) || { path, pagePv: 0, pageUv: 0 };
+        const row = pages.get(path) || { path, pagePv: 0, pageUv: 0, readSeconds: 0, readSamples: 0, depthSum: 0 };
         const metadataCount = Number(key.metadata?.count);
         row[field] = Number.isFinite(metadataCount) && metadataCount >= 0
           ? metadataCount
@@ -174,14 +180,17 @@ const listPageStats = async (env) => {
   };
   await addPrefix('page:pv:', 'pagePv');
   await addPrefix('page:uv:', 'pageUv');
+  await addPrefix('page:read:seconds:', 'readSeconds');
+  await addPrefix('page:read:samples:', 'readSamples');
+  await addPrefix('page:read:depth:', 'depthSum');
   return [...pages.values()]
-    .filter((row) => row.pagePv > 0 || row.pageUv > 0)
+    .filter((row) => row.pagePv > 0 || row.pageUv > 0 || row.readSamples > 0)
     .sort((a, b) => b.pagePv - a.pagePv || b.pageUv - a.pageUv || a.path.localeCompare(b.path));
 };
 
 const backfillStatsMetadata = async (env) => {
   let updated = 0;
-  for (const prefix of ['page:pv:', 'page:uv:']) {
+  for (const prefix of ['page:pv:', 'page:uv:', 'page:read:seconds:', 'page:read:samples:', 'page:read:depth:']) {
     let cursor;
     do {
       const listed = await env.STATS.list({ prefix, cursor });
@@ -251,6 +260,38 @@ const handleHit = async (request, env, origin) => {
   return jsonResponse({ siteUv, sitePv, pagePv, pageUv, path }, 200, origin, extraHeaders);
 };
 
+const handleRead = async (request, env, origin) => {
+  if (!isAllowedOrigin(origin)) {
+    return jsonResponse({ error: 'origin_not_allowed' }, 403, origin);
+  }
+  if (!(await enforceHitRateLimit(env, request))) {
+    return jsonResponse({ error: 'rate_limited' }, 429, origin);
+  }
+  let body = {};
+  try {
+    body = await request.json();
+  } catch {
+    body = {};
+  }
+  const path = normalizePath(body.path || '/');
+  if (!path || shouldSkipPath(path)) {
+    return jsonResponse({ error: 'invalid_path' }, 400, origin);
+  }
+  const seconds = Math.min(3600, Math.max(0, Number(body.seconds) || 0));
+  const depth = Math.min(100, Math.max(0, Math.round(Number(body.depth) || 0)));
+  if (seconds < 1 && depth < 1) {
+    return jsonResponse({ ok: true, ignored: true }, 200, origin);
+  }
+  if (seconds >= 1) {
+    await addAmount(env, `page:read:seconds:${path}`, Math.round(seconds));
+    await bumpCount(env, `page:read:samples:${path}`);
+  }
+  if (depth >= 1) {
+    await addAmount(env, `page:read:depth:${path}`, depth);
+  }
+  return jsonResponse({ ok: true, path, seconds: Math.round(seconds), depth }, 200, origin);
+};
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get('Origin') || '';
@@ -289,6 +330,10 @@ export default {
       }, 200, origin);
     }
 
+    if (url.pathname === '/v1/read' && request.method === 'POST') {
+      return handleRead(request, env, origin);
+    }
+
     if (url.pathname === '/v1/hit' && request.method === 'POST') {
       return handleHit(request, env, origin);
     }
@@ -296,7 +341,7 @@ export default {
     if (url.pathname === '/' && request.method === 'GET') {
       return jsonResponse({
         service: 'sujing-site-stats',
-        endpoints: ['/v1/hit', '/v1/stats', '/v1/admin/stats', '/v1/admin/backfill', '/__health']
+        endpoints: ['/v1/hit', '/v1/read', '/v1/stats', '/v1/admin/stats', '/v1/admin/backfill', '/__health']
       }, 200, origin);
     }
 
