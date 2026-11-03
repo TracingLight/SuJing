@@ -285,9 +285,9 @@ const handleRead = async (request, env, origin) => {
   if (seconds >= 1) {
     await addAmount(env, `page:read:seconds:${path}`, Math.round(seconds));
     await bumpCount(env, `page:read:samples:${path}`);
-  }
-  if (depth >= 1) {
-    await addAmount(env, `page:read:depth:${path}`, depth);
+    if (depth >= 1) {
+      await addAmount(env, `page:read:depth:${path}`, depth);
+    }
   }
   return jsonResponse({ ok: true, path, seconds: Math.round(seconds), depth }, 200, origin);
 };

@@ -3441,7 +3441,7 @@ void main() {
       accrue();
       updateDepth();
       const measured = Math.round(seconds);
-      if (measured < 3 && maxDepth <= 0) return;
+      if (measured < 3) return;
       send({ path, seconds: Math.min(3600, measured), depth: maxDepth });
       seconds = 0;
       maxDepth = 0;
