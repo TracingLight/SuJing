@@ -4189,6 +4189,13 @@ a.sujing-bento-card:hover::before {
   transform: translateY(0);
 }
 
+.sujing-music-panel {
+  max-height: calc(100vh - 96px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
 .sujing-music-panel-head {
   grid-column: 1 / -1;
   display: flex;
@@ -7704,4 +7711,464 @@ body {
 
 .sujing-music-controls [data-music='loop'].is-active .sujing-music-loop-one {
   opacity: 1;
+}
+
+/* ---------------- 音乐播放器：歌词 ---------------- */
+
+.sujing-music-head-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sujing-music-head-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 26px;
+  padding: 0 8px;
+  border: 1px solid rgba(154, 123, 79, 0.28);
+  border-radius: 4px;
+  color: var(--sujing-ink-soft);
+  background: rgba(154, 123, 79, 0.08);
+  font-family: var(--sujing-display);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.sujing-music-head-actions button em {
+  font-style: normal;
+}
+
+.sujing-music-head-actions button:hover,
+.sujing-music-head-actions button.is-active {
+  color: var(--sujing-seal);
+  border-color: rgba(180, 69, 58, 0.36);
+  background: rgba(180, 69, 58, 0.1);
+}
+
+.sujing-music-lyrics {
+  grid-column: 1 / -1;
+  margin-top: 2px;
+  padding: 8px 10px 10px;
+  border: 1px solid rgba(154, 123, 79, 0.22);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.sujing-music-lyrics[hidden] {
+  display: none;
+}
+
+#sujing-music.lyrics-blur .sujing-music-lyrics {
+  background: rgba(255, 255, 255, 0.62);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  backdrop-filter: blur(10px) saturate(120%);
+}
+
+.sujing-music-lyrics-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.sujing-music-lyrics-title {
+  color: var(--sujing-gold);
+  font-family: var(--sujing-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+}
+
+.sujing-music-lyrics-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sujing-music-lyrics-actions button {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--sujing-muted);
+  background: transparent;
+  font-size: 0.66rem;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.sujing-music-lyrics-actions button:hover,
+.sujing-music-lyrics-actions button.is-active {
+  color: var(--sujing-seal);
+  border-color: rgba(180, 69, 58, 0.3);
+  background: rgba(180, 69, 58, 0.08);
+}
+
+.sujing-music-lyrics-body {
+  position: relative;
+  max-height: 128px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(154, 123, 79, 0.35) transparent;
+  mask-image: linear-gradient(180deg, transparent, #000 12%, #000 88%, transparent);
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 12%, #000 88%, transparent);
+}
+
+.sujing-music-lyrics-body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sujing-music-lyrics-body::-webkit-scrollbar-thumb {
+  border-radius: 2px;
+  background: rgba(154, 123, 79, 0.35);
+}
+
+.sujing-music-lyrics-list {
+  margin: 0;
+  padding: 6px 0;
+  list-style: none;
+}
+
+.sujing-music-lyric-line {
+  padding: 3px 2px;
+  color: var(--sujing-muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+  text-align: center;
+  cursor: pointer;
+  transition: color 0.24s ease, transform 0.24s ease, opacity 0.24s ease;
+  opacity: 0.62;
+}
+
+.sujing-music-lyric-line:hover {
+  color: var(--sujing-ink-soft);
+  opacity: 0.9;
+}
+
+.sujing-music-lyric-line.is-past {
+  opacity: 0.42;
+}
+
+.sujing-music-lyric-line.is-active {
+  color: var(--sujing-seal);
+  font-weight: 700;
+  opacity: 1;
+  transform: scale(1.04);
+}
+
+.sujing-music-lyric-text {
+  display: block;
+}
+
+.sujing-music-lyric-trans {
+  display: block;
+  margin-top: 1px;
+  color: var(--sujing-muted);
+  font-size: 0.62rem;
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.sujing-music-lyrics.lyrics-hide-translation .sujing-music-lyric-trans {
+  display: none;
+}
+
+.sujing-music-lyrics-empty {
+  margin: 6px 0;
+  color: var(--sujing-muted);
+  font-size: 0.7rem;
+  text-align: center;
+}
+
+.sujing-music-lyrics-empty[hidden] {
+  display: none;
+}
+
+/* 字号档位 */
+.sujing-music-lyrics[data-size='sm'] .sujing-music-lyric-line {
+  font-size: 0.64rem;
+}
+
+.sujing-music-lyrics[data-size='lg'] .sujing-music-lyric-line {
+  font-size: 0.82rem;
+}
+
+.sujing-music-lyrics[data-size='lg'] .sujing-music-lyric-trans {
+  font-size: 0.68rem;
+}
+
+/* 歌词设置面板 */
+.sujing-music-lyric-settings {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(154, 123, 79, 0.28);
+}
+
+.sujing-music-lyric-settings[hidden] {
+  display: none;
+}
+
+.sujing-music-lyric-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--sujing-ink-soft);
+  font-size: 0.68rem;
+}
+
+.sujing-music-lyric-row input[type='checkbox'] {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--sujing-seal);
+  cursor: pointer;
+}
+
+.sujing-music-lyric-sizes {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.sujing-music-lyric-sizes button {
+  min-width: 28px;
+  height: 22px;
+  border: 1px solid rgba(154, 123, 79, 0.28);
+  border-radius: 4px;
+  color: var(--sujing-ink-soft);
+  background: rgba(154, 123, 79, 0.06);
+  font-size: 0.64rem;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.sujing-music-lyric-sizes button.is-active,
+.sujing-music-lyric-sizes button:hover {
+  color: var(--sujing-seal);
+  border-color: rgba(180, 69, 58, 0.36);
+  background: rgba(180, 69, 58, 0.1);
+}
+
+.sujing-music-lyric-recenter {
+  min-height: 24px;
+  border: 1px dashed rgba(154, 123, 79, 0.4);
+  border-radius: 4px;
+  color: var(--sujing-ink-soft);
+  background: transparent;
+  font-size: 0.66rem;
+  cursor: pointer;
+}
+
+.sujing-music-lyric-recenter:hover {
+  color: var(--sujing-seal);
+  border-color: rgba(180, 69, 58, 0.45);
+}
+
+/* 沉浸歌词 */
+body.sujing-lyrics-immersive {
+  overflow: hidden;
+}
+
+#sujing-music.lyrics-immersive {
+  inset: 0;
+  z-index: 1004;
+}
+
+#sujing-music.lyrics-immersive .sujing-music-toggle {
+  display: none;
+}
+
+#sujing-music.lyrics-immersive .sujing-music-panel {
+  position: fixed;
+  inset: 0;
+  width: auto;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  padding: clamp(24px, 6vh, 72px) clamp(20px, 8vw, 140px);
+  border: 0;
+  border-radius: 0;
+  transform: none;
+  visibility: visible;
+  opacity: 1;
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(26, 122, 130, 0.22), transparent 60%),
+    rgba(17, 24, 28, 0.94);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+#sujing-music.lyrics-immersive .sujing-music-panel > *:not(.sujing-music-lyrics) {
+  display: none;
+}
+
+#sujing-music.lyrics-immersive .sujing-music-lyrics {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: min(780px, 100%);
+  align-self: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  min-height: 0;
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+#sujing-music.lyrics-immersive .sujing-music-lyrics-head {
+  justify-content: center;
+  position: relative;
+  margin-bottom: 10px;
+}
+
+#sujing-music.lyrics-immersive .sujing-music-lyrics-actions {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+#sujing-music.lyrics-immersive .sujing-music-lyrics-title {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+#sujing-music.lyrics-immersive .sujing-music-lyrics-actions button {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+#sujing-music.lyrics-immersive .sujing-music-lyrics-body {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent);
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent);
+}
+
+#sujing-music.lyrics-immersive .sujing-music-lyric-line {
+  padding: 8px 0;
+  color: rgba(255, 255, 255, 0.74);
+  font-size: clamp(0.95rem, 1.5vw, 1.3rem);
+  line-height: 1.7;
+  opacity: 0.55;
+}
+
+#sujing-music.lyrics-immersive .sujing-music-lyric-line.is-past {
+  opacity: 0.36;
+}
+
+#sujing-music.lyrics-immersive .sujing-music-lyric-line.is-active {
+  color: #fff;
+  text-shadow: 0 0 24px rgba(79, 176, 173, 0.55);
+  transform: scale(1.04);
+}
+
+#sujing-music.lyrics-immersive .sujing-music-lyric-trans {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: clamp(0.72rem, 1vw, 0.9rem);
+}
+
+#sujing-music.lyrics-immersive .sujing-music-lyrics-empty {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+}
+
+#sujing-music.lyrics-immersive .sujing-music-lyric-settings {
+  border-top-color: rgba(255, 255, 255, 0.2);
+}
+
+#sujing-music.lyrics-immersive .sujing-music-lyric-row {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+#sujing-music.lyrics-immersive .sujing-music-lyric-sizes button,
+#sujing-music.lyrics-immersive .sujing-music-lyric-recenter {
+  color: rgba(255, 255, 255, 0.75);
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+@media (max-width: 640px) {
+  .sujing-music-panel {
+    width: min(340px, calc(100vw - 28px));
+  }
+
+  .sujing-music-lyrics-body {
+    max-height: 108px;
+  }
+}
+
+.sujing-music-lyric-offset {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sujing-music-lyric-offset button {
+  min-width: 2.5rem;
+  padding: 0.15rem 0.35rem;
+  border: 1px solid var(--sujing-line-soft);
+  border-radius: 5px;
+  color: var(--sujing-muted);
+  background: transparent;
+  font: inherit;
+  font-size: 0.6rem;
+  cursor: pointer;
+}
+
+.sujing-music-lyric-offset button:hover,
+.sujing-music-lyric-offset button:focus-visible {
+  color: var(--sujing-seal);
+  border-color: rgba(180, 69, 58, 0.34);
+  outline: none;
+}
+
+.sujing-music-lyric-offset output {
+  min-width: 2.8rem;
+  color: var(--sujing-gold);
+  font: 650 0.62rem/1 ui-monospace, Consolas, monospace;
+  text-align: center;
+}
+
+/* 暗色歌词面板：避免浅色背景配浅色歌词 */
+[data-theme='dark'] .sujing-music-lyrics {
+  border-color: rgba(127, 214, 208, 0.18);
+  background: rgba(17, 27, 31, 0.78);
+}
+
+[data-theme='dark'] #sujing-music.lyrics-blur .sujing-music-lyrics {
+  background: rgba(17, 27, 31, 0.88);
+}
+
+[data-theme='dark'] .sujing-music-lyric-line {
+  color: rgba(218, 234, 231, 0.7);
+}
+
+[data-theme='dark'] .sujing-music-lyric-line:hover {
+  color: #ffffff;
+}
+
+[data-theme='dark'] .sujing-music-lyric-line.is-past {
+  opacity: 0.34;
+}
+
+[data-theme='dark'] .sujing-music-lyric-trans {
+  color: rgba(188, 211, 208, 0.62);
 }

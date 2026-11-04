@@ -12,7 +12,9 @@ tracks:
     artist: 艾辰
     url: https://img.sujing.dev/media/music/2026/10/e-3-4e-3-4-e-a-1-2-c-o-2-091465c53586.mp3
     cover: /img/sujing-icon-full-512.png
+    lyric: /media/music/lyrics/cuoweishikong.lrc
   - title: 惊鸿一面
     artist: YG名刀
     url: /media/music/e-a-e-djc-_hi-res_24bit.mp3
     cover: /img/sujing-icon-full-512.png
+    lyric: /media/music/lyrics/jinghongyimian.lrc

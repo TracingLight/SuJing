@@ -50,6 +50,58 @@
   const MUSIC_VOLUME_KEY = 'sujing-music-volume';
   const MUSIC_LAST_VOLUME_KEY = 'sujing-music-last-volume';
   const MUSIC_LOOP_KEY = 'sujing-music-loop';
+  const MUSIC_LYRICS_KEY = 'sujing-music-lyrics-open';
+  const MUSIC_LYRIC_SETTINGS_KEY = 'sujing-music-lyric-settings';
+
+  const readStoredJson = (key, fallback) => {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch {
+      return fallback;
+    }
+  };
+
+  const writeStoredJson = (key, value) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch {
+      /* ignore private mode/quota */
+    }
+  };
+
+  /**
+   * 解析 LRC 歌词文本：支持单行多时间标签、[mm:ss.xx]、同一时间戳的翻译行合并。
+   * 返回 [{ time, text, trans }]
+   */
+  const parseLyrics = (text) => {
+    const stampRe = /\[(\d{1,3}):(\d{1,2})(?:[.:](\d{1,3}))?\]/g;
+    const collected = [];
+    for (const raw of String(text || '').split(/\r?\n/)) {
+      const content = raw.replace(/\[[^\]]*\]/g, '').trim();
+      if (!content) continue;
+      let match;
+      stampRe.lastIndex = 0;
+      while ((match = stampRe.exec(raw)) !== null) {
+        const minutes = Number(match[1]);
+        const seconds = Number(match[2]);
+        const fraction = match[3] ? Number(`0.${match[3]}`) : 0;
+        if (!Number.isFinite(minutes) || !Number.isFinite(seconds)) continue;
+        collected.push({ time: minutes * 60 + seconds + fraction, text: content });
+      }
+    }
+    collected.sort((a, b) => a.time - b.time);
+    const merged = [];
+    for (const line of collected) {
+      const prev = merged[merged.length - 1];
+      if (prev && Math.abs(prev.time - line.time) < 0.05) {
+        if (!prev.trans) prev.trans = line.text;
+        continue;
+      }
+      merged.push({ ...line });
+    }
+    return merged;
+  };
 
   const readStoredVolume = (key, fallback) => {
     try {
@@ -2218,13 +2270,63 @@ void main() {
       <section class="sujing-music-panel" aria-label="音乐播放器">
         <div class="sujing-music-panel-head">
           <span>正在听</span>
-          <button type="button" data-music="list" title="展开或收起歌单" aria-label="展开或收起歌单" aria-expanded="true">
-            <i class="fas fa-list-ul" aria-hidden="true"></i>
-            <em>歌单 · ${tracks.length}</em>
-          </button>
+          <div class="sujing-music-head-actions">
+            <button type="button" data-music="lyrics" title="显示歌词" aria-label="显示歌词" aria-pressed="false">
+              <i class="fas fa-align-left" aria-hidden="true"></i>
+              <em>词</em>
+            </button>
+            <button type="button" data-music="list" title="展开或收起歌单" aria-label="展开或收起歌单" aria-expanded="true">
+              <i class="fas fa-list-ul" aria-hidden="true"></i>
+              <em>歌单 · ${tracks.length}</em>
+            </button>
+          </div>
         </div>
         <img class="sujing-music-cover" alt="" src="${escapeHtml(tracks[0].cover || '/img/sujing-icon-full-512.png')}">
         <div class="sujing-music-info"><strong></strong><span></span></div>
+        <div class="sujing-music-lyrics" hidden>
+          <div class="sujing-music-lyrics-head">
+            <span class="sujing-music-lyrics-title">歌词</span>
+            <span class="sujing-music-lyrics-actions">
+              <button type="button" data-music="lyric-settings" title="歌词设置" aria-label="歌词设置" aria-expanded="false"><i class="fas fa-sliders" aria-hidden="true"></i></button>
+              <button type="button" data-music="lyric-full" title="沉浸歌词" aria-label="沉浸歌词" aria-pressed="false"><i class="fas fa-up-right-and-down-left-from-center" aria-hidden="true"></i></button>
+            </span>
+          </div>
+          <div class="sujing-music-lyrics-body">
+            <ol class="sujing-music-lyrics-list"></ol>
+            <p class="sujing-music-lyrics-empty" hidden>暂无歌词</p>
+          </div>
+          <div class="sujing-music-lyric-settings" hidden>
+            <div class="sujing-music-lyric-row">
+              <span>字号</span>
+              <span class="sujing-music-lyric-sizes">
+                <button type="button" data-lyric-size="sm">小</button>
+                <button type="button" data-lyric-size="md">中</button>
+                <button type="button" data-lyric-size="lg">大</button>
+              </span>
+            </div>
+            <div class="sujing-music-lyric-row">
+              <span>歌词偏移</span>
+              <span class="sujing-music-lyric-offset">
+                <button type="button" data-lyric-offset="-0.5" aria-label="歌词提前半秒">−0.5s</button>
+                <output data-lyric-offset-value>0.0s</output>
+                <button type="button" data-lyric-offset="0.5" aria-label="歌词延后半秒">+0.5s</button>
+              </span>
+            </div>
+            <label class="sujing-music-lyric-row">
+              <span>显示翻译</span>
+              <input type="checkbox" data-lyric-setting="translation">
+            </label>
+            <label class="sujing-music-lyric-row">
+              <span>毛玻璃背景</span>
+              <input type="checkbox" data-lyric-setting="blur">
+            </label>
+            <label class="sujing-music-lyric-row">
+              <span>自动滚动</span>
+              <input type="checkbox" data-lyric-setting="autoScroll">
+            </label>
+            <button type="button" class="sujing-music-lyric-recenter" data-lyric-recenter>回到当前行</button>
+          </div>
+        </div>
         <div class="sujing-music-controls">
           <button type="button" data-music="prev" title="上一首" aria-label="上一首"><i class="fas fa-backward-step" aria-hidden="true"></i></button>
           <button type="button" data-music="play" title="播放" aria-label="播放"><i class="fas fa-play" aria-hidden="true"></i></button>
@@ -2329,6 +2431,204 @@ void main() {
       toast(loopOne ? '单曲循环已开启' : '单曲循环已关闭');
     });
 
+    /* ---------------- 歌词 ---------------- */
+    const lyricsBox = player.querySelector('.sujing-music-lyrics');
+    const lyricsBody = player.querySelector('.sujing-music-lyrics-body');
+    const lyricsList = player.querySelector('.sujing-music-lyrics-list');
+    const lyricsEmpty = player.querySelector('.sujing-music-lyrics-empty');
+    const lyricsToggle = player.querySelector('[data-music="lyrics"]');
+    const lyricSettingsBtn = player.querySelector('[data-music="lyric-settings"]');
+    const lyricSettingsBox = player.querySelector('.sujing-music-lyric-settings');
+    const lyricFullBtn = player.querySelector('[data-music="lyric-full"]');
+    const lyricSizeButtons = [...player.querySelectorAll('[data-lyric-size]')];
+
+    let lyricLines = [];
+    let lyricIndex = -1;
+    let lyricToken = 0;
+    let lyricsOpen = readStoredFlag(MUSIC_LYRICS_KEY, false);
+    let lyricSettings = {
+      size: 'md',
+      translation: true,
+      blur: true,
+      autoScroll: true,
+      offset: 0,
+      ...readStoredJson(MUSIC_LYRIC_SETTINGS_KEY, {}),
+    };
+
+    const applyLyricSettings = () => {
+      lyricsBox.dataset.size = lyricSettings.size;
+      player.classList.toggle('lyrics-blur', !!lyricSettings.blur);
+      lyricsBox.classList.toggle('lyrics-hide-translation', !lyricSettings.translation);
+      lyricSizeButtons.forEach((button) => {
+        button.classList.toggle('is-active', button.dataset.lyricSize === lyricSettings.size);
+      });
+      const bindCheckbox = (name, value) => {
+        const input = player.querySelector(`[data-lyric-setting="${name}"]`);
+        if (input) input.checked = !!value;
+      };
+      bindCheckbox('translation', lyricSettings.translation);
+      bindCheckbox('blur', lyricSettings.blur);
+      bindCheckbox('autoScroll', lyricSettings.autoScroll);
+      const offsetValue = Number(lyricSettings.offset) || 0;
+      const offsetOutput = player.querySelector('[data-lyric-offset-value]');
+      if (offsetOutput) offsetOutput.textContent = `${offsetValue >= 0 ? '+' : ''}${offsetValue.toFixed(1)}s`;
+      writeStoredJson(MUSIC_LYRIC_SETTINGS_KEY, lyricSettings);
+    };
+
+    const scrollLyricsToActive = (force = false) => {
+      const items = lyricsList.children;
+      for (let i = 0; i < items.length; i += 1) {
+        items[i].classList.toggle('is-active', i === lyricIndex);
+        items[i].classList.toggle('is-past', i < lyricIndex);
+      }
+      const active = items[lyricIndex];
+      if (!active) return;
+      if (!lyricSettings.autoScroll && !force) return;
+      const top = active.offsetTop - lyricsBody.clientHeight / 2 + active.offsetHeight / 2;
+      lyricsBody.scrollTo({ top: Math.max(0, top), behavior: force ? 'auto' : 'smooth' });
+    };
+
+    const syncLyrics = (force = false) => {
+      if (!lyricLines.length) return;
+      const current = audio.currentTime + 0.12 + (Number(lyricSettings.offset) || 0);
+      let next = -1;
+      for (let i = 0; i < lyricLines.length; i += 1) {
+        if (lyricLines[i].time <= current) next = i;
+        else break;
+      }
+      if (next === lyricIndex) {
+        if (force) scrollLyricsToActive(true);
+        return;
+      }
+      lyricIndex = next;
+      scrollLyricsToActive(force);
+    };
+
+    const renderLyrics = () => {
+      lyricIndex = -1;
+      lyricsList.innerHTML = '';
+      const hasLyrics = lyricLines.length > 0;
+      lyricsEmpty.hidden = hasLyrics;
+      lyricsList.hidden = !hasLyrics;
+      if (!hasLyrics) return;
+      const frag = document.createDocumentFragment();
+      lyricLines.forEach((line) => {
+        const item = document.createElement('li');
+        item.className = 'sujing-music-lyric-line';
+        const text = document.createElement('span');
+        text.className = 'sujing-music-lyric-text';
+        text.textContent = line.text;
+        item.appendChild(text);
+        if (line.trans) {
+          const trans = document.createElement('span');
+          trans.className = 'sujing-music-lyric-trans';
+          trans.textContent = line.trans;
+          item.appendChild(trans);
+        }
+        item.addEventListener('click', () => {
+          if (!Number.isFinite(audio.duration) || audio.duration <= 0) return;
+          audio.currentTime = Math.min(Math.max(line.time, 0), Math.max(audio.duration - 0.25, 0));
+          setProgress(audio.duration ? audio.currentTime / audio.duration : 0);
+          syncLyrics(true);
+        });
+        frag.appendChild(item);
+      });
+      lyricsList.appendChild(frag);
+      scrollLyricsToActive(true);
+    };
+
+    const loadLyrics = async (track) => {
+      const token = (lyricToken += 1);
+      lyricLines = [];
+      renderLyrics();
+      if (!track?.lyric) return;
+      try {
+        const response = await fetch(track.lyric, { cache: 'force-cache' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const text = await response.text();
+        if (token !== lyricToken) return;
+        lyricLines = parseLyrics(text);
+        renderLyrics();
+        if (lyricsOpen) syncLyrics(true);
+      } catch (error) {
+        console.warn('[Sujing] lyrics load failed', error);
+      }
+    };
+
+    const setLyricsOpen = (open) => {
+      lyricsOpen = !!open;
+      lyricsBox.hidden = !lyricsOpen;
+      player.classList.toggle('lyrics-open', lyricsOpen);
+      lyricsToggle.classList.toggle('is-active', lyricsOpen);
+      lyricsToggle.setAttribute('aria-pressed', lyricsOpen ? 'true' : 'false');
+      lyricsToggle.title = lyricsOpen ? '隐藏歌词' : '显示歌词';
+      lyricsToggle.setAttribute('aria-label', lyricsOpen ? '隐藏歌词' : '显示歌词');
+      writeStoredFlag(MUSIC_LYRICS_KEY, lyricsOpen);
+      if (lyricsOpen) syncLyrics(true);
+    };
+
+    lyricsToggle.addEventListener('click', () => {
+      setLyricsOpen(!lyricsOpen);
+      if (lyricsOpen && !lyricLines.length && !tracks[state.trackIndex]?.lyric) toast('当前曲目暂无歌词');
+    });
+    lyricSettingsBtn.addEventListener('click', () => {
+      const open = lyricSettingsBox.hidden;
+      lyricSettingsBox.hidden = !open;
+      lyricSettingsBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      lyricSettingsBtn.classList.toggle('is-active', open);
+    });
+    lyricFullBtn.addEventListener('click', () => {
+      const on = !player.classList.contains('lyrics-immersive');
+      player.classList.toggle('lyrics-immersive', on);
+      document.body.classList.toggle('sujing-lyrics-immersive', on);
+      lyricFullBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      lyricFullBtn.title = on ? '退出沉浸歌词' : '沉浸歌词';
+      if (on) {
+        setLyricsOpen(true);
+        window.setTimeout(() => scrollLyricsToActive(true), 80);
+      }
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      if (!player.classList.contains('lyrics-immersive')) return;
+      player.classList.remove('lyrics-immersive');
+      document.body.classList.remove('sujing-lyrics-immersive');
+      lyricFullBtn.setAttribute('aria-pressed', 'false');
+      lyricFullBtn.title = '沉浸歌词';
+    });
+    lyricSizeButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        lyricSettings.size = button.dataset.lyricSize || 'md';
+        applyLyricSettings();
+      });
+    });
+    [...player.querySelectorAll('[data-lyric-offset]')].forEach((button) => {
+      button.addEventListener('click', () => {
+        const delta = Number(button.dataset.lyricOffset) || 0;
+        lyricSettings.offset = Math.min(5, Math.max(-5, (Number(lyricSettings.offset) || 0) + delta));
+        applyLyricSettings();
+        syncLyrics(true);
+      });
+    });
+    [
+      ['translation', 'translation'],
+      ['blur', 'blur'],
+      ['autoScroll', 'autoScroll'],
+    ].forEach(([name, key]) => {
+      const input = player.querySelector(`[data-lyric-setting="${name}"]`);
+      input?.addEventListener('change', () => {
+        lyricSettings[key] = input.checked;
+        applyLyricSettings();
+        scrollLyricsToActive(true);
+      });
+    });
+    player.querySelector('[data-lyric-recenter]')?.addEventListener('click', () => {
+      syncLyrics(true);
+      toast('已回到当前歌词行');
+    });
+    applyLyricSettings();
+    setLyricsOpen(lyricsOpen);
+
     const savedVolume = readStoredVolume(MUSIC_VOLUME_KEY, lastVolume);
     lastVolume = readStoredVolume(MUSIC_LAST_VOLUME_KEY, savedVolume || 0.72);
     syncVolumeUI(savedVolume, false);
@@ -2387,6 +2687,7 @@ void main() {
       }
       syncPlaylistActive();
       persistMusicState({ trackIndex: state.trackIndex });
+      void loadLyrics(track);
     };
     const ensureAudioSource = () => {
       const track = tracks[state.trackIndex];
@@ -2502,6 +2803,7 @@ void main() {
     });
     audio.addEventListener('timeupdate', () => {
       setProgress(audio.duration ? audio.currentTime / audio.duration : 0);
+      syncLyrics();
       if (state.musicPersistTimer) return;
       state.musicPersistTimer = window.setTimeout(() => {
         state.musicPersistTimer = null;
