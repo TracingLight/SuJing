@@ -3337,8 +3337,7 @@ a.sujing-bento-card:hover::before {
   transform: translateY(-2px);
 }
 
-.sujing-about-section,
-.sujing-about-principle {
+.sujing-about-section {
   margin-top: 68px;
   padding-top: 48px;
   border-top: 1px solid var(--sujing-line);
@@ -3350,8 +3349,7 @@ a.sujing-bento-card:hover::before {
   border-top: 0;
 }
 
-.sujing-about-section > h2,
-.sujing-about-principle h2 {
+.sujing-about-section > h2 {
   margin: 0 0 26px !important;
   color: var(--sujing-ink);
   font-size: 1.65rem;
@@ -3390,25 +3388,11 @@ a.sujing-bento-card:hover::before {
   font-size: 1rem;
 }
 
-.sujing-about-grid p,
-.sujing-about-principle > p:last-child {
+.sujing-about-grid p {
   margin: 0 !important;
   color: var(--sujing-muted);
   font-size: 0.86rem;
   line-height: 1.75;
-}
-
-.sujing-about-principle {
-  padding-bottom: 12px;
-}
-
-.sujing-about-principle h2 {
-  max-width: 700px;
-  margin-bottom: 14px !important;
-}
-
-.sujing-about-principle > p:last-child {
-  max-width: 780px;
 }
 
 /* Notes, gallery and music */

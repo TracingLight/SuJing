@@ -50,10 +50,4 @@ comments: true
       </li>
     </ul>
   </section>
-
-  <section class="sujing-about-principle">
-    <p class="sujing-kicker">原则</p>
-    <h2></h2>
-    <p></p>
-  </section>
 </div>
