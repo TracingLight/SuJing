@@ -27,3 +27,5 @@ assets/user/duplicates/
 .sujing-agent.json
 .sujing-agent-memory.json
 .sujing-comments-cache.json
+.sujing-stats-cache.json
+.sujing-snapshots-cache.json
