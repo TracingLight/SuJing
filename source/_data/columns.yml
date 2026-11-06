@@ -10,6 +10,68 @@
   slug: cpp
   icon: fas fa-terminal
   description: C++ 语言、面向对象和底层实践
+  modules:
+    - name: 语言基础
+      slug: cpp-basics
+      icon: fas fa-book-open
+      description: 从历史、程序结构到头文件、命名空间、函数与跨语言调用
+      mark: 语
+      match:
+        titleIncludes:
+          - 'extern "C"'
+          - '命名空间'
+          - '头文件的防卫式声明'
+          - 'C++程序的基本结构'
+          - 'C++ 的语言构成'
+          - 'C++ 的历史与版本'
+          - '内联函数'
+          - '函数重载'
+          - '参数与返回值的传递'
+    - name: 类与对象
+      slug: class-and-object
+      icon: fas fa-cube
+      description: 封装、构造析构、对象生命周期、静态成员、const、友元与模板
+      mark: 类
+      match:
+        titleIncludes:
+          - '从C到C++'
+          - '面向对象的第一课'
+          - '类的访问控制与封装'
+          - '类的具体设计'
+          - '类的两大经典类型'
+          - '构造函数与初始化'
+          - '从无到有：构造函数和初始化'
+          - '构造函数与析构函数'
+          - '对象的存储位置与生命周期'
+          - 'new和delete'
+          - '类的静态成员'
+          - 'const关键字'
+          - '友元函数'
+          - '模板'
+    - name: 拷贝与运算符重载
+      slug: copy-and-operators
+      icon: fas fa-clone
+      description: 深浅拷贝、拷贝构造与赋值，以及成员/非成员运算符重载
+      mark: 符
+      match:
+        titleIncludes:
+          - '浅拷贝'
+          - '拷贝构造函数'
+          - '拷贝赋值运算符'
+          - '成员函数的操作符重载'
+          - '非成员函数的操作符重载'
+          - '操作符重载返回值'
+          - '字符串的输出操作符重载'
+    - name: 继承与组合
+      slug: inheritance-and-composition
+      icon: fas fa-diagram-project
+      description: 继承、委托与组合三种复用方式，以及对象间关系
+      mark: 承
+      match:
+        titleIncludes:
+          - '继承'
+          - '委托'
+          - '类的组合'
 - name: 计算机基础
   slug: computer-basics
   icon: fas fa-microchip
