@@ -67,7 +67,7 @@ const modulePage = (column, module) => {
     path: pagePath(modulePath(column, module)),
     layout: ['page', 'index'],
     data: {
-      title: `${module.name} · ${column.name}`,
+      title: module.name,
       description: module.description,
       top_img: false,
       aside: false,
