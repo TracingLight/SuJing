@@ -1,5 +1,14 @@
 'use strict';
 
+const {
+  normalizeColumn,
+  matchesColumn,
+  matchesModule,
+  columnPath,
+  modulePath,
+  moduleKey
+} = require('./lib/column-model');
+
 const SITE_SINCE = '2026-07-21';
 
 const cleanText = (value) => String(value || '')
@@ -8,8 +17,6 @@ const cleanText = (value) => String(value || '')
   .trim();
 
 const sitePath = (value) => `/${String(value || '').replace(/^\/+/, '')}`;
-
-const normalizeColumnName = (value) => String(value || '').trim().toLocaleLowerCase('zh-CN');
 
 const countWords = (content) => {
   const text = String(content || '').replace(/<[^>]*>/g, ' ');
@@ -20,6 +27,17 @@ const countWords = (content) => {
 
 hexo.extend.generator.register('sujing-site-data', (locals) => {
   const rawPosts = locals.posts.toArray().sort((a, b) => b.date.valueOf() - a.date.valueOf());
+  const configuredColumns = Array.isArray(locals.data.columns) ? locals.data.columns : [];
+  const seenColumns = new Set();
+  const columns = configuredColumns
+    .map(normalizeColumn)
+    .filter(Boolean)
+    .filter((column) => {
+      if (seenColumns.has(column.slug)) return false;
+      seenColumns.add(column.slug);
+      return true;
+    });
+
   const posts = rawPosts.map((post) => ({
     title: post.title,
     path: sitePath(post.path),
@@ -30,6 +48,38 @@ hexo.extend.generator.register('sujing-site-data', (locals) => {
     date: post.date.toISOString(),
     categories: post.categories.toArray().map((item) => item.name),
     tags: post.tags.toArray().map((item) => item.name)
+  }));
+
+  posts.forEach((post) => {
+    post.columnSlugs = columns
+      .filter((column) => matchesColumn(post, column))
+      .map((column) => column.slug);
+    post.moduleSlugs = columns
+      .filter((column) => post.columnSlugs.includes(column.slug))
+      .flatMap((column) => column.modules
+        .filter((module) => matchesModule(post, module))
+        .map((module) => moduleKey(column, module)));
+  });
+
+  const publicColumns = columns.map((column) => ({
+    name: column.name,
+    slug: column.slug,
+    icon: column.icon,
+    description: column.description,
+    path: columnPath(column),
+    count: posts.filter((post) => post.columnSlugs.includes(column.slug)).length,
+    modules: column.modules.map((module) => ({
+      name: module.name,
+      slug: module.slug,
+      icon: module.icon,
+      description: module.description,
+      mark: module.mark,
+      path: modulePath(column, module),
+      count: posts.filter((post) => (
+        post.columnSlugs.includes(column.slug) &&
+        post.moduleSlugs.includes(moduleKey(column, module))
+      )).length
+    }))
   }));
 
   const categories = locals.categories.toArray()
@@ -53,23 +103,6 @@ hexo.extend.generator.register('sujing-site-data', (locals) => {
     .sort((a, b) => b.date.localeCompare(a.date));
   const gallery = locals.data.gallery || { title: '溯境相册', albums: [] };
   const albums = Array.isArray(gallery.albums) ? gallery.albums : [];
-  const configuredColumns = Array.isArray(locals.data.columns) ? locals.data.columns : [];
-  const columns = configuredColumns
-    .map((column) => ({
-      name: String(column.name || '').trim(),
-      slug: String(column.slug || '').trim(),
-      icon: String(column.icon || '').trim(),
-      description: String(column.description || '').trim()
-    }))
-    .filter((column) => column.name && column.slug)
-    .map((column) => ({
-      ...column,
-      path: `/columns/${column.slug}/`,
-      count: posts.filter((post) => {
-        const values = [...post.categories, ...post.tags].map(normalizeColumnName);
-        return values.includes(normalizeColumnName(column.name));
-      }).length
-    }));
   const words = rawPosts.reduce((sum, post) => sum + countWords(post.content), 0);
   const sinceCandidates = [
     SITE_SINCE,
@@ -90,6 +123,6 @@ hexo.extend.generator.register('sujing-site-data', (locals) => {
 
   return {
     path: 'site-index.json',
-    data: JSON.stringify({ posts, categories, tags, music, notes, gallery, columns, stats })
+    data: JSON.stringify({ posts, categories, tags, music, notes, gallery, columns: publicColumns, stats })
   };
 });

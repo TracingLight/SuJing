@@ -2868,8 +2868,11 @@ void main() {
     const posts = Array.isArray(data.posts) ? data.posts : [];
     const normalize = (value) => String(value || '').trim().toLocaleLowerCase('zh-CN');
     const currentSlug = String(root.dataset.columnSlug || '').trim().toLocaleLowerCase('en-US');
+    const currentModuleSlug = String(root.dataset.moduleSlug || '').trim().toLocaleLowerCase('en-US');
     const status = root.querySelector('[data-sujing-column-status]');
     const stage = root.querySelector('[data-sujing-column-stage]');
+    const modulesBox = root.querySelector('[data-sujing-column-modules]');
+    const moduleSwitcherWrap = root.querySelector('[data-sujing-column-module-switcher]');
     let qInput = root.querySelector('[data-sujing-column-q]');
     let clearBtn = root.querySelector('[data-sujing-column-clear]');
 
@@ -2878,10 +2881,10 @@ void main() {
       const toolbar = document.createElement('section');
       toolbar.className = 'sujing-column-toolbar';
       toolbar.setAttribute('data-sujing-reveal', '');
-      toolbar.setAttribute('aria-label', '专栏检索');
+      toolbar.setAttribute('aria-label', currentModuleSlug ? '模块检索' : '专栏检索');
       toolbar.innerHTML = `<label class="sujing-archive-search">
         <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
-        <input type="search" name="q" data-sujing-column-q placeholder="检索本专栏的标题、摘要、分类或标签" autocomplete="off" spellcheck="false">
+        <input type="search" name="q" data-sujing-column-q placeholder="${currentModuleSlug ? '检索本模块的标题、摘要、标签' : '检索本专栏的标题、摘要、分类或标签'}" autocomplete="off" spellcheck="false">
         <button type="button" data-sujing-column-clear hidden aria-label="清除检索">清除</button>
       </label>`;
       stage.parentNode.insertBefore(toolbar, stage);
@@ -2893,10 +2896,6 @@ void main() {
     let query = params.get('q') || '';
     if (qInput) qInput.value = query;
 
-    const matches = (post, column) => {
-      const values = [...(post.categories || []), ...(post.tags || [])].map(normalize);
-      return values.includes(normalize(column.name));
-    };
     const matchesQuery = (post) => {
       const q = normalize(query);
       if (!q) return true;
@@ -2925,6 +2924,44 @@ void main() {
         <span class="sujing-column-card-body"><time datetime="${escapeHtml(post.date)}">${escapeHtml(formatDate(post.date))}</time><strong>${escapeHtml(post.title || '未命名')}</strong>${post.description ? `<em>${escapeHtml(post.description)}</em>` : ''}</span>
       </a>`).join('');
 
+    const renderModuleCards = (column) => {
+      if (!modulesBox) return;
+      if (!column.modules?.length || currentModuleSlug) {
+        modulesBox.hidden = true;
+        modulesBox.innerHTML = '';
+        return;
+      }
+      modulesBox.hidden = false;
+      modulesBox.innerHTML = `<div class="sujing-column-modules-head">
+        <div><p class="sujing-kicker">模块</p><h2>按主题浏览</h2></div>
+        <span>${column.modules.length} 个模块</span>
+      </div>
+      <div class="sujing-column-module-grid">${column.modules.map((module) => `
+        <a class="sujing-column-module-card" href="${escapeHtml(module.path)}" data-sujing-reveal>
+          <span class="sujing-column-module-icon" aria-hidden="true"><i class="${escapeHtml(module.icon)}"></i></span>
+          <span class="sujing-column-module-body"><strong>${escapeHtml(module.name)}</strong><em>${escapeHtml(module.description)}</em></span>
+          <span class="sujing-column-module-count">${Number(module.count) || 0} 篇</span>
+          <span class="sujing-column-module-mark" aria-hidden="true">${escapeHtml(module.mark || '辑')}</span>
+        </a>`).join('')}</div>`;
+    };
+
+    const renderModuleSwitcher = (column, activeModule) => {
+      if (!moduleSwitcherWrap) return;
+      if (!column.modules?.length) {
+        moduleSwitcherWrap.hidden = true;
+        moduleSwitcherWrap.innerHTML = '';
+        return;
+      }
+      moduleSwitcherWrap.hidden = false;
+      moduleSwitcherWrap.innerHTML = `<nav class="sujing-column-module-switcher" aria-label="模块切换">
+        <a href="${escapeHtml(column.path)}"${activeModule ? '' : ' class="is-active" aria-current="page"'}>全部</a>
+        ${column.modules.map((module) => {
+          const active = activeModule?.slug === module.slug;
+          return `<a href="${escapeHtml(module.path)}"${active ? ' class="is-active" aria-current="page"' : ''}>${escapeHtml(module.name)}<em>${Number(module.count) || 0}</em></a>`;
+        }).join('')}
+      </nav>`;
+    };
+
     if (!stage || !status) {
       const hash = window.location.hash.replace(/^#/, '').trim().toLocaleLowerCase('en-US');
       if (hash && columns.some((column) => column.slug === hash)) {
@@ -2941,21 +2978,52 @@ void main() {
       if (!column) {
         status.textContent = '暂无可用专栏';
         stage.innerHTML = '<div class="sujing-data-empty"><span class="sujing-empty-seal" aria-hidden="true">空</span><h2>专栏配置为空</h2><p>请在 source/_data/columns.yml 中配置专栏。</p></div>';
+        if (modulesBox) modulesBox.hidden = true;
+        if (moduleSwitcherWrap) moduleSwitcherWrap.hidden = true;
         root.setAttribute('aria-busy', 'false');
         return;
       }
-      const baseList = posts.filter((post) => matches(post, column));
+
+      const activeModule = currentModuleSlug
+        ? column.modules?.find((module) => module.slug === currentModuleSlug)
+        : null;
+      if (currentModuleSlug && !activeModule) {
+        status.textContent = '暂无此模块';
+        stage.innerHTML = '<div class="sujing-data-empty"><span class="sujing-empty-seal" aria-hidden="true">空</span><h2>这个模块不存在</h2><p>回到专栏查看可用的模块。</p></div>';
+        if (modulesBox) modulesBox.hidden = true;
+        if (moduleSwitcherWrap) moduleSwitcherWrap.hidden = true;
+        root.setAttribute('aria-busy', 'false');
+        return;
+      }
+
+      renderModuleCards(column);
+      renderModuleSwitcher(column, activeModule);
+
+      const baseList = posts.filter((post) => {
+        if (!(post.columnSlugs || []).includes(column.slug)) return false;
+        if (!activeModule) return true;
+        return (post.moduleSlugs || []).includes(`${column.slug}/${activeModule.slug}`);
+      });
       const list = baseList.filter(matchesQuery);
       const trimmed = query.trim();
+      const scopeName = activeModule ? `${column.name} / ${activeModule.name}` : column.name;
       status.textContent = trimmed
-        ? `${column.name} · 检索 ${list.length} / ${baseList.length} 篇`
-        : `${column.name} · ${list.length} 篇`;
+        ? `${scopeName} · 检索 ${list.length} / ${baseList.length} 篇`
+        : `${scopeName} · ${list.length} 篇`;
       if (qInput) qInput.value = query;
       if (clearBtn) clearBtn.hidden = !trimmed;
-      const empty = trimmed
-        ? '<div class="sujing-data-empty"><span class="sujing-empty-seal" aria-hidden="true">寻</span><h2>没有匹配的文章</h2><p>换个关键词，或清空检索查看这个专栏的全部文章。</p></div>'
-        : '<div class="sujing-data-empty"><span class="sujing-empty-seal" aria-hidden="true">空</span><h2>这个专栏还没有文章</h2><p>给文章添加对应的分类或标签后，它会自动出现在这里。</p></div>';
-      stage.innerHTML = `<header class="sujing-column-stage-head"><div><p class="sujing-kicker">${escapeHtml(column.name)}</p><h2>文章索引</h2></div><span>${list.length} 篇</span></header>${list.length ? `<div class="sujing-columns-grid">${renderCards(list)}</div>` : empty}`;
+
+      let empty = '';
+      if (trimmed) {
+        empty = '<div class="sujing-data-empty"><span class="sujing-empty-seal" aria-hidden="true">寻</span><h2>没有匹配的文章</h2><p>换个关键词，或清空检索查看这个范围的全部文章。</p></div>';
+      } else if (activeModule) {
+        empty = '<div class="sujing-data-empty"><span class="sujing-empty-seal" aria-hidden="true">筹</span><h2>这个模块还在筹备中</h2><p>相关文章整理好后会自动出现；可以先看看同专栏的其他模块。</p></div>';
+      } else {
+        empty = '<div class="sujing-data-empty"><span class="sujing-empty-seal" aria-hidden="true">空</span><h2>这个专栏还没有文章</h2><p>给文章添加对应的分类或标签后，它会自动出现在这里。</p></div>';
+      }
+
+      const kicker = activeModule ? `${column.name} / ${activeModule.name}` : column.name;
+      stage.innerHTML = `<header class="sujing-column-stage-head"><div><p class="sujing-kicker">${escapeHtml(kicker)}</p><h2>文章索引</h2></div><span>${list.length} 篇</span></header>${list.length ? `<div class="sujing-columns-grid">${renderCards(list)}</div>` : empty}`;
       root.setAttribute('aria-busy', 'false');
       installMotion();
     };

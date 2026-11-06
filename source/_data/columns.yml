@@ -14,10 +14,48 @@
   slug: computer-basics
   icon: fas fa-microchip
   description: 数据结构、算法、系统与计算机基础知识
+  modules:
+    - name: 数据结构
+      slug: data-structures
+      icon: fas fa-sitemap
+      description: 线性表、栈队列、树、图与常见结构
+      mark: 构
+      match:
+        tags: [数据结构]
+    - name: 操作系统
+      slug: operating-systems
+      icon: fas fa-desktop
+      description: 进程线程、内存、文件与系统调用
+      mark: 系
+      match:
+        tags: [操作系统]
+    - name: 计算机网络
+      slug: computer-networks
+      icon: fas fa-network-wired
+      description: TCP/IP、HTTP、DNS 与网络分层
+      mark: 网
+      match:
+        tags: [计算机网络]
+    - name: 计算机组成原理
+      slug: computer-organization
+      icon: fas fa-microchip
+      description: CPU、存储层次、指令与总线
+      mark: 组
+      match:
+        tags: [计算机组成原理]
 - name: 算法
   slug: algorithm
   icon: fas fa-square-root-variable
   description: LeetCode 等算法平台题解与算法思想
+  modules:
+    - name: LeetCode Hot100
+      slug: hot100
+      icon: fas fa-fire
+      description: LeetCode 热题 100 的题解、思路与代码整理
+      mark: 题
+      match:
+        titleIncludes: [LeetCode-Hot100]
+        tags: [Hot100]
 - name: 设计模式
   slug: design-patterns
   icon: fas fa-diagram-project
