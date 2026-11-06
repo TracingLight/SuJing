@@ -1,7 +1,7 @@
 ---
-title: LeetCode-Hot1100：矩阵置零
+title: LeetCode-Hot100：矩阵置零
 date: '2026-09-16 23:01:18'
-updated: '2026-09-18 23:07:43'
+updated: '2026-11-06 22:07:25'
 categories:
   - 学习笔记
 tags:
