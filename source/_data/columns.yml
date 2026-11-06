@@ -14,6 +14,10 @@
   slug: computer-basics
   icon: fas fa-microchip
   description: 数据结构、算法、系统与计算机基础知识
+- name: 算法
+  slug: algorithm
+  icon: fas fa-square-root-variable
+  description: 数据结构、LeetCode 题解与算法思想
 - name: 设计模式
   slug: design-patterns
   icon: fas fa-diagram-project
