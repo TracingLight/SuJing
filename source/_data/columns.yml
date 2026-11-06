@@ -17,7 +17,7 @@
 - name: 算法
   slug: algorithm
   icon: fas fa-square-root-variable
-  description: 数据结构、LeetCode 题解与算法思想
+  description: LeetCode 等算法平台题解与算法思想
 - name: 设计模式
   slug: design-patterns
   icon: fas fa-diagram-project
