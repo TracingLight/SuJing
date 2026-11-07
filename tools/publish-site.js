@@ -66,7 +66,7 @@ async function publishSite({ cwd = path.join(__dirname, '..'), log = console.log
   const behind = await git('rev-list', '--count', 'HEAD..origin/main');
   if (Number(behind) > 0) throw new Error('GitHub 上有本机尚未合并的提交，请先同步后发布；没有执行覆盖推送。');
   const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-  for (const script of ['check', 'prune', 'check:performance-build']) {
+  for (const script of ['test', 'check', 'minify', 'prune', 'check:performance-build']) {
     await command(npm, ['run', script]);
   }
   await git('add', '-A', '--', '.');

@@ -55,19 +55,21 @@ assert.equal(home('script[src*="cdnjs"], link[href*="cdnjs"]').length, 0);
 assert.ok(home('link[rel="stylesheet"][href^="/vendor/"]').length);
 
 // 4. 响应式图片：每个 srcset 候选都存在，且派生图确实小于原图
+// 同时覆盖懒加载图片的 data-srcset；此时真实原图在 data-lazy-src，src 是占位图。
 let variants = 0;
 let imagesWithSrcset = 0;
 for (const file of walk(root).filter((item) => item.endsWith('.html'))) {
   const $ = cheerio.load(fs.readFileSync(file, 'utf8'));
-  $('img[srcset]').each((_, node) => {
+  $('img[srcset], img[data-srcset]').each((_, node) => {
     const img = $(node);
-    const original = img.attr('src');
-    if (!original) return;
+    const srcset = img.attr('srcset') || img.attr('data-srcset');
+    const original = img.attr('data-lazy-src') || img.attr('src');
+    if (!srcset || !original) return;
     const originalPath = resolveUrl(original);
     if (!fs.existsSync(originalPath)) return;
     const originalBytes = fs.statSync(originalPath).size;
     imagesWithSrcset += 1;
-    for (const entry of String(img.attr('srcset')).split(',')) {
+    for (const entry of String(srcset).split(',')) {
       const [url, width] = entry.trim().split(/\s+/);
       if (!url || !width) continue;
       assert.match(width, /^\d+w$/, `srcset 宽度格式错误：${url} ${width}`);
@@ -75,6 +77,10 @@ for (const file of walk(root).filter((item) => item.endsWith('.html'))) {
       assert.ok(fs.existsSync(variantPath), `缺少响应式图片：${url}`);
       if (url === original) continue;
       assert.ok(fs.statSync(variantPath).size < originalBytes, `派生图比原图大：${url}`);
+      assert.ok(
+        fs.statSync(variantPath).size <= 350 * 1024,
+        `派生图超出 350KB 预算：${url} ${fs.statSync(variantPath).size} 字节`
+      );
       variants += 1;
     }
   });
@@ -89,6 +95,18 @@ assert.match(fs.readFileSync(path.join(root, '_headers'), 'utf8'), /immutable/);
 // 下线的历史资源必须通过 _redirects 显式拦截，否则 Pages 会回落到历史部署里的同名文件
 assert.match(fs.readFileSync(path.join(root, '_redirects'), 'utf8'), /\/404\.html\s+404/);
 
+// 6. 压缩后的体积预算；数值在实测值上留出约 15% 回归空间
+const BUDGET = {
+  'js/sujing.js': 128 * 1024,
+  'css/sujing.css': 176 * 1024,
+  'js/main.js': 24 * 1024,
+  'css/index.css': 195 * 1024
+};
+for (const [file, limit] of Object.entries(BUDGET)) {
+  const bytes = fs.statSync(path.join(root, file)).size;
+  assert.ok(bytes <= limit, `体积超预算：${file} ${bytes} > ${limit} 字节，请检查 minify 步骤或新增代码`);
+}
+
 console.log(
-  `Build checks passed: 最新文章预渲染、首屏 eager、依赖本地化、${imagesWithSrcset} 张图共 ${variants} 个响应式引用、列表布局、缓存头。`
+  `Build checks passed: 最新文章预渲染、首屏 eager、依赖本地化、${imagesWithSrcset} 张图共 ${variants} 个响应式引用、列表布局、缓存头、体积预算。`
 );

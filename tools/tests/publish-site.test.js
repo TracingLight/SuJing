@@ -44,7 +44,7 @@ test('publishes additions, edits and deletions; ignores secrets/archive; retry n
   fs.writeFileSync(path.join(f.cwd, 'assets/_archive/private.png'), 'private');
   const result = await publishSite(f.options);
   assert.equal(result.pushed, true);
-  assert.deepEqual(f.builds, ['check', 'prune', 'check:performance-build']);
+  assert.deepEqual(f.builds, ['test', 'check', 'minify', 'prune', 'check:performance-build']);
   assert.equal(f.git('rev-parse', 'origin/main'), result.commit);
   const files = f.git('ls-tree', '-r', '--name-only', 'origin/main');
   assert.match(files, /source\/post.md/);
