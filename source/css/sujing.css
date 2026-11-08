@@ -8320,3 +8320,39 @@ body.sujing-lyrics-immersive {
     font-size: 0.66rem;
   }
 }
+
+/* Article figures with captions */
+.post #article-container .sujing-figure {
+  max-width: 100%;
+  margin: 2.1em auto;
+  text-align: center;
+}
+
+.post #article-container .sujing-figure img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--sujing-line);
+  border-radius: 10px;
+  box-shadow: 0 10px 26px rgba(20, 40, 47, 0.08);
+}
+
+.post #article-container .sujing-figure figcaption {
+  max-width: 92%;
+  margin: 0.78em auto 0;
+  color: var(--sujing-muted);
+  font-size: 0.82em;
+  line-height: 1.7;
+  letter-spacing: 0.01em;
+}
+
+@media (max-width: 640px) {
+  .post #article-container .sujing-figure {
+    margin: 1.6em auto;
+  }
+
+  .post #article-container .sujing-figure figcaption {
+    max-width: 96%;
+  }
+}
