@@ -8193,3 +8193,129 @@ body.sujing-lyrics-immersive {
 [data-theme='dark'] .sujing-music-lyric-trans {
   color: rgba(188, 211, 208, 0.62);
 }
+
+/* 代码块：采用接近 VS Code Dark+ 的对比度与字体，避免整块发灰 */
+:root {
+  --sujing-code-font: "Cascadia Code", "Cascadia Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  --hl-bg: #1e1e1e;
+  --hl-color: #d4d4d4;
+  --hltools-bg: #252526;
+  --hltools-color: #cccccc;
+  --hlnumber-bg: #1e1e1e;
+  --hlnumber-color: #858585;
+  --hlscrollbar-bg: #3e3e42;
+}
+
+[data-theme='dark'] {
+  --hl-bg: #1e1e1e;
+  --hl-color: #d4d4d4;
+  --hltools-bg: #252526;
+  --hltools-color: #cccccc;
+  --hlnumber-bg: #1e1e1e;
+  --hlnumber-color: #858585;
+  --hlscrollbar-bg: #3e3e42;
+}
+
+.post #article-container figure.highlight {
+  border-color: #33383d;
+  border-radius: 8px;
+  background: #1e1e1e;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+}
+
+.post #article-container .highlight-tools {
+  border-bottom-color: #33383d;
+  background: #252526;
+  color: #cccccc;
+}
+
+.post #article-container .highlight-tools .code-lang {
+  color: #d7d7d7;
+  font-family: var(--sujing-code-font);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.post #article-container figure.highlight pre,
+.post #article-container figure.highlight code,
+.post #article-container :not(pre) > code {
+  font-family: var(--sujing-code-font) !important;
+  font-variant-ligatures: none;
+}
+
+.post #article-container figure.highlight td.code pre {
+  padding: 12px 16px;
+  color: #d4d4d4;
+  font-size: 0.9rem;
+  line-height: 1.62;
+}
+
+.post #article-container figure.highlight .gutter pre {
+  padding: 12px 12px;
+  background: #1e1e1e;
+  color: #858585;
+  font-size: 0.9rem;
+  line-height: 1.62;
+}
+
+.post #article-container figure.highlight .comment,
+.post #article-container figure.highlight .quote {
+  color: #6a9955;
+  font-style: normal;
+}
+
+.post #article-container figure.highlight .keyword,
+.post #article-container figure.highlight .selector-tag {
+  color: #569cd6;
+}
+
+.post #article-container figure.highlight .type,
+.post #article-container figure.highlight .title.class_ {
+  color: #4ec9b0;
+}
+
+.post #article-container figure.highlight .string,
+.post #article-container figure.highlight .regexp,
+.post #article-container figure.highlight .attribute {
+  color: #ce9178;
+}
+
+.post #article-container figure.highlight .number,
+.post #article-container figure.highlight .literal {
+  color: #b5cea8;
+}
+
+.post #article-container figure.highlight .built_in,
+.post #article-container figure.highlight .builtin-name,
+.post #article-container figure.highlight .function .title,
+.post #article-container figure.highlight .title.function_ {
+  color: #dcdcaa;
+}
+
+.post #article-container figure.highlight .variable,
+.post #article-container figure.highlight .template-variable,
+.post #article-container figure.highlight .params {
+  color: #9cdcfe;
+}
+
+.post #article-container figure.highlight .meta {
+  color: #c586c0;
+}
+
+.post #article-container figure.highlight .line.marked {
+  background: rgba(38, 79, 120, 0.48);
+}
+
+@media (max-width: 640px) {
+  .post #article-container figure.highlight td.code pre,
+  .post #article-container figure.highlight .gutter pre {
+    padding: 10px 12px;
+    font-size: 0.78rem;
+    line-height: 1.6;
+  }
+
+  .post #article-container .highlight-tools .code-lang {
+    font-size: 0.66rem;
+  }
+}
