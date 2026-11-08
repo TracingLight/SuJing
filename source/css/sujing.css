@@ -30,9 +30,9 @@
   --sujing-glass-saturate: 145%;
   --sujing-glass-shadow: 0 16px 40px rgba(20, 40, 47, 0.08);
   --sujing-content: 1180px;
-  --sujing-reading: 780px;
-  --sujing-display: "Source Han Serif SC", "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
-  --sujing-sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
+  --sujing-reading: 740px;
+  --sujing-display: "Source Han Serif SC", "Noto Serif CJK SC", "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  --sujing-sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", "Noto Sans SC", "Source Han Sans SC", system-ui, sans-serif;
 }
 
 /* Inline annotations：交互式词条 + 粒子/着色器光晕 */
@@ -2273,8 +2273,8 @@ a.sujing-bento-card:hover::before {
 
 #article-container {
   color: var(--sujing-ink-soft);
-  font-size: 0.98rem;
-  line-height: 1.9;
+  font-size: 1.03rem;
+  line-height: 1.95;
 }
 
 .post #article-container {
