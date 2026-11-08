@@ -1601,7 +1601,7 @@ a.sujing-bento-card:hover::before {
   height: 100%;
   margin: 0;
   object-fit: cover;
-  object-position: center 8%;
+  object-position: center 18%;
   transition: transform 0.55s ease;
 }
 
