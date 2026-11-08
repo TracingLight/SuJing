@@ -307,7 +307,7 @@
 .sujing-column-card { display: grid; overflow: hidden; border: 1px solid var(--sujing-line); border-radius: 10px; color: var(--sujing-ink); background: var(--sujing-paper); transition: border-color 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease; }
 .sujing-column-card:hover { border-color: rgba(23, 126, 137, 0.5); box-shadow: 0 10px 26px rgba(20, 40, 47, 0.1); transform: translateY(-2px); }
 .sujing-column-card-media { display: block; aspect-ratio: 16 / 9; overflow: hidden; background: var(--sujing-mist); }
-.sujing-column-card-media img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 0.35s ease; }
+.sujing-column-card-media img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 24%; transition: transform 0.35s ease; }
 .sujing-column-card:hover .sujing-column-card-media img { transform: scale(1.04); }
 .sujing-column-card-body { display: grid; gap: 7px; padding: 15px 16px 17px; }
 .sujing-column-card-body time { color: var(--sujing-muted); font: 0.68rem Consolas, monospace; }
@@ -5498,6 +5498,7 @@ a.sujing-bento-card:hover::before {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center 24%;
   transition: transform 0.45s ease;
 }
 

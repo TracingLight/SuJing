@@ -2918,9 +2918,14 @@ void main() {
       window.history.replaceState(null, '', `${window.location.pathname}${qs ? `?${qs}` : ''}`);
     };
 
+    const coverStyleOf = (post) => {
+      const position = String(post?.cover_position || '').trim();
+      return position ? ` style="object-position:${escapeHtml(position)}"` : '';
+    };
+
     const renderCards = (list) => list.map((post) => `
       <a class="sujing-column-card" href="${escapeHtml(post.path)}" data-sujing-reveal>
-        <span class="sujing-column-card-media"><img src="${escapeHtml(post.cover || '/img/sujing-icon-full-512.png')}" alt="" loading="lazy" width="480" height="300"></span>
+        <span class="sujing-column-card-media"><img src="${escapeHtml(post.cover || '/img/sujing-icon-full-512.png')}" alt="" loading="lazy" width="480" height="300"${coverStyleOf(post)}></span>
         <span class="sujing-column-card-body"><time datetime="${escapeHtml(post.date)}">${escapeHtml(formatDate(post.date))}</time><strong>${escapeHtml(post.title || '未命名')}</strong>${post.description ? `<em>${escapeHtml(post.description)}</em>` : ''}</span>
       </a>`).join('');
 
@@ -3118,6 +3123,10 @@ void main() {
     };
 
     const coverOf = (post) => escapeHtml(post.cover || '/img/sujing-icon-full-512.png');
+    const coverStyleOf = (post) => {
+      const position = String(post?.cover_position || '').trim();
+      return position ? ` style="object-position:${escapeHtml(position)}"` : '';
+    };
 
     const renderTimeline = (list) => {
       const groups = new Map();
@@ -3144,7 +3153,7 @@ void main() {
                     ${postMetaLine(post) ? `<small>${postMetaLine(post)}</small>` : ''}
                   </span>
                   <span class="sujing-archive-entry-cover" aria-hidden="true">
-                    <img src="${coverOf(post)}" alt="" loading="lazy" width="96" height="64">
+                    <img src="${coverOf(post)}" alt="" loading="lazy" width="96" height="64"${coverStyleOf(post)}>
                   </span>
                 </a>
               </li>`).join('')}
@@ -3155,7 +3164,7 @@ void main() {
     const renderMatrix = (list) => `<div class="sujing-archive-matrix">${list.map((post) => `
       <a class="sujing-archive-card" href="${escapeHtml(post.path)}" data-sujing-reveal>
         <span class="sujing-archive-card-media" aria-hidden="true">
-          <img src="${coverOf(post)}" alt="" loading="lazy" width="480" height="300">
+          <img src="${coverOf(post)}" alt="" loading="lazy" width="480" height="300"${coverStyleOf(post)}>
         </span>
         <span class="sujing-archive-card-body">
           <time datetime="${escapeHtml(post.date)}">${escapeHtml(formatDate(post.date))}</time>
