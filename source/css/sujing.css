@@ -8196,7 +8196,7 @@ body.sujing-lyrics-immersive {
 
 /* 代码块：采用接近 VS Code Dark+ 的对比度与字体，避免整块发灰 */
 :root {
-  --sujing-code-font: "Cascadia Code", "Cascadia Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  --sujing-code-font: Consolas, "Cascadia Mono", "Liberation Mono", Menlo, "Courier New", monospace;
   --hl-bg: #1e1e1e;
   --hl-color: #d4d4d4;
   --hltools-bg: #252526;
