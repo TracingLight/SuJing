@@ -4,7 +4,7 @@ date: '2026-07-21 16:00:00'
 type: sujing-about
 aside: false
 top_img: false
-description: 关于溯光如初与溯境：Unity 游戏客户端、技术学习与生活记录。
+description: 关于溯光如初与溯境：游戏客户端、技术学习与生活记录。
 comments: true
 ---
 
@@ -15,7 +15,7 @@ comments: true
       <p class="sujing-kicker">关于</p>
       <h1>溯光如初</h1>
       <p class="sujing-about-role">HELLO, I'M 溯光如初</p>
-      <p>你好，我是溯光如初，计科在读，专注于 Unity 游戏客户端开发，会不断在博客中记录学习到的知识，欢迎来到我的博客</p>
+      <p>你好，我是溯光如初，计科在读，专注于游戏客户端开发相关内容，会不断在博客中记录学习到的知识，欢迎来到我的博客</p>
       <div class="sujing-about-links">
         <a href="https://github.com/TracingLight" target="_blank" rel="noopener noreferrer"><i class="fab fa-github" aria-hidden="true"></i>GitHub</a>
         <a href="mailto:suguangruchu@gmail.com"><i class="fas fa-envelope" aria-hidden="true"></i>Email</a>

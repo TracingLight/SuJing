@@ -20,13 +20,14 @@ hexo.extend.filter.register('before_generate', async () => {
     const input = await fs.readFile(path.join(hexo.source_dir, 'img', file));
     const metadata = await sharp(input).metadata();
     if (metadata.pages > 1 || !metadata.width || metadata.width < 480) continue;
-    const hash = crypto.createHash('sha256').update(input).update('quality84-v1').digest('hex').slice(0, 16);
+    const hash = crypto.createHash('sha256').update(input).update('quality84-q80-1600-v2').digest('hex').slice(0, 16);
     const variants = [];
     for (const width of [480, 800, 1200, 1600].filter(width => width < metadata.width)) {
       const name = `${hash}-${width}.webp`;
       const target = path.join(cacheDir, name);
+      const quality = width >= 1600 ? 80 : 84;
       try { await fs.access(target); } catch {
-        await sharp(input).rotate().resize({ width, withoutEnlargement: true }).webp({ quality: 84, effort: 5 }).toFile(target);
+        await sharp(input).rotate().resize({ width, withoutEnlargement: true }).webp({ quality, effort: 5 }).toFile(target);
       }
       if ((await fs.stat(target)).size >= input.length) continue;
       variants.push({ width, path: `img/responsive/${name}`, file: target });
