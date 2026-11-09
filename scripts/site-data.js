@@ -38,17 +38,31 @@ hexo.extend.generator.register('sujing-site-data', (locals) => {
       return true;
     });
 
-  const posts = rawPosts.map((post) => ({
-    title: post.title,
-    path: sitePath(post.path),
-    source: post.source,
-    cover: post.cover || '',
-    cover_position: post.cover_position || post.coverPosition || '',
-    description: cleanText(post.description || post.excerpt).slice(0, 180),
-    date: post.date.toISOString(),
-    categories: post.categories.toArray().map((item) => item.name),
-    tags: post.tags.toArray().map((item) => item.name)
-  }));
+  const coverData = (cover) => {
+    const image = cover && hexo.sujingImages && hexo.sujingImages[cover];
+    if (!image) return {};
+    return {
+      cover_srcset: image.srcset,
+      cover_width: image.width,
+      cover_height: image.height
+    };
+  };
+
+  const posts = rawPosts.map((post) => {
+    const cover = post.cover || '';
+    return {
+      title: post.title,
+      path: sitePath(post.path),
+      source: post.source,
+      cover,
+      cover_position: post.cover_position || post.coverPosition || '',
+      ...coverData(cover),
+      description: cleanText(post.description || post.excerpt).slice(0, 180),
+      date: post.date.toISOString(),
+      categories: post.categories.toArray().map((item) => item.name),
+      tags: post.tags.toArray().map((item) => item.name)
+    };
+  });
 
   posts.forEach((post) => {
     post.columnSlugs = columns

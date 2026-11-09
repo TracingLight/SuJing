@@ -2923,9 +2923,17 @@ void main() {
       return position ? ` style="object-position:${escapeHtml(position)}"` : '';
     };
 
+    const coverAttrs = (post, sizes, width = 480, height = 300) => {
+      const srcset = String(post?.cover_srcset || '').trim();
+      const responsive = srcset
+        ? ` srcset="${escapeHtml(srcset)}" sizes="${escapeHtml(sizes)}"`
+        : '';
+      return `src="${escapeHtml(post?.cover || '/img/sujing-icon-full-512.png')}"${responsive} width="${width}" height="${height}" loading="lazy" decoding="async" fetchpriority="low"`;
+    };
+
     const renderCards = (list) => list.map((post) => `
       <a class="sujing-column-card" href="${escapeHtml(post.path)}" data-sujing-reveal>
-        <span class="sujing-column-card-media"><img src="${escapeHtml(post.cover || '/img/sujing-icon-full-512.png')}" alt="" loading="lazy" width="480" height="300"${coverStyleOf(post)}></span>
+        <span class="sujing-column-card-media"><img ${coverAttrs(post, '(max-width: 640px) calc(100vw - 48px), (max-width: 960px) calc((100vw - 76px) / 2), 420px')} alt=""${coverStyleOf(post)}></span>
         <span class="sujing-column-card-body"><time datetime="${escapeHtml(post.date)}">${escapeHtml(formatDate(post.date))}</time><strong>${escapeHtml(post.title || '未命名')}</strong>${post.description ? `<em>${escapeHtml(post.description)}</em>` : ''}</span>
       </a>`).join('');
 
@@ -3123,6 +3131,13 @@ void main() {
     };
 
     const coverOf = (post) => escapeHtml(post.cover || '/img/sujing-icon-full-512.png');
+    const coverAttrsOf = (post, sizes, width, height) => {
+      const srcset = String(post?.cover_srcset || '').trim();
+      const responsive = srcset
+        ? ` srcset="${escapeHtml(srcset)}" sizes="${escapeHtml(sizes)}"`
+        : '';
+      return `src="${coverOf(post)}"${responsive} width="${width}" height="${height}" loading="lazy" decoding="async" fetchpriority="low"`;
+    };
     const coverStyleOf = (post) => {
       const position = String(post?.cover_position || '').trim();
       return position ? ` style="object-position:${escapeHtml(position)}"` : '';
@@ -3153,7 +3168,7 @@ void main() {
                     ${postMetaLine(post) ? `<small>${postMetaLine(post)}</small>` : ''}
                   </span>
                   <span class="sujing-archive-entry-cover" aria-hidden="true">
-                    <img src="${coverOf(post)}" alt="" loading="lazy" width="96" height="64"${coverStyleOf(post)}>
+                    <img ${coverAttrsOf(post, '112px', 96, 64)} alt=""${coverStyleOf(post)}>
                   </span>
                 </a>
               </li>`).join('')}
@@ -3164,7 +3179,7 @@ void main() {
     const renderMatrix = (list) => `<div class="sujing-archive-matrix">${list.map((post) => `
       <a class="sujing-archive-card" href="${escapeHtml(post.path)}" data-sujing-reveal>
         <span class="sujing-archive-card-media" aria-hidden="true">
-          <img src="${coverOf(post)}" alt="" loading="lazy" width="480" height="300"${coverStyleOf(post)}>
+          <img ${coverAttrsOf(post, '(max-width: 640px) calc(100vw - 48px), (max-width: 960px) calc((100vw - 80px) / 2), 360px', 480, 300)} alt=""${coverStyleOf(post)}>
         </span>
         <span class="sujing-archive-card-body">
           <time datetime="${escapeHtml(post.date)}">${escapeHtml(formatDate(post.date))}</time>
@@ -3396,7 +3411,15 @@ void main() {
       if (frame !== null) return;
       frame = window.requestAnimationFrame(update);
     };
+    const cleanup = () => {
+      window.removeEventListener('scroll', onScroll);
+      if (frame !== null) window.cancelAnimationFrame(frame);
+      frame = null;
+      document.removeEventListener('pjax:send', cleanup);
+      hero.dataset.sujingParallaxReady = '';
+    };
     window.addEventListener('scroll', onScroll, { passive: true });
+    document.addEventListener('pjax:send', cleanup, { once: true });
     update();
   };
 
@@ -3513,6 +3536,11 @@ void main() {
     document.addEventListener('pjax:complete', () => {
       document.body.classList.remove('sujing-leaving');
     });
+    const restoreAfterNavigationError = () => {
+      document.body.classList.remove('sujing-leaving');
+    };
+    document.addEventListener('pjax:error', restoreAfterNavigationError);
+    document.addEventListener('pjax:timeout', restoreAfterNavigationError);
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
