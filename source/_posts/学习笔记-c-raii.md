@@ -12,7 +12,6 @@ cover: /img/covers/preview-upscaled-4x-mw7v0eps.webp
 copyright: true
 cover_position: 51.7% 24.8%
 ---
-
 观前提醒：只需要懂 C++ 最基础的 `new / delete`、类的构造函数与析构函数即可无障碍阅读前半部分，涉及 `C++11` 移动语义（`std::move`）、智能指针等进阶特性时，文中仅会简单提及
 
 > 有人说，不懂 `RAII`，你写的其实只是带 `class` 的 C 语言，但同时 C++ 社区把 `RAII` 捧上神坛几十年，写了无数条 `Core Guidelines`，现实中的大型 C++ 项目却依然在为内存泄漏和莫名其妙的崩溃而头痛不已~
@@ -33,20 +32,20 @@ cover_position: 51.7% 24.8%
 
 ![image](/img/posts/image-mw7x21lt.png)
 
-手动管理的资源获取与资源释放在代码中，空间上是分离的，一旦抛出异常，程序会立刻跳出当前执行路径，顺着调用栈往上找匹配的 catch 处理器，同时可能因为方法的代码量过大，加之没注意，而提前写了`return`返回，写在函数末尾的诸如`delete[]`、fclose、unlock等资源释放操作都会被跳过，你写的释放语句越多、越分散，异常发生时漏掉的资源可能就会越多
+手动管理的资源获取与资源释放在代码中，空间上是分离的，一旦抛出异常，程序会立刻跳出当前执行路径，顺着调用栈往上找匹配的 catch 处理器，同时可能因为方法的代码量过大，加之没注意，而提前写了`return`返回，写在函数末尾的诸如`delete[]`、`fclose`、`unlock`等资源释放操作都会被跳过，你写的释放语句越多、越分散，异常发生时漏掉的资源可能就会越多
 
 这可怎么办呢？界内给出了两条主流路线：
 
-- Java / Go / Python 的选择（垃圾回收 GC）：由运行时环境在后台自动回收不再使用的内存。开发者无需手动干预内存释放，代价是带来了一定的运行时性能开销，并且内存回收的时机不可控，容易产生不可预测的停顿延迟（Stop-The-World Pause）
+- Java / Go / Python 的选择（垃圾回收 {% annotation "Garbage Collection，垃圾回收" %}GC{% endannotation %}）：由运行时环境在后台自动回收不再使用的内存。开发者无需手动干预内存释放，代价是带来了一定的运行时性能开销，并且内存回收的时机不可控，容易产生不可预测的停顿延迟（{% annotation "垃圾回收期间暂停应用线程造成的停顿" %}Stop-The-World Pause{% endannotation %}）
 - 传统 C 的选择：零运行时开销，释放时机精确到行，但可靠性随着代码规模指数级暴跌
 
 C++ 既想要 C 语言的极致性能与零运行时开销，又不甘心天天被内存泄漏折磨，于是走出了一条独特的第三条路，也就今天我们提到的`RAII`
 
 ## 什么是 RAII？
 
-`RAII` 的全称是 Resource Acquisition Is Initialization（资源获取即初始化），由 C++之父 Bjarne Stroustrup最早提出
+`RAII` 的全称是 {% annotation "资源获取即初始化，RAII 的全称" %}Resource Acquisition Is Initialization{% endannotation %}（资源获取即初始化），由 C++之父 {% annotation "C++ 之父，RAII 的提出者" %}Bjarne Stroustrup{% endannotation %}最早提出
 
-正常来说，Bjarne Stroustrup在 1980 年代设计 C++ 异常处理机制时起的这个名字，挺容易误导初学者的
+正常来说，{% annotation "C++ 之父，RAII 的提出者" %}Bjarne Stroustrup{% endannotation %}在 1980 年代设计 C++ 异常处理机制时起的这个名字，挺容易误导初学者的
 
 <figure class="sujing-figure">
   <img src="/img/posts/image-mw7xc64m.png" alt="image" loading="lazy">
@@ -77,7 +76,7 @@ C++ 既想要 C 语言的极致性能与零运行时开销，又不甘心天天�
 
 - 析构函数（出口）：在对象销毁时自动调用，把持有的资源全部归还系统
 
-==这就建立了第一项保证，可用性保证（Availability Guarantee），对象存在严格等价于资源已持有==
+==这就建立了第一项保证，可用性保证（{% annotation "可用性保证：对象存在即资源已持有" %}Availability Guarantee{% endannotation %}），对象存在严格等价于资源已持有==
 
 ### 栈对象生命周期
 
@@ -85,36 +84,36 @@ C++ 既想要 C 语言的极致性能与零运行时开销，又不甘心天天�
 
 栈对象的生命周期和 { ... } 作用域死死绑定在一起。
 
-无论代码是正常走完大括号（fall through），还是中途遭遇 `return`、break、continue、goto，甚至抛出了异常触发栈展开（Stack Unwinding，《C++ Primer Plus》中译作栈解退），编译器生成的清理代码都会沿着调用栈，把已构造完成的栈对象挨个析构，且严格保证只析构一次（exactly once）
+无论代码是正常走完大括号（fall through），还是中途遭遇 `return`、break、continue、goto，甚至抛出了异常触发栈展开（{% annotation "栈展开（栈解退）：异常抛出后逐层析构已构造对象的过程" %}Stack Unwinding{% endannotation %}，《C++ Primer Plus》中译作栈解退），编译器生成的清理代码都会沿着调用栈，把已构造完成的栈对象挨个析构，且严格保证只析构一次（exactly once）
 
 不仅如此，当一个类里包含多个成员对象时，它们会严格按照在类中声明的顺序依次构造，再按照完全相反的顺序（逆序）依次析构（注意：哪怕你在构造函数初始化列表里把顺序颠倒着写，实际构造顺序依然只认声明顺序）
 
-==这就带来了第二项保证，确定性保证（Determinism Guarantee），这就是和GC的区别了，GC 什么时候回收内存看运行时心情，而这里是固定的==
+==这就带来了第二项保证，确定性保证（{% annotation "确定性保证：析构时机由作用域决定" %}Determinism Guarantee{% endannotation %}），这就是和{% annotation "Garbage Collection，垃圾回收" %}GC{% endannotation %}的区别了，GC 什么时候回收内存看运行时心情，而这里是固定的==
 
 ### 所有权模型
 
 ==有了机制和触发，还得解决一个问题，这块资源到底归谁管？==谁负责最后的释放？
 
-> 《C++ Primer Plus》第 16 章里记载过一段著名的 `C++98` 翻车史，初代智能指针 `std::auto_ptr`。当年还没有移动语义，auto_ptr 为了实现“独占所有权”，竟然把拷贝操作（p2 = p1）写成了剥夺所有权，看起来只是赋了个值或者把指针传进了一个普通函数，但p1一下就变成空指针了，回头再访问 p1 当场崩溃，最终 auto_ptr 在选择中被无情淘汰，并在 `C++17` 中被正式移除
+> 《C++ Primer Plus》第 16 章里记载过一段著名的 `C++98` 翻车史，初代智能指针 `std::auto_ptr`。当年还没有移动语义，`auto_ptr` 为了实现“独占所有权”，竟然把拷贝操作（p2 = p1）写成了剥夺所有权，看起来只是赋了个值或者把指针传进了一个普通函数，但p1一下就变成空指针了，回头再访问 p1 当场崩溃，最终 `auto_ptr` 在选择中被无情淘汰，并在 `C++17` 中被正式移除
 
 痛定思痛，`C++11` 结合全新的移动语义，把口头约定变成了编译器可检查的类型系统规则，确立了现代所有权三剑客，也就是后续我会详细写的智能指针相关内容，这里仅作简洁介绍
 
 `std::unique_ptr`（独占所有权）
 
-- 同一时刻只能有一个 unique_ptr 指向该资源
+- 同一时刻只能有一个 `unique_ptr` 指向该资源
 - 禁用了拷贝操作，但支持通过 `std::move` 将所有权安全地转移给另一个指针
 
 `std::shared_ptr`（共享所有权）
 
-- 多个 shared_ptr 可以同时指向同一块资源
-- 内部通过原子引用计数来管理生命周期，当最后一个指向该资源的 shared_ptr 销毁时，资源才会被自动释放
+- 多个 `shared_ptr` 可以同时指向同一块资源
+- 内部通过原子引用计数来管理生命周期，当最后一个指向该资源的 `shared_ptr` 销毁时，资源才会被自动释放
 
 `std::weak_ptr`（观察者语义）
 
-- 作为 shared_ptr 的辅助指针，不参与所有权管理，也不增加引用计数
-- 主要用于解决 shared_ptr 相互引用导致的循环引用
+- 作为 `shared_ptr` 的辅助指针，不参与所有权管理，也不增加引用计数
+- 主要用于解决 `shared_ptr` 相互引用导致的循环引用
 
-==这就是第三项保证，唯一性保证（Uniqueness Guarantee），释放责任永远清晰唯一==
+==这就是第三项保证，唯一性保证（{% annotation "唯一性保证：释放责任清晰唯一" %}Uniqueness Guarantee{% endannotation %}），释放责任永远清晰唯一==
 
 ![Gemini_Generated_Image_j6anwaj6anwaj6an1](/img/posts/gemini-generated-image-j6anwaj6anwaj6an1-mw9csl4r.jpg)
 
@@ -124,7 +123,7 @@ C++ 既想要 C 语言的极致性能与零运行时开销，又不甘心天天�
 
 很多同学看到这里会冒出一个极其刁钻的问题：
 
-> 既然普通栈对象出了作用域也会自动释放，那我直接在栈上建对象/数组不就行了？干嘛还要用 unique_ptr 或 vector 这种管理堆内存的 `RAII` 对象？
+> 既然普通栈对象出了作用域也会自动释放，那我直接在栈上建对象/数组不就行了？干嘛还要用 `unique_ptr` 或 vector 这种管理堆内存的 `RAII` 对象？
 
 咳咳，我只能说，性能在其中矣
 
@@ -154,13 +153,13 @@ C++ 既想要 C 语言的极致性能与零运行时开销，又不甘心天天�
 
 | 资源类型 | 获取操作（构造函数） | 释放操作（析构函数） |
 | --- | --- | --- |
-| 堆内存 | `new` / malloc | `delete` / free |
-| 文件句柄 | fopen / CreateFile | fclose / CloseHandle |
-| 网络连接 | socket / connect | closesocket / shutdown |
-| 互斥锁 | lock / mutex::lock | unlock / mutex::unlock |
-| 数据库连接 | connect / open | disconnect / close |
-| 图形资源 | CreatePen / LoadBitmap | DeleteObject |
-| 窗体句柄 | CreateWindow | DestroyWindow |
+| 堆内存 | `new` / `malloc` | `delete` / `free` |
+| 文件句柄 | `fopen` / `CreateFile` | `fclose` / `CloseHandle` |
+| 网络连接 | `socket` / `connect` | `closesocket` / `shutdown` |
+| 互斥锁 | `lock` / `mutex::lock` | `unlock` / `mutex::unlock` |
+| 数据库连接 | `connect` / `open` | `disconnect` / `close` |
+| 图形资源 | `CreatePen` / `LoadBitmap` | `DeleteObject` |
+| 窗体句柄 | `CreateWindow` | `DestroyWindow` |
 
 ## 总结
 
