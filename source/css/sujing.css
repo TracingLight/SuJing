@@ -8356,3 +8356,16 @@ body.sujing-lyrics-immersive {
     max-width: 96%;
   }
 }
+
+.post #article-container mark.sujing-key {
+  color: #9a541c;
+  background: linear-gradient(transparent 58%, rgba(229, 171, 88, 0.3) 58%);
+  border-radius: 0.18em;
+  padding: 0 0.08em;
+  font-weight: 600;
+}
+
+[data-theme="dark"] .post #article-container mark.sujing-key {
+  color: #f2c879;
+  background: linear-gradient(transparent 58%, rgba(242, 200, 121, 0.18) 58%);
+}
