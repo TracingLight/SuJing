@@ -177,6 +177,15 @@ C++ 既想要 C 语言的极致性能与零运行时开销，又不甘心天天�
 
 ## 参考资料
 
-1. LummiGhost鬼明. 【程序那些事】RAII：赛博世界的拯救者？还是老旧古董的送葬人？[EB/OL]. Bilibili, 2026-10-07[2026-11-09]. https://www.bilibili.com/video/BV1vEH16VEP4.
-2. LummiGhost鬼明. 【短的C++】不懂 RAII，你就是不会 C++[EB/OL]. Bilibili, 2025-12-19[2026-11-09]. https://www.bilibili.com/video/BV1gAqpBgEb2.
-3. 夏曹俊. 理解C++唯一重要概念RAII,怎么解决内存安全问题,代码演示 #C++ #RAII #智能指针[EB/OL]. Bilibili, 2025-01-09[2026-11-09]. https://www.bilibili.com/video/BV1E9rkYwERm.
+1. LummiGhost鬼明.  
+   【程序那些事】RAII：赛博世界的拯救者？还是老旧古董的送葬人？  
+   [EB/OL]. Bilibili, 2026-10-07  
+   [2026-11-09]. https://www.bilibili.com/video/BV1vEH16VEP4.
+2. LummiGhost鬼明.  
+   【短的C++】不懂 RAII，你就是不会 C++  
+   [EB/OL]. Bilibili, 2025-12-19  
+   [2026-11-09]. https://www.bilibili.com/video/BV1gAqpBgEb2.
+3. 夏曹俊.  
+   理解C++唯一重要概念RAII,怎么解决内存安全问题,代码演示 #C++ #RAII #智能指针  
+   [EB/OL]. Bilibili, 2025-01-09  
+   [2026-11-09]. https://www.bilibili.com/video/BV1E9rkYwERm.
