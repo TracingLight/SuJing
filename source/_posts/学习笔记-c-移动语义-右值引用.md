@@ -1,14 +1,14 @@
 ---
 title: 移动语义和右值引用
 date: '2026-11-12 11:47:15'
-updated: '2026-11-12 21:40:08'
+updated: '2026-11-12 23:46:55'
 categories:
   - 学习笔记
 tags:
   - C++
   - 移动语义
   - 右值引用
-description: ''
+description: 介绍C++11移动语义与右值引用的核心概念，包括左值/右值的区分、移动构造与移动赋值的实现，以及std::move的本质与常见误用。
 cover: /img/covers/preview-upscaled-4x-mwcw4ozn.webp
 copyright: true
 ---
@@ -428,4 +428,24 @@ return std::move(str);
 ![04-move-pitfalls](/img/posts/04-move-pitfalls-mwdhaj68.png)
 
 
+## 参考资料
 
+
+## 参考资料
+
+1. LummiGhost鬼明.  
+   【短的C++】移动语义[EB/OL].  
+   Bilibili, 2025-11-28  
+   [2026-11-12]. https://www.bilibili.com/video/BV1zzSEBGE7t.
+2. 夏曹俊.  
+   c++新特性,如果只保留一个就是move移动语义,详细分析一下move语义,并作代码演示 #C++ #move #cpp #RAII[EB/OL].  
+   Bilibili, 2025-01-13  
+   [2026-11-12]. https://www.bilibili.com/video/BV1zBc2e4E4g.
+3. 夏曹俊.  
+   c++新特性,如果只保留一个就是move移动语义,详细分析一下move语义,并作代码演示 #C++ #move #cpp #RAII[EB/OL].  
+   Bilibili, 2025-01-13  
+   [2026-11-12]. https://www.bilibili.com/video/BV1wvX7YtEk3/?spm_id_from=333.337.search-card.all.click&vd_source=e67b5a9eec12bd99ce71cf7bf0cf9b51.
+4. mq白cpp.  
+   全网第一C++移动语义讲解！[EB/OL].  
+   Bilibili, 2024-01-13  
+   [2026-11-12]. https://www.bilibili.com/video/BV1FN4y1p729.
