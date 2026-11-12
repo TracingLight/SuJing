@@ -29,3 +29,6 @@ assets/user/duplicates/
 .sujing-comments-cache.json
 .sujing-stats-cache.json
 .sujing-snapshots-cache.json
+
+# 本地临时脚本，不进仓库
+.tmp-*
