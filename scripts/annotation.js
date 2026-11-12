@@ -16,7 +16,9 @@ const parseNote = (args) => {
     return String(JSON.parse(raw) || '').trim();
   } catch {
     // Keep malformed legacy input from breaking the whole Hexo build.
-    return raw.replace(/^("|')|("|')$/g, '').trim();
+    // 「引号」工具会把 JSON 双引号转成中文弯引号，这里一并剥掉。
+    const unwrapped = raw.replace(/^("|'|“|‘)|("|'|”|’)$/g, '').trim();
+    return unwrapped;
   }
 };
 

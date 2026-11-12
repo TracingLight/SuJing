@@ -1,8 +1,39 @@
-﻿$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path $PSScriptRoot -Parent
 Set-Location -LiteralPath $projectRoot
 $blogUrl = 'http://127.0.0.1:4000/'
 $adminProcess = $null
+
+# 关闭控制台「快速编辑」：只要在这个窗口里选中过文字，系统的任何 stdout 写入都会被
+# 挂起，Node 的日志会同步阻塞，管理 API 随即整体失去响应（表现为页面一直转圈）。
+function Disable-QuickEdit {
+    try {
+        if (-not ('SujingConsoleMode' -as [type])) {
+            Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+public static class SujingConsoleMode {
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern IntPtr GetStdHandle(int nStdHandle);
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode);
+}
+'@ -ErrorAction Stop
+        }
+        $handle = [SujingConsoleMode]::GetStdHandle(-10)
+        if ($handle -eq [IntPtr]::Zero -or $handle -eq [IntPtr](-1)) { return }
+        $mode = [uint32]0
+        if (-not [SujingConsoleMode]::GetConsoleMode($handle, [ref]$mode)) { return }
+        $withoutQuickEdit = $mode -band (-bnot [uint32]0x0040)
+        [void][SujingConsoleMode]::SetConsoleMode($handle, $withoutQuickEdit)
+    } catch {
+        # 拿不到控制台句柄（例如无窗口运行）时忽略，不影响启动。
+    }
+}
+
+Disable-QuickEdit
 
 function Test-ConsoleReady {
     try {

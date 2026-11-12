@@ -66,8 +66,15 @@ async function publishSite({ cwd = path.join(__dirname, '..'), log = console.log
   const behind = await git('rev-list', '--count', 'HEAD..origin/main');
   if (Number(behind) > 0) throw new Error('GitHub 上有本机尚未合并的提交，请先同步后发布；没有执行覆盖推送。');
   const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-  for (const script of ['test', 'check', 'minify', 'prune', 'check:performance-build']) {
+  const scripts = ['test', 'check', 'minify', 'prune', 'check:performance-build'];
+  for (let index = 0; index < scripts.length; index += 1) {
+    const script = scripts[index];
+    const startedAt = Date.now();
+    // Per-step progress so a long build is visible in the admin log instead of
+    // looking like a stalled publish.
+    log(`[publish] (${index + 1}/${scripts.length}) 开始 npm run ${script}${NL}`);
     await command(npm, ['run', script]);
+    log(`[publish] (${index + 1}/${scripts.length}) 完成 npm run ${script}（${((Date.now() - startedAt) / 1000).toFixed(1)}s）${NL}`);
   }
   await git('add', '-A', '--', '.');
   const changed = await git('diff', '--cached', '--name-only');

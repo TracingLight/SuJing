@@ -12,6 +12,7 @@ cover: /img/covers/preview-upscaled-4x-mw7v0eps.webp
 copyright: true
 cover_position: 51.7% 24.8%
 ---
+
 观前提醒：只需要懂 C++ 最基础的 `new / delete`、类的构造函数与析构函数即可无障碍阅读前半部分，涉及 `C++11` 移动语义（`std::move`）、智能指针等进阶特性时，文中仅会简单提及
 
 > 有人说，不懂 `RAII`，你写的其实只是带 `class` 的 C 语言，但同时 C++ 社区把 `RAII` 捧上神坛几十年，写了无数条 `Core Guidelines`，现实中的大型 C++ 项目却依然在为内存泄漏和莫名其妙的崩溃而头痛不已~
