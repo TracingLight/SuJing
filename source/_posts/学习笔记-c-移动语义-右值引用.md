@@ -106,7 +106,7 @@ int a=10;
 ![image](/img/posts/image-mwdhhksh.png)
 
 
-在一种常见的 x86 汇编表示中，可能对应：{% annotation "把立即数 10 写入 [a] 处的 4 字节内存；源操作数不变" %}mov DWORD PTR [a], 10{% endannotation %}
+在一种常见的 x86 汇编表示中，可能对应：{% annotation "把右边源操作数的值复制到左边目标，源操作数保持不变" %}mov{% endannotation %} {% annotation "双字，4 字节（32 位）宽度；PTR 表示后面是地址表达式，按这个宽度读写内存" %}DWORD PTR{% endannotation %} {% annotation "内存操作数：按 a 这个地址读写内存" %}[a]{% endannotation %}, {% annotation "立即数 10：直接写在指令里的常量，不是从内存读出来的" %}10{% endannotation %}
 
 这里的 [a] 就是实际的内存地址，该语句执行完之后，a 仍然存在于栈上
 
@@ -151,11 +151,11 @@ int&& rref=20;
 
 ![image](/img/posts/image-mwdhitmp.png)
 
-对于 `int& ref = a;`，编译器先取变量 a 的地址（{% annotation "算出 a 的地址放进寄存器 rax；只算地址，不读这块内存" %}lea rax, [a]{% endannotation %}），再将该地址存入 ref 对应的栈空间（{% annotation "把寄存器 rax 写入 [ref] 处的内存；源操作数不变" %}mov [ref], rax{% endannotation %}）。
+对于 `int& ref = a;`，编译器先取变量 a 的地址（{% annotation "取有效地址：只算出地址，不读取该地址里的内容" %}lea{% endannotation %} {% annotation "寄存器 rax：累加器，也常用来存放函数返回值" %}rax{% endannotation %}, {% annotation "内存操作数：按 a 这个地址读写内存" %}[a]{% endannotation %}），再将该地址存入 ref 对应的栈空间（{% annotation "把右边源操作数的值复制到左边目标，源操作数保持不变" %}mov{% endannotation %} {% annotation "内存操作数：按 ref 这个地址读写内存" %}[ref]{% endannotation %}, {% annotation "寄存器 rax：累加器，也常用来存放函数返回值" %}rax{% endannotation %}）。
 
 此后对 ref 的读写，均通过一个本身不可变的指针（`int* const`）间接访问 a
 
-对于 `int&& rref = 20;`，字面量 20 本身没有地址，编译器会在栈上创建一个匿名临时变量，先将 20 写入其中（{% annotation "把立即数 20 写入 [tmp] 处的 4 字节内存；源操作数不变" %}mov DWORD PTR [tmp], 20{% endannotation %}），再取出该临时变量的地址存入 rref（{% annotation "算出 tmp 的地址放进寄存器 rax；只算地址，不读这块内存" %}lea rax, [tmp]{% endannotation %} → {% annotation "把寄存器 rax 写入 [rref] 处的内存；源操作数不变" %}mov [rref], rax{% endannotation %}）
+对于 `int&& rref = 20;`，字面量 20 本身没有地址，编译器会在栈上创建一个匿名临时变量，先将 20 写入其中（{% annotation "把右边源操作数的值复制到左边目标，源操作数保持不变" %}mov{% endannotation %} {% annotation "双字，4 字节（32 位）宽度；PTR 表示后面是地址表达式，按这个宽度读写内存" %}DWORD PTR{% endannotation %} {% annotation "内存操作数：按 tmp 这个地址读写内存" %}[tmp]{% endannotation %}, {% annotation "立即数 20：直接写在指令里的常量，不是从内存读出来的" %}20{% endannotation %}），再取出该临时变量的地址存入 rref（{% annotation "取有效地址：只算出地址，不读取该地址里的内容" %}lea{% endannotation %} {% annotation "寄存器 rax：累加器，也常用来存放函数返回值" %}rax{% endannotation %}, {% annotation "内存操作数：按 tmp 这个地址读写内存" %}[tmp]{% endannotation %} → {% annotation "把右边源操作数的值复制到左边目标，源操作数保持不变" %}mov{% endannotation %} {% annotation "内存操作数：按 rref 这个地址读写内存" %}[rref]{% endannotation %}, {% annotation "寄存器 rax：累加器，也常用来存放函数返回值" %}rax{% endannotation %}）
 
 看到了吗？在机器码层面，左值引用和右值引用并没有什么区别，全都是存了一个内存地址而已
 
@@ -370,7 +370,7 @@ std::vector<int> b = std::move(a);
 
 但对于 `int`、`double`、裸指针，或者内部全是定长栈数组的 `std::array<int, 100>`，它们所有的数据都直接嵌在栈对象内部
 
-同时如果编译器在 Debug 模式或复杂调用链下没有将 `std::move` 及移动构造函数内联（`Inline`），多出来的函数跳转（{% annotation "调用函数，把返回地址压栈，执行完跳回来" %}call{% endannotation %} 指令）开销，对于小对象来说反而比直接按位复制还要慢
+同时如果编译器在 Debug 模式或复杂调用链下没有将 `std::move` 及移动构造函数内联（`Inline`），多出来的函数跳转（{% annotation "调用函数：把下一条指令的地址压栈，函数返回后接着往下执行" %}call{% endannotation %} 指令）开销，对于小对象来说反而比直接按位复制还要慢
 
 ==如果你自己写的类没有定义移动构造函数（或者因为手写了析构函数导致编译器不再自动生成移动构造）==
 
