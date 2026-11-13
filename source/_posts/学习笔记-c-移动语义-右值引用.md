@@ -1,7 +1,7 @@
 ---
 title: 移动语义和右值引用
 date: '2026-11-12 11:47:15'
-updated: '2026-11-13 10:53:01'
+updated: '2026-11-13 11:00:21'
 categories:
   - 学习笔记
 tags:
@@ -430,19 +430,21 @@ return std::move(str);
 
 ## 参考资料
 
+## 参考资料
+
 1. LummiGhost鬼明.  
    【短的C++】移动语义[EB/OL].  
    Bilibili, 2025-11-28  
-   [2026-11-12]. https://www.bilibili.com/video/BV1zzSEBGE7t.
+   [2026-11-13]. https://www.bilibili.com/video/BV1zzSEBGE7t.
 2. 夏曹俊.  
    c++新特性,如果只保留一个就是move移动语义,详细分析一下move语义,并作代码演示 #C++ #move #cpp #RAII[EB/OL].  
    Bilibili, 2025-01-13  
-   [2026-11-12]. https://www.bilibili.com/video/BV1zBc2e4E4g.
+   [2026-11-13]. https://www.bilibili.com/video/BV1zBc2e4E4g.
 3. 程序员陈子青.  
    深入浅出C++左值与右值 —— 一个视频彻底搞懂左值与右值！[EB/OL].  
    Bilibili, 2025-03-19  
-   [2026-11-12]. https://www.bilibili.com/video/BV1wvX7YtEk3/?spm_id_from=333.337.search-card.all.click&vd_source=e67b5a9eec12bd99ce71cf7bf0cf9b51.
+   [2026-11-13]. https://www.bilibili.com/video/BV1wvX7YtEk3.
 4. mq白cpp.  
    全网第一C++移动语义讲解！[EB/OL].  
    Bilibili, 2024-01-13  
-   [2026-11-12]. https://www.bilibili.com/video/BV1FN4y1p729.
+   [2026-11-13]. https://www.bilibili.com/video/BV1FN4y1p729.
