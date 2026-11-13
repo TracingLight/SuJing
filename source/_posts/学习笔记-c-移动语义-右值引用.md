@@ -1,7 +1,7 @@
 ---
 title: 移动语义和右值引用
 date: '2026-11-12 11:47:15'
-updated: '2026-11-12 23:51:57'
+updated: '2026-11-13 10:53:01'
 categories:
   - 学习笔记
 tags:
@@ -426,9 +426,6 @@ return std::move(str);
 
 
 ![04-move-pitfalls](/img/posts/04-move-pitfalls-mwdhaj68.png)
-
-
-## 参考资料
 
 
 ## 参考资料

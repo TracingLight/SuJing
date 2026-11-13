@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path $PSScriptRoot -Parent
 Set-Location -LiteralPath $projectRoot
 $blogUrl = 'http://127.0.0.1:4000/'
@@ -60,7 +60,15 @@ try {
     }
     Write-Host '正在启动溯境控制台，页面就绪后会自动打开。'
     Write-Host '请保留此窗口；按 Ctrl+C 停止服务。首次使用时，将下方 Token 粘贴到网页右下角「管」中。'
-    $adminProcess = Start-Process -FilePath $node -ArgumentList '"tools/admin/start.js"' -WorkingDirectory $projectRoot -NoNewWindow -PassThru
+    # 用 .NET Process.Start 而不是 Start-Process：后者会把当前环境变量装进大小写不敏感
+    # 的字典，环境里若同时存在 NO_PROXY / no_proxy 这类大小写成对的变量会直接抛
+    # ArgumentException；Process.Start 未触碰环境字典时按原样继承，两种环境都兼容。
+    $psi = New-Object System.Diagnostics.ProcessStartInfo
+    $psi.FileName = $node
+    $psi.Arguments = '"tools/admin/start.js"'
+    $psi.WorkingDirectory = $projectRoot
+    $psi.UseShellExecute = $false
+    $adminProcess = [System.Diagnostics.Process]::Start($psi)
     $deadline = (Get-Date).AddSeconds(120)
     $ready = $false
     while ((Get-Date) -lt $deadline) {
