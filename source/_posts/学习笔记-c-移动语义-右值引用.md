@@ -1,7 +1,7 @@
 ---
 title: 移动语义和右值引用
 date: '2026-11-12 11:47:15'
-updated: '2026-11-13 11:46:57'
+updated: '2026-11-13 12:02:14'
 categories:
   - 学习笔记
 tags:
@@ -364,7 +364,7 @@ std::vector<int> b = std::move(a);
 
 觉得只要加上 `std::move` 性能就能起飞，甚至连 `int`、`double` 都想要 `std::move` 一把
 
-实际上，对平凡类型与标量类型（Trivial / Scalar Types）来说，`std::move` 是毫无收益的
+实际上，对{% annotation "可以像内存块一样直接拷贝、不用调构造函数/析构函数的类型" %}平凡类型{% endannotation %}与{% annotation "C++ 内置的“单个值”类型" %}标量类型{% endannotation %}（Trivial / Scalar Types）来说，`std::move` 是毫无收益的
 
 ==移动之所以快，唯一的原因是它通过转移指针避开了堆内存等外部资源的深拷贝==
 
@@ -412,7 +412,7 @@ std::string createString()
 }
 ```
 
-这里编译器可能直接进行返回值优化（NRVO），让对象在最终返回位置直接构造
+这里编译器可能直接进行返回值优化（{% annotation "NRVO（具名返回值优化） 是 C++ 编译器的一种优化技术，它允许编译器在函数返回一个具名局部对象时，直接在调用方的内存空间中构造该对象，从而消除拷贝/移动构造函数的调用" %}NRVO{% endannotation %}），让对象在最终返回位置直接构造
 
 如果无法进行复制消除，符合条件的局部变量在返回时也可能触发隐式移动
 
