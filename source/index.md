@@ -17,7 +17,6 @@ type: sujing-home
       <p class="sujing-intro-kicker">SUJING · 2026</p>
       <p class="sujing-intro-name">溯境</p>
       <span class="sujing-intro-rule" aria-hidden="true"></span>
-      <p class="sujing-intro-sub">以游戏为舟 · 记沿途之光</p>
     </div>
     <span class="sujing-intro-index" aria-hidden="true">序 / PROLOGUE</span>
   </div>
