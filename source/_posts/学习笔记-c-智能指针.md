@@ -1,14 +1,12 @@
 ---
 title: 智能指针详解（大长篇）
 date: '2026-11-15 20:30:00'
-updated: '2026-11-15 21:35:56'
+updated: '2026-11-16 16:29:08'
 categories:
   - 学习笔记
 tags:
   - C++
   - 智能指针
-  - RAII
-  - shared_ptr
 description: >-
   这篇博客详细讲解了C++智能指针的所有权语义，重点介绍了unique_ptr、shared_ptr和weak_ptr的用法、实现原理及常见陷阱（如重复释放、循环引用泄漏），并给出函数传参时的选择建议。
 cover: /img/covers/preview-upscaled-4x-mwcw4ozn.webp
