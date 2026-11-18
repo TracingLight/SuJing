@@ -1,7 +1,7 @@
 ---
 title: 智能指针详解（大长篇）
 date: '2026-11-15 20:30:00'
-updated: '2026-11-16 16:29:08'
+updated: '2026-11-17 20:07:23'
 categories:
   - 学习笔记
 tags:
@@ -280,114 +280,203 @@ private:
 
 ## shared_ptr：共享所有权，最后一个所有者负责释放
 
-接下来换一个情况，多个异步任务都需要独立保存同一个对象，任何一个任务都可能最后完成，不能简单保证谁先退出
+`unique_ptr` 表达的是独占所有权，一个对象只有一个所有者，其他所有者想要接管，就必须通过移动完成交接
 
-这时，让每个任务各持有一份所有权就有意义了
+但有些对象需要被多个相互独立的部分共同持有，例如多个异步任务都保存着同一个对象，每个任务都可能最后结束，无法提前指定由哪一个任务负责销毁
+
+这时可以让每个任务都持有一份所有权，只要还有任务没有结束，对象就继续存活，最后一个任务结束时才销毁对象
+
+`shared_ptr` 表达的就是这种共享所有权
 
 ```cpp
-//一个所有者
-auto a = std::make_shared<int>(10);
-//二个所有者
-auto b = a;
-//还是二个，b放弃了资源所有权
-auto c = std::move(b);
+auto a = std::make_shared<int>(10);//a成为第一个所有者，引用计数为1
 
-//只有c一个所有者
-a.reset();
-//最后c也放弃资源所有权，资源被释放
-c.reset();
+auto b = a;//b加入所有权组，引用计数变为2
+
+auto c = std::move(b);//b把所有权转交给c，引用计数仍然为2
+
+a.reset();//a退出，引用计数变为1，int对象不会销毁
+
+c.reset();//最后一个所有者退出，引用计数归0，int对象被销毁
 ```
 
-注意 `auto b = a` 不会再分配一个 `int`，也不会复制整数值来制造另一份独立资源
-
-它复制的是共享管理关系
-
-一个很直接的验证
+`auto b = a` 不会复制出另一个 `int` 对象，而是让 `b` 和 `a` 共同拥有同一个 `int` 对象
 
 ```cpp
 auto a = std::make_shared<int>(10);
 auto b = a;
+
 *b = 20;
-//*a 也等于 20：它们访问的是同一个 int
+
+std::cout << *a << '\n';//20
 ```
 
-但编译器怎么知道现在有几个所有者？难道把计数放进 `int` 里吗？
-
-但`int` 并没有给标准库预留计数字段
-
-答案是单独保存管理信息，也就是控制块
+移动则只是转交所有权，`b` 退出所有权组，`c` 接替 `b`，所有者总数没有变化，所以引用计数不变
 
 ### 控制块的作用
 
-常见 `shared_ptr` 实现可以理解成两部分地址信息：
+为了判断最后一个所有者何时退出，`shared_ptr` 需要记录当前有多少个所有者，这个数量称为引用计数
+
+计数不能放进被管理的 `int` 对象里，因为 `int` 没有给标准库预留这样的字段
+
+也不能让每个 `shared_ptr` 各自保存一份计数，否则复制时只修改新指针的计数，原来的指针无法知道所有者数量已经变化
+
+因此，同一份计数必须放在所有所有者都能找到的地方，这份共享的管理信息称为控制块
+
+一个 `shared_ptr` 可以简化理解为保存两个地址：
 
 ```cpp
-//概念示意
-T* stored_pointer;          //get() 返回，用来访问对象
-ControlBlock* control;     //指向共享管理信息
+T* ptr;//被管理对象的地址
+ControlBlock* control;//共享控制块的地址
 ```
 
-控制块通常要表达强引用计数、弱观察状态，以及最终怎么销毁对象、怎么释放相关存储的策略，具体怎么实现各家标准库不同，不必深究
+复制 `shared_ptr` 时，复制的是这两个地址，多个 `shared_ptr` 的 `control` 指向同一个控制块，因此它们修改的是同一份计数
 
-最关键的一点：**共享同一个{% annotation "共用同一个控制块的那一组 shared_ptr" %}所有权组{% endannotation %}的指针，必须协调同一份管理状态，而不是每个指针各拿一个互不相干的计数器**
+==引用计数不是编译器自动维护的，而是 `shared_ptr` 的构造、赋值、析构和 `reset()` 共同维护的==
 
-复制一个非空 `shared_ptr`，加入这组所有者；移动则转交原来的那份所有权
+### 手写一个简化版 shared_ptr
 
-析构、`reset` 或赋值覆盖旧值，则离开原来的所有权组
-
-这里的计数记录的是强所有者，不是“有多少行代码访问过这个对象”，也不统计从 `get()` 拿出去的裸指针
-
-### 引用计数是怎么加减的
-
-前面说控制块表达强引用计数，**强引用计数就是控制块里的一个整数，记录当前有几个 `shared_ptr` 变量拥有这个对象**
-
-这个数只有一份，存在控制块里，每个 `shared_ptr` 自己不保存计数，只保存指向哪块控制块
-
-后文把强引用计数简称为强计数，`weak_ptr` 对应的观察计数称为弱计数
-
-还是前面那段代码，这次每一步标出强计数
+下面是仅用于理解的共享指针，管理单个 `new T` 对象，不支持数组、自定义删除器、`weak_ptr` 和线程安全等完整标准库功能
 
 ```cpp
-auto a = std::make_shared<int>(10);
-//新建int对象和一块控制块，控制块里的强计数 = 1（所有者：a）
+#pragma once
 
-auto b = a;
-//b的拷贝构造函数找到a指向的控制块，把强计数+1，变为2（所有者：a、b）
+template <class T>
+class MiniShared
+{
+public:
+	//explicit主要为了防止裸指针隐式转换
+	explicit MiniShared(T* p=nullptr) : ptr(p)
+	{
+		//只有实际管理资源（对象）时才新建控制块
+		if (ptr != nullptr)
+		{
+			//此刻控制块自动初始化为1
+			control = new ControlBlock();
+		}
+	}
+	~MiniShared()
+	{
+		release();
+	}
+	//拷贝构造和拷贝赋值
+	//复制拷贝对象地址和控制块地址
+	MiniShared(const MiniShared& other): ptr(other.ptr),control(other.control)
+	{
+		//当前对象也加入所有权组
+		if (control != nullptr) ++control->count;
+	}
 
-auto c = std::move(b);
-//移动不改计数：所有权从变量b转给变量c，所有者总数没变，还是2（所有者：a、c）
-//b变为空，不再是所有者
+	MiniShared& operator=(const MiniShared& other)
+	{
+		//避免自赋值
+		if (this == &other) return *this;
 
-a.reset();
-//a放弃所有权，强计数-1，变为1（所有者：c），不是0，对象不删除
+		//如果控制块有效，增加引用计数
+		if (other.control != nullptr) ++other.control->count;
+		//先释放自身资源
+		release();
 
-c.reset();
-//c放弃所有权，强计数-1，变为0，执行这次减法的操作顺手删除int对象
+		ptr = other.ptr;
+		control = other.control;
+
+		return *this;
+	}
+
+
+	//移动构造和移动赋值，移动构造和赋值是不增加引用计数的
+	MiniShared& operator=(MiniShared&& other) noexcept
+	{
+		if (this == &other) return *this;
+		release();
+		ptr = other.ptr;
+		control = other.control;
+		other.ptr = nullptr;
+		other.control = nullptr;
+		return *this;
+	}
+
+	MiniShared(MiniShared&& other) noexcept : ptr(other.ptr), control(other.control)
+	{
+		//放弃管理资源和控制块
+		other.ptr = nullptr;
+		other.control = nullptr;
+		//所有者只是放弃资源所有权，引用计数不变
+	}
+
+	size_t use_count() const
+	{
+		return control == nullptr ? 0 : control->count;
+	}
+
+
+
+	void reset()
+	{
+		release();
+	}
+
+	//重载运算符
+
+	T* operator->() const
+	{
+		return ptr;
+	}
+
+	T& operator*() const
+	{
+		return *ptr;
+	}
+	T* get() const
+	{
+		return ptr;
+	}
+private:
+	struct ControlBlock
+	{
+		//新建控制块时，当前指针是第一个所有者
+		size_t count = 1;
+	};
+	//保存管理资源的地址
+	T* ptr = nullptr;
+	//保存共享的控制块地址
+	ControlBlock* control = nullptr;
+	//控制块让多个MiniShared对象共享同一份计数
+
+	void release()
+	{
+		//如果对象没有管理任何资源，直接返回
+		if (control == nullptr) return;
+
+		--control->count;
+
+		if (control->count == 0)
+		{
+			delete ptr;
+			delete control;
+		}
+
+		ptr = nullptr;
+		control = nullptr;
+	}
+};
 ```
 
-哪些操作会动强计数，汇总成一张表：
+拷贝构造复制对象地址和控制块地址，然后让共享计数加 1，表示当前对象也加入了所有权组
 
-| 操作 | 对强计数的影响 |
-| --- | --- |
-| 拷贝构造 `auto b = a;` | a 所在组 +1，b 成为新所有者 |
-| 拷贝赋值 `b = a;` | a 所在组 +1，b 原来所在组 -1 |
-| 移动构造 `auto c = std::move(b);` | 不变，所有权从 b 转给 c |
-| 移动赋值 `b = std::move(c);` | c 所在组不变，b 原来所在组 -1 |
-| 析构、`reset()` | 该变量离开当前组，-1 |
-| `get()`、`*p`、`->`、按引用传参 | 不动，借用不产生所有者 |
+移动构造同样接管这两个地址，但会把 `other` 置空，因此只是所有权交接，不会增加计数
 
-每次 -1 之后都会检查结果：**谁把强计数减到 0，谁就负责销毁对象**
+赋值比构造多了一步 `release()`，因为当前对象可能已经管理着另一个对象，必须先退出原来的所有权组，不能直接覆盖原来的地址
 
-所以「最后一个所有者负责释放」不是事先指定某个变量，而是由执行最后一次减法的那个操作顺手完成
+拷贝赋值会先增加 `other` 所在组的计数，再释放当前对象的旧所有权，移动赋值则不会增加新所有权组的计数
 
-控制块里有两个计数，各管一件事
+`release()` 也不是无条件删除对象，它先把计数减 1，只有计数归 0时才执行 `delete ptr`
 
-- **强计数**决定对象生死：减到 0，对象销毁
-- **弱计数**决定控制块生死：对象销毁后，若弱计数也到 0，控制块释放；还有 `weak_ptr` 在观察，控制块就保留，让它们能判断对象已销毁、`lock()` 返回空（`weak_ptr` 后面会专门讲）
+这里的 `release()` 只是类内部复用的辅助函数，对外主动放弃所有权使用的是 `reset()`，不要把它和 `unique_ptr::release()` 混在一起
 
-至于为什么借用不计数，计数的加减必须挂在有析构时机的对象上，`shared_ptr` 析构时一定会执行 -1
+==拷贝会增加所有者，移动只转交所有权，析构和 `reset()` 会让当前所有者退出，最后一个所有者才负责销毁对象==
 
-裸指针没有析构函数，离开作用域时没有任何代码通知控制块，如果让它 +1 就永远减不回来，所以借用不计数，代价是借用者自己保证有效期
+当前版本还没有观察者，所以计数归 0时会连同控制块一起释放，等后面引入 `weak_ptr`，对象和控制块的释放时机就需要分开处理
 
 ### 同一个地址，为什么不能重新包装？
 
@@ -461,78 +550,109 @@ part.reset();
 
 ## weak_ptr：观察对象而不延长其生命周期
 
-现在考虑一个观察者，它想知道对象是否还活着，却不希望自己的观察延长对象的生命周期
+有时候，一个对象只是想知道另一个对象是否还活着，并在它活着的时候访问一下，却不希望自己的存在延长对方的生命周期
 
-如果它持有 `shared_ptr`，就已经参与所有权了，但如果只保存裸指针，对象死了它又不知道
+如果它持有 `shared_ptr`，就已经参与了所有权，只要它不退出，对象就不会销毁
 
-这就是 `weak_ptr` 的位置
+但如果只保存裸指针，对象销毁后，它也无法从裸指针本身得知这件事
 
-到这里补一个定义，前面那些真正拥有对象且能决定它生死的 `shared_ptr`，叫**强所有者**（控制块里记的强引用计数就是数它们）
-
-`weak_ptr` 则是**弱观察者**，只看不拥有，不延长对象寿命
+`weak_ptr` 用来表达的就是这种关系：**只观察，不拥有**
 
 ```cpp
-//弱观察者，暂未观察对象
-std::weak_ptr<int> observer;
+std::weak_ptr<int> observer;//创建一个暂不观察任何对象的weak_ptr
 
 {
-//这里的owner是一个共享所有者，拥有int对象的所有权
-auto owner = std::make_shared<int>(10);
-//弱观察者指向共享所有者，观察对象的生命周期
-observer = owner;
+    auto owner = std::make_shared<int>(10);
+    observer = owner;//observer开始观察owner管理的int对象，但不增加强计数
 
-//这里的lock()方法会返回一个shared_ptr
-//如果对象还有强所有者，那么lock()返回的shared_ptr会共享所有权，否则返回空的shared_ptr
-if (auto hold = observer.lock())
-{
-int value = *hold;
+    if (auto hold = observer.lock())
+    {
+        //lock成功后会返回一个新的shared_ptr，hold也加入了所有权组
+        owner.reset();//owner退出，但hold仍然拥有int对象，所以对象不会销毁
+
+        std::cout << *hold << '\n';//10
+    }
+    //hold析构，此时它是最后一个所有者，int对象被销毁
 }
-}
-//此时owner已经超出作用域被释放，弱观察者观察的对象已经被释放
-auto hold = observer.lock();
+
+auto hold = observer.lock();//int对象已经销毁，lock返回空的shared_ptr
 ```
 
-`weak_ptr` 没有 `operator*` 和 `operator->`，不能直接解引用
+`owner.reset()` 后对象没有销毁，不是因为 `observer` 延长了它的生命周期，而是因为 `lock()` 创建的 `hold` 仍然是所有者
 
-它的关键能力也不是单纯看一眼对象有没有被销毁，而是通过 `lock()` 原子地尝试取得一份强所有权
+==`weak_ptr` 本身不延长对象寿命，但 `lock()` 成功时返回的 `shared_ptr` 会取得一份临时的强所有权==
 
-成功就用返回的 `shared_ptr` 维持对象存活，失败就得到空指针
+`lock()` 能否成功，也不是看原来的 `owner` 变量是否还存在，而是看同一所有权组中是否还有 `shared_ptr`
 
-==注意这里的「原子」针对的是获得所有权这件事，不代表对象里的业务字段自动变成线程安全==
+即使原来的 `owner` 已经退出，只要还有其他所有者，对象就仍然活着，`lock()` 就可以成功
+
+如果强计数已经归 0，对象已经销毁，`lock()` 只会返回空的 `shared_ptr`，不会把已经销毁的对象复活
+
+### 为什么 weak_ptr 不能直接解引用
+
+`weak_ptr` 没有 `operator*` 和 `operator->`
+
+因为它并不拥有对象，仅仅保存观察关系，不能保证下一次访问时对象还活着
+
+所以访问前必须先调用 `lock()`，尝试取得一份强所有权
+
+```cpp
+if (auto hold = observer.lock())
+{
+    //hold存活期间，当前对象至少还有hold这个所有者
+    int value = *hold;
+}
+else
+{
+    //对象已经销毁，不能通过observer访问它
+}
+```
+
+这样做以后，对象是否存活就不再依靠提前假设，而是由 `lock()` 的实际结果决定
 
 ### 为什么不能先 expired，再访问？
 
-因为检查时活着，不等于下一行执行时还活着
+`expired()` 可以检查对象是否已经销毁，但检查结果只代表检查发生时的状态
 
 ```cpp
-//不要把 expired() 当作后续操作成功的保证
-if (!observer.expired()) {
-    //此时其他线程仍可能释放最后一个强所有者
+if (!observer.expired())
+{
+    //即使这里判断对象还活着，其他线程也可能随后释放最后一个shared_ptr
 }
 
-//直接尝试取得所有权，并检查实际结果
-if (auto hold = observer.lock()) {
-    //使用 hold，而不是检查前保存的裸指针
+if (auto hold = observer.lock())
+{
+    //直接使用lock返回的hold
 }
 ```
 
-`lock()` 也不会复活已经结束生命周期的对象，强所有权已经归零，就不能再凭一个弱观察者把它拉回来
+如果先检查 `expired()`，再根据检查结果使用之前保存的裸指针，检查和访问之间仍可能发生变化
 
-那么对象没了以后，`weak_ptr` 怎么知道它没了？
+`lock()` 则把“检查对象是否还活着”和“活着就取得一份所有权”合成了一次原子操作
 
-答案是控制块还可以继续活着
+这里的原子只针对取得所有权这件事，不代表对象内部的业务数据也自动变成了线程安全
 
-**对象的生命周期和共享管理信息的生命周期，是两件事**
+### 对象销毁后，weak_ptr 怎么知道它已经不存在了？
 
-最后一个强所有者退出时，执行对象清理，如果仍有弱观察者，就保留必要管理状态，让它们能够安全判断销毁，尝试 `lock()`
+因为对象销毁后，控制块不一定马上销毁
 
-当这些管理信息也不再被需要时，再释放控制块
+只要还有 `weak_ptr` 在观察，控制块就会保留必要的管理信息，让这些观察者能够知道对象已经销毁，并让后续的 `lock()` 安全地返回空
 
-![weak_ptr 通过 lock 安全取得临时共享所有权](/img/posts/smart-04-weak.png)
+因此，对象的生命周期和控制块的生命周期是两件事
+
+强计数归 0时，被管理对象销毁
+
+如果此时还有弱观察者，控制块继续保留；当这些管理信息也不再被需要时，控制块才会释放
+
+为了和 `shared_ptr` 的强计数区分，`weak_ptr` 对应的观察计数可以称为弱计数，弱计数不参与决定对象何时销毁，只参与决定控制块何时释放
+
+==强计数决定对象还能活多久，弱观察状态让观察者在对象销毁后仍能安全得知这个结果==
+
+这种只观察、不拥有的关系，也正好可以用来打破 `shared_ptr` 形成的循环所有权
 
 ## 全用了智能指针，为什么还是泄漏？
 
-看下面这段看起来很「现代」的代码：
+看下面这段代码，为了方便描述，把 `a` 管理的节点称为 A，把 `b` 管理的节点称为 B
 
 ```cpp
 struct Node
@@ -541,68 +661,65 @@ struct Node
 };
 
 {
-    auto a = std::make_shared<Node>();
-    auto b = std::make_shared<Node>();
+    auto a = std::make_shared<Node>();//A的强计数为1
+    auto b = std::make_shared<Node>();//B的强计数为1
 
-    a->next = b;
-    b->next = a;
+    a->next = b;//A.next也拥有B，B的强计数变为2
+    b->next = a;//B.next也拥有A，A的强计数变为2
 }
 ```
 
-离开作用域，局部变量 `a` 和 `b` 都析构了，两个节点会一起销毁吗？
+离开作用域时，局部变量 `a` 和 `b` 都会析构，但它们管理的 A 和 B 不一定会析构
 
-不会
+`b` 析构后，B 的强计数从 2 减到 1，剩下的所有者是 `A.next`
 
-局部变量退出前，每个节点都有两个强所有者，一个来自外部变量，另一个来自对方成员
+`a` 析构后，A 的强计数也从 2 减到 1，剩下的所有者是 `B.next`
 
-外部变量退出后，每个节点还剩一个来自对方的强所有者
+此时两个节点都无法销毁，因为它们的强计数都没有归 0
 
-A 没有析构，所以 A 里面持有 B 的 `shared_ptr` 不析构
+而 `A.next` 和 `B.next` 又不是当前作用域里的局部变量，它们分别是 A 和 B 的成员，只有所属节点析构时，它们才会跟着析构
 
-B 没有析构，所以 B 里面持有 A 的 `shared_ptr` 也不析构
+于是，A 无法析构，`A.next` 就无法析构，B 的计数就不会继续下降
 
-这里没有线程，也没有谁在等待互斥锁，它是循环所有权导致的泄漏，不应混称为线程死锁
+B 同样无法析构，`B.next` 也无法析构，A 的计数同样不会继续下降
+
+==不是局部变量 `a` 和 `b` 没有析构，而是它们析构后，两个节点各剩一个来自对方成员的所有者，两个计数都停在了 1==
 
 ### 引用计数不判断对象的可达性
 
-人一眼就能看出这两个节点已经没用了，引用计数却只知道每个节点还剩一个所有者
+人一眼就能看出，外部已经没有办法访问这两个节点了
 
-它没有负责遍历整个对象图，从根开始判断哪些对象不可达
+但引用计数不会遍历对象之间的关系，也不会判断一个对象是否已经无法从外部访问，它只在所有者退出时减少计数
 
-==解决方法不是把计数器设计得更复杂，而是把所有权关系设计正确==
+因此，即使两个节点在业务上已经没用了，只要它们仍然互相持有，引用计数就不会把它们判定为可以释放
 
-例如父节点拥有子节点，但子节点只是知道父节点是谁
+### 把其中一条边改成 weak_ptr
+
+如果 B 只是需要知道 A 是谁，并不需要决定 A 的生命周期，就不要让 B 持有 A 的强所有权
 
 ```cpp
-#include <memory>
-#include <vector>
-
-struct Node 
+struct Node
 {
-    std::vector<std::shared_ptr<Node>> children;
-    std::weak_ptr<Node> parent;
+    std::shared_ptr<Node> next;
+    std::weak_ptr<Node> prev;
 };
 
-auto root = std::make_shared<Node>();
-auto child = std::make_shared<Node>();
+{
+    auto a = std::make_shared<Node>();//A的强计数为1
+    auto b = std::make_shared<Node>();//B的强计数为1
 
-root->children.push_back(child);
-child->parent = root;
+    a->next = b;//A拥有B，B的强计数变为2
+    b->prev = a;//B只观察A，A的强计数仍然为1
+}
 ```
 
-父到子是拥有，子到父是观察，强所有权环就没有形成
+离开作用域时，`b` 先析构，B 的强计数从 2 减到 1，暂时不会销毁
 
-![循环 shared_ptr 所有权以及用 weak_ptr 打破循环](/img/posts/smart-03-cycle.png)
+随后 `a` 析构，A 的强计数从 1 减到 0，A 开始析构
 
-在只有一个简单环的示例里，削弱一条边就能破环
+A 析构时，它的成员 `A.next` 也会析构，于是 B 的强计数从 1 减到 0，B 接着析构
 
-复杂图可能有多个强引用环，不能随便改一处就宣布修复
-
-也不是所有带环的图都要让节点互相 `shared_ptr`
-
-还可以由容器集中拥有节点，节点之间用 ID、索引或生命周期受控的非拥有指针表达关系
-
-**数据关系可以有环，拥有关系不必照着每条数据关系原样复制**
+==`weak_ptr` 不会自动寻找并解开循环，它只是让其中一条关系不再增加强计数，使强所有权环从一开始就没有形成==
 
 ## 函数参数：按所有权语义选择传参方式
 
