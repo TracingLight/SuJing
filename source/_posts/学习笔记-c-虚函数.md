@@ -8,7 +8,7 @@ tags:
   - 面向对象
 description: 从同一个基类引用为什么能调用不同函数讲起，通过可运行的例子理解C++虚函数、override、对象切片和虚析构，再用sizeof和汇编观察虚函数表与虚指针。
 copyright: true
-updated: '2026-11-19 08:58:53'
+updated: '2026-11-19 11:02:34'
 cover: /img/covers/preview-upscaled-4x-mwma3qjj.webp
 ---
 
@@ -63,7 +63,7 @@ Person
 
 `printRole` 拿到的是引用，还是原来的学生对象。但 `person` 声明为 `const Person&`，普通成员函数会按声明里的类型来选，所以调用了 `Person::role()`
 
-想让它调用学生自己的版本，只要在基类的 `role()` 前加上 `virtual`，把它声明为**虚函数**：
+想让它调用学生自己的版本，只要在基类的 `role()` 前加上 `virtual`，把它声明为{% annotation "用 virtual 声明、允许派生类重写的成员函数" %}虚函数{% endannotation %}：
 
 ```cpp
 virtual const char* role() const
@@ -72,14 +72,14 @@ virtual const char* role() const
 }
 ```
 
-再跑一次，两行都输出 `Student`。派生类给基类的虚函数提供自己的版本，这叫**重写**
+再跑一次，两行都输出 `Student`。派生类给基类的虚函数提供自己的版本，这叫{% annotation "派生类给基类虚函数提供新实现，声明要和基类一致" %}重写{% endannotation %}
 
 看 `person.role()` 时，分清两种类型就够了：
 
-- **静态类型**看声明，`person` 声明为 `const Person&`，所以从 `Person` 里找 `role()`
-- **动态类型**看实际对象，这次传进来的是 `Student`，所以虚调用选了 `Student` 的版本
+- {% annotation "声明里写出来的类型，编译期就能确定" %}静态类型{% endannotation %}：从声明就能确定，这里找的是 `Person` 的接口
+- {% annotation "运行时实际指向的对象类型" %}动态类型{% endannotation %}：看实际对象，这里选的是 `Student` 的版本
 
-同一行代码，传进学生就用学生的版本，传进老师就用老师的版本，这就是**运行时多态**。通过基类指针调用也是一样的
+同一行代码，传进学生就用学生的版本，传进老师就用老师的版本，这就是{% annotation "同一处调用按实际对象选择实现，C++ 里主要靠虚函数" %}运行时多态{% endannotation %}。通过基类指针调用也是一样的
 
 ### override：少写一个 const，怎么就不重写了？
 
@@ -115,13 +115,13 @@ const char* role() override  //编译错误
 | 重写 | 派生类为基类的虚函数提供新实现，比如 `Student::role() const`，通过基类引用也能调到它 |
 | 隐藏 | 派生类声明了同名成员，比如漏掉 `const` 的 `Student::role()`，名字一样，但没有重写 |
 
-面试里容易把两步混在一起：**先按静态类型找函数、选重载，再按动态类型选这个虚函数的实现**。派生类自己新增的重载，不会凭空出现在基类接口里
+平时可能容易把两步混在一起：**先按静态类型找函数、选重载，再按动态类型选这个虚函数的实现**。派生类自己新增的重载，不会凭空出现在基类接口里
 
 如果显式写 `person.Person::role()`，就是指定调用基类版本，不走虚派发。`override` 负责检查有没有重写，`final` 则可以禁止下一层再重写
 
 ### 虚函数带默认参数，参数听谁的？
 
-默认参数由**调用处的静态类型**决定，虚派发只决定执行哪个函数体。比如下面这段放进 `main()`，会输出 `Derived 1`，不是 `Derived 2`
+默认参数由**调用处的静态类型**决定，虚派发只决定执行哪个函数体。比如运行下面的程序，会输出 `Derived 1`，不是 `Derived 2`
 
 ```cpp
 #include <iostream>
@@ -130,8 +130,7 @@ struct Base
 {
     virtual void show(int n = 1)
     {
-        std::cout << "Base " << n << '
-';
+        std::cout << "Base " << n << '\n';
     }
 };
 
@@ -139,8 +138,7 @@ struct Derived : Base
 {
     void show(int n = 2) override
     {
-        std::cout << "Derived " << n << '
-';
+        std::cout << "Derived " << n << '\n';
     }
 };
 
@@ -167,13 +165,13 @@ printRole(view);  //Student
 printRole(copy);  //Person
 ```
 
-`view` 引用的还是原来的 `Student`，而 `copy` 是新建的 `Person`，只复制了基类部分，这叫**对象切片**
+`view` 引用的还是原来的 `Student`，而 `copy` 是新建的 `Person`，只复制了基类部分，这叫{% annotation "用基类类型按值复制派生对象，派生类部分会被丢掉" %}对象切片{% endannotation %}
 
 把 `printRole` 的参数改成按值传递的 `Person person`，也会发生同样的事
 
 ## 基类不想提供默认实现怎么办？
 
-如果 `Person` 不想给一个默认身份，只想要求每个具体的派生类提供 `role()`，就把它声明为**纯虚函数**，也就是在声明末尾写 `= 0`：
+如果 `Person` 不想给一个默认身份，只想要求每个具体的派生类提供 `role()`，就把它声明为{% annotation "声明末尾写 = 0 的虚函数，要求派生类给出实现" %}纯虚函数{% endannotation %}，也就是在声明末尾写 `= 0`：
 
 ```cpp
 struct Person
@@ -190,17 +188,19 @@ struct Student : Person
 };
 ```
 
-这时 `Person` 是**抽象类**，不能直接创建 `Person` 对象，但还可以用 `Person&` 或 `Person*` 来访问 `Student`
+`Person` 现在是{% annotation "还有纯虚函数没实现的类，不能直接创建对象" %}抽象类{% endannotation %}，不能直接创建 `Person` 对象，但还可以用 `Person&` 或 `Person*` 来访问 `Student`
 
-如果 `Student` 不重写 `role()`，它也还是抽象类。注意，`= 0` 不是说函数绝对不能有函数体，纯虚函数也可以在类外提供定义，但有了定义并不会让基类变成可实例化的类
+如果 `Student` 不重写 `role()`，它也还是抽象类
 
-**纯虚析构是个常见追问**：`virtual ~Base() = 0;` 可以让 `Base` 成为抽象类，但仍要在类外写 `Base::~Base() = default;`，因为派生对象析构时，基类部分总得收尾
+`= 0` 不是说函数绝对不能有函数体，纯虚函数也可以在类外提供定义，通常放一些公共的默认代码，供派生类在重写时显式调用，比如子类里写 `Person::role();`。但有了定义，`Person` 仍然是抽象类
+
+{% annotation "析构函数写 = 0，类外仍需提供定义" %}纯虚析构{% endannotation %}是个常见追问：`virtual ~Base() = 0;` 同样能让 `Base` 成为抽象类，但仍要在类外写 `Base::~Base() = default;`，因为派生对象析构时，基类部分总得收尾
 
 ## 有虚函数，析构函数就必须是虚的吗？
 
 不一定，关键是会不会通过基类指针删除派生对象
 
-局部变量 `Student student;` 离开作用域时，本来就会先析构 `Student`，再析构 `Person`。但如果写成 `Person* p = new Student();`，再执行 `delete p;`，`Person` 的析构函数不是虚函数就会产生**未定义行为**，也就是 C++ 不保证会发生什么，不能说它一定只调用 `~Person()`
+局部变量 `Student student;` 离开作用域时，本来就会先析构 `Student`，再析构 `Person`。但如果写成 `Person* p = new Student();`，再执行 `delete p;`，`Person` 的析构函数不是虚函数就会产生{% annotation "标准不规定程序会做什么，结果不可依赖" %}未定义行为{% endannotation %}，也就是 C++ 不保证会发生什么，不能说它一定只调用 `~Person()`
 
 ### 允许通过基类删除：public virtual
 
@@ -239,7 +239,7 @@ int main()
 ~Person
 ```
 
-`virtual ~Person()` 就是**虚析构函数**，通过 `Person*` 销毁对象时，会从 `~Student()` 开始。不需要打日志时，写 `virtual ~Person() = default;` 就够了
+`virtual ~Person()` 就是{% annotation "让基类指针 delete 能调用到派生类析构" %}虚析构函数{% endannotation %}
 
 ### 不允许外部通过基类删除：protected 非虚
 
@@ -396,9 +396,9 @@ int main()
 
 ![Visual Studio 快速监视：展开 p 的 __vfptr，看到 Derived::func1 和 Base::func2](/img/posts/cpp-virtual-vfptr.png)
 
-图里的 `__vfptr` 就是 MSVC 展示的**虚指针（vptr）**，它指向一张记录虚函数入口的表，这张表叫**虚函数表（vtable）**
+图里的 `__vfptr` 就是 MSVC 展示的{% annotation "对象中指向虚函数表的隐藏指针" %}虚指针（vptr）{% endannotation %}，它指向一张记录虚函数入口的表，这张表叫{% annotation "记录虚函数入口的表，同一类的对象共用" %}虚函数表（vtable）{% endannotation %}
 
-看 `Derived` 虚表的两项：
+看 `Derived` 虚表的两个{% annotation "虚表中的一个位置，存放对应虚函数的入口地址" %}表项{% endannotation %}：
 
 - `[0]` 指向 `Derived::func1`，这个函数被重写了
 - `[1]` 仍指向 `Base::func2`，这个函数没被重写
@@ -466,9 +466,9 @@ int main()
 
 如果 `Both` 同时继承 `Left` 和 `Right`，一个 `Both` 对象里就有两个基类子对象，也就是两个基类各自的那一部分。把 `Both*` 转成 `Right*`，指针指向的是 `Right` 那一部分，不保证和完整对象同址
 
-比如 `Both` 重写了 `Right::run()`，通过 `Right*` 调用它时，派生类实现需要的却是 `Both*`。常见实现会让表项先指向一小段代码，把传进来的 `this` 调整到 `Both` 的位置，再跳进 `Both::run()`，这段代码叫 **thunk**
+比如 `Both` 重写了 `Right::run()`，通过 `Right*` 调用它时，派生类实现需要的却是 `Both*`。常见实现会让表项先指向一小段代码，把传进来的 `this` 调整到 `Both` 的位置，再跳进 `Both::run()`，这段代码叫{% annotation "多继承中先调整 this、再跳到真正函数的代码" %}thunk{% endannotation %}
 
-所以一个对象可能有不止一个虚指针，不能把单继承截图里的「对象开头有一个虚指针」背成通用规则。**ABI** 就是编译器用来约定对象布局、表项和参数传递的规则，不同实现可以不一样
+所以一个对象可能有不止一个虚指针，不能把单继承截图里的「对象开头有一个虚指针」背成通用规则。{% annotation "编译器约定对象布局、参数传递和调用方式的规则" %}ABI{% endannotation %} 就是这套约定
 
 **虚继承和虚函数解决的是两个问题**。假设 `Left` 和 `Right` 都继承 `Root`，而 `Both` 又继承它们，普通继承会留下两份 `Root`。把两条到 `Root` 的继承都改成虚继承，`Both` 里就共享一份 `Root`。虚继承决定基类子对象是否共享，虚函数决定调用哪个版本
 
